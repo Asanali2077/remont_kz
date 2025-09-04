@@ -14,14 +14,20 @@ import { toast } from "sonner";
 import { Organization } from "@/lib/data";
 import { Stars } from "./Stars";
 import { Currency } from "./Currency";
+import Image from "next/image";
+import { FavoriteButton } from "@/components/favorites/FavoriteButton";
 
 interface OrgCardProps {
   org: Organization;
 }
 
 export function OrgCard({ org }: OrgCardProps) {
+  const imageSrc = org.imageUrl ?? "https://images.unsplash.com/photo-1501183638710-841dd1904471";
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow overflow-hidden">
+      <div className="relative aspect-[16/9] w-full">
+        <Image src={imageSrc} alt={org.name} fill className="object-cover" />
+      </div>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -93,7 +99,8 @@ export function OrgCard({ org }: OrgCardProps) {
             <Globe className="h-4 w-4"/>
             Сайт
           </a>
-
+          <FavoriteButton id={org.id} />
+          
           <Dialog>
             <DialogTrigger asChild>
               <Button className="gap-2">

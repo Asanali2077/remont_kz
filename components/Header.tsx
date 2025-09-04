@@ -13,7 +13,6 @@ export function Header() {
               <Building2 className="h-7 w-7 text-primary" />
               <div>
                 <h1 className="text-xl md:text-2xl font-bold">Remont.kz</h1>
-                <p className="text-sm text-muted-foreground">Ремонт, обслуживание и услуги</p>
               </div>
             </Link>
           </div>
@@ -46,7 +45,7 @@ export function Header() {
           </nav>
           
           <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="rounded-xl">Демо</Badge>
+            <Link href="/favorites" className="text-sm hover:underline">Избранное</Link>
           </div>
         </div>
       </div>

@@ -18,6 +18,7 @@ export interface Organization {
   website: string;
   phone: string;
   tags: string[];
+  imageUrl?: string;
 }
 
 export const ORGS: Organization[] = [
@@ -39,6 +40,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/1",
     phone: "+7 701 123 45 67",
     tags: ["Гарантия 12 мес.", "Без предоплаты"],
+    imageUrl: "https://images.unsplash.com/photo-1501183638710-841dd1904471",
   },
   {
     id: 2,
@@ -58,6 +60,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/2",
     phone: "+7 702 555 77 88",
     tags: ["3D‑визуализация", "Договор"],
+    imageUrl: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
   },
   {
     id: 3,
@@ -77,6 +80,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/3",
     phone: "+7 705 222 11 00",
     tags: ["Срочный выезд"],
+    imageUrl: "https://images.unsplash.com/photo-1516116216624-53e697fedbea",
   },
   {
     id: 4,
@@ -96,6 +100,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/4",
     phone: "+7 700 999 66 55",
     tags: ["24/7", "Гарантия 24 мес."],
+    imageUrl: "https://images.unsplash.com/photo-1581090467213-8cba0e09a49a",
   },
   {
     id: 5,
@@ -115,6 +120,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/5",
     phone: "+7 707 123 00 11",
     tags: ["Рассрочка", "Замер бесплатно"],
+    imageUrl: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4",
   },
   {
     id: 6,
@@ -134,6 +140,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/auto1",
     phone: "+7 701 100 20 30",
     tags: ["Гарантия", "Оригинальные запчасти"],
+    imageUrl: "https://images.unsplash.com/photo-1542362567-b07e54358753",
   },
   {
     id: 7,
@@ -153,6 +160,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/auto2",
     phone: "+7 702 300 40 50",
     tags: ["Запись онлайн"],
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
   },
   {
     id: 8,
@@ -172,6 +180,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/auto3",
     phone: "+7 705 555 55 55",
     tags: ["24/7"],
+    imageUrl: "https://images.unsplash.com/photo-1515920010264-05a0f6a4c28f",
   },
   {
     id: 9,
@@ -191,6 +200,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/oth1",
     phone: "+7 700 800 90 10",
     tags: ["Выезд"],
+    imageUrl: "https://images.unsplash.com/photo-1581093588401-16e7c98a8f17",
   },
   {
     id: 10,
@@ -210,6 +220,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/oth2",
     phone: "+7 700 700 70 70",
     tags: ["Недорого"],
+    imageUrl: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4",
   },
   {
     id: 11,
@@ -229,6 +240,7 @@ export const ORGS: Organization[] = [
     website: "https://demo.example/re1",
     phone: "+7 777 111 22 33",
     tags: ["Эко-средства"],
+    imageUrl: "https://images.unsplash.com/photo-1600585154526-990dced4db0d",
   },
 ];
 
