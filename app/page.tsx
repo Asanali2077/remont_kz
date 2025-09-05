@@ -1,15 +1,13 @@
-import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Wrench, Users, TrendingUp, Car, Home, Package } from "lucide-react";
+import { Building2, Wrench, Users, Car, Home, Package } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <Header />
-      
       <main className="mx-auto max-w-6xl px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
@@ -97,33 +95,114 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="text-center">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-center gap-2">
-                <TrendingUp className="h-6 w-6" />
-                Готовы начать?
-              </CardTitle>
-              <CardDescription>
-                Присоединяйтесь к тысячам довольных клиентов
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <Link href="/automobiles">
-                  <Button size="lg" className="w-full gap-2"><Car className="h-5 w-5"/>Авто</Button>
-                </Link>
-                <Link href="/real-estate">
-                  <Button size="lg" className="w-full gap-2"><Home className="h-5 w-5"/>Недвижимость</Button>
-                </Link>
-                <Link href="/other">
-                  <Button size="lg" className="w-full gap-2"><Package className="h-5 w-5"/>Другое</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* News */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold">Новости</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[{
+              title: "Как выбрать подрядчика для ремонта",
+              desc: "5 критериев, на которые стоит обратить внимание.",
+              img: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4"
+            }, {
+              title: "Обновления платформы Remont.kz",
+              desc: "Новые возможности поиска и фильтрации.",
+              img: "https://images.unsplash.com/photo-1600585154526-990dced4db0d"
+            }, {
+              title: "Сезон клининга: советы",
+              desc: "Как подготовить квартиру к генеральной уборке.",
+              img: "https://images.unsplash.com/photo-1515920010264-05a0f6a4c28f"
+            }].map((a, i) => (
+              <Card key={i} className="overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative aspect-[16/9] w-full">
+                  <Image src={a.img} alt={a.title} fill className="object-cover" />
+                </div>
+                <CardHeader>
+                  <CardTitle className="line-clamp-2">{a.title}</CardTitle>
+                  <CardDescription className="line-clamp-2">{a.desc}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Articles */}
+        <section className="mb-16">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">Статьи</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[{
+              title: "ТО автомобиля: что входит",
+              desc: "Чек‑лист регулярного обслуживания вашего авто.",
+              img: "https://images.unsplash.com/photo-1515920010264-05a0f6a4c28f"
+            }, {
+              title: "Уборка после ремонта: советы",
+              desc: "Эффективные способы быстро навести порядок.",
+              img: "https://images.unsplash.com/photo-1600585154526-990dced4db0d"
+            }, {
+              title: "Дизайн-проект: с чего начать",
+              desc: "Первые шаги и типичные ошибки.",
+              img: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4"
+            }].map((a, i) => (
+              <Card key={i} className="overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative aspect-[16/9] w-full">
+                  <Image src={a.img} alt={a.title} fill className="object-cover" />
+                </div>
+                <CardHeader>
+                  <CardTitle className="line-clamp-2">{a.title}</CardTitle>
+                  <CardDescription className="line-clamp-2">{a.desc}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* PR */}
+        <section className="mb-16">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">PR</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[{
+              title: "Запуск партнерской программы",
+              desc: "Новые условия для бизнеса и подрядчиков.",
+              img: "https://images.unsplash.com/photo-1600585154526-990dced4db0d"
+            }, {
+              title: "Акции для новых пользователей",
+              desc: "Скидки и бонусы при первых заказах.",
+              img: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4"
+            }, {
+              title: "Расширение покрытия",
+              desc: "Теперь и в новых городах Казахстана.",
+              img: "https://images.unsplash.com/photo-1515920010264-05a0f6a4c28f"
+            }].map((a, i) => (
+              <Card key={i} className="overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative aspect-[16/9] w-full">
+                  <Image src={a.img} alt={a.title} fill className="object-cover" />
+                </div>
+                <CardHeader>
+                  <CardTitle className="line-clamp-2">{a.title}</CardTitle>
+                  <CardDescription className="line-clamp-2">{a.desc}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Analytics */}
+        <section className="mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">Аналитика</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[{ t: "Средняя цена ремонта", v: "25 000 ₸" }, { t: "ТО авто средн.", v: "18 000 ₸" }, { t: "Рейтинг подрядчиков", v: "4.5/5" }, { t: "Сроки старта", v: "≤ 7 дней" }].map((kpi, i) => (
+              <Card key={i} className="text-center">
+                <CardHeader>
+                  <CardTitle className="text-sm text-muted-foreground">{kpi.t}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kpi.v}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
       </main>
       
       <Footer />

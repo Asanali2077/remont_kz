@@ -1,6 +1,5 @@
 "use client";
 
-import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useFavorites } from "@/components/favorites/FavoritesProvider";
 import { ORGS } from "@/lib/data";
@@ -13,7 +12,6 @@ export default function FavoritesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <Header />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <h1 className="text-2xl md:text-3xl font-bold mb-4">Избранное</h1>
         <p className="text-muted-foreground mb-6">Сохраненные исполнители</p>

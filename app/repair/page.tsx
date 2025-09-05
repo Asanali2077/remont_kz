@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import { ORGS, CITIES, SERVICES } from "@/lib/data";
@@ -69,7 +68,6 @@ export default function RepairPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <Header />
       
       <main className="mx-auto max-w-6xl px-4 py-6">
         <FilterBar

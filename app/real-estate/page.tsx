@@ -1,6 +1,5 @@
 "use client";
 
-import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ORGS, Organization, SERVICES_REAL_ESTATE } from "@/lib/data";
 import { useMemo, useState } from "react";
@@ -21,7 +20,6 @@ export default function RealEstatePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <Header />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <FilterBar
           title="Фильтры"
