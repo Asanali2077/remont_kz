@@ -1,8 +1,10 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { Lang } from "@/lib/translations";
 
-type Lang = "ru" | "kaz";
+export type { Lang };
+
 type LangContextValue = { lang: Lang; setLang: (l: Lang) => void };
 const LangContext = createContext<LangContextValue | undefined>(undefined);
 
@@ -34,5 +36,3 @@ export function LangSwitcher() {
     </div>
   );
 }
-
-

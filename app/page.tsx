@@ -1,7 +1,7 @@
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Wrench, Users, Car, Home, Package } from "lucide-react";
+import { Car, Home, Package } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 

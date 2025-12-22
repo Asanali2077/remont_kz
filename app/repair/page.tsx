@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { ORGS, CITIES, SERVICES } from "@/lib/data";
 import { OrgCard } from "@/components/OrgCard";
 import { FilterBar } from "@/components/filters/FilterBar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 export default function RepairPage() {
   const [query, setQuery] = useState("");
@@ -80,7 +83,7 @@ export default function RepairPage() {
           minRating={minRating}
           licensedOnly={licensedOnly}
           canStartWithin7={canStartWithin7}
-          sortBy={sortBy as any}
+          sortBy={sortBy}
           cityOptions={CITIES}
           serviceOptions={SERVICES}
           priceMin={0}

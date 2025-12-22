@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Building2, Calendar, CheckCircle2, Clock, Globe, MapPin, Phone, ShieldCheck, Car, Home, Package } from "lucide-react";
+import { Building2, CheckCircle2, Clock, Globe, MapPin, Phone, ShieldCheck, Car, Home, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Organization } from "@/lib/data";
 import { Stars } from "./Stars";

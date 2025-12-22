@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Home, Building2, Wrench, Phone, Car, Package } from "lucide-react";
+import { Home, Building2, Phone, Car, Package } from "lucide-react";
 import Link from "next/link";
 
 export function Header() {
