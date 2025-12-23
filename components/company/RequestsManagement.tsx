@@ -27,24 +27,25 @@ export function RequestsManagement() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
+  interface ApiRequest {
+    id: string;
+    client: { name?: string; email: string; phone?: string };
+    service: { name: string };
+    serviceId: string;
+    message: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  }
+
   const loadRequests = async () => {
     try {
       setLoading(true);
-      const data = await api.getRequests(
+      const data = (await api.getRequests(
         statusFilter !== "all" ? { status: statusFilter } : undefined
-      );
+      )) as ApiRequest[];
       // Transform API response
-      interface ApiRequest {
-        id: string;
-        client: { name?: string; email: string; phone?: string };
-        service: { name: string };
-        serviceId: string;
-        message: string;
-        status: string;
-        createdAt: string;
-        updatedAt: string;
-      }
-      const transformed = data.map((r: ApiRequest) => ({
+      const transformed = data.map((r) => ({
         id: r.id,
         clientName: r.client.name || r.client.email,
         clientEmail: r.client.email,

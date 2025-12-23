@@ -4,9 +4,11 @@ import { prisma } from "@/lib/db";
 import { requireCompany } from "@/lib/middleware";
 import { ServiceCategory, Prisma } from "@prisma/client";
 
+const serviceCategories = ["automobiles", "real-estate", "other"] as const;
+
 const updateServiceSchema = z.object({
   name: z.string().min(1).optional(),
-  category: z.enum(["automobiles", "real-estate", "other"]).optional(),
+  category: z.enum(serviceCategories).optional(),
   description: z.string().min(1).optional(),
   priceFrom: z.number().positive().optional(),
   priceTo: z.number().positive().optional(),
@@ -16,7 +18,7 @@ const updateServiceSchema = z.object({
   availabilityDays: z.number().int().positive().optional(),
   urgency: z.enum(["low", "medium", "high"]).optional(),
   tags: z.array(z.string()).optional(),
-  customAttributes: z.record(z.string()).optional(),
+  customAttributes: z.record(z.string(), z.string()).optional(),
   active: z.boolean().optional(),
 });
 
@@ -136,7 +138,8 @@ export async function PUT(
     if (validatedData.availabilityDays !== undefined) updateData.availabilityDays = validatedData.availabilityDays;
     if (validatedData.urgency !== undefined) updateData.urgency = validatedData.urgency;
     if (validatedData.tags !== undefined) updateData.tags = validatedData.tags;
-    if (validatedData.customAttributes !== undefined) updateData.customAttributes = validatedData.customAttributes;
+    if (validatedData.customAttributes !== undefined)
+      updateData.customAttributes = validatedData.customAttributes as Prisma.InputJsonValue;
     if (validatedData.active !== undefined) updateData.active = validatedData.active;
 
     const service = await prisma.service.update({
@@ -160,7 +163,7 @@ export async function PUT(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation error", details: error.errors },
+        { error: "Validation error", details: error.issues },
         { status: 400 }
       );
     }

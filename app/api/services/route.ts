@@ -4,9 +4,11 @@ import { prisma } from "@/lib/db";
 import { requireCompany } from "@/lib/middleware";
 import { ServiceCategory, Prisma } from "@prisma/client";
 
+const serviceCategories = ["automobiles", "real-estate", "other"] as const;
+
 const createServiceSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  category: z.enum(["automobiles", "real-estate", "other"]),
+  category: z.enum(serviceCategories),
   description: z.string().min(1, "Description is required"),
   priceFrom: z.number().positive("Price must be positive"),
   priceTo: z.number().positive("Price must be positive"),
@@ -16,7 +18,7 @@ const createServiceSchema = z.object({
   availabilityDays: z.number().int().positive().optional(),
   urgency: z.enum(["low", "medium", "high"]).optional(),
   tags: z.array(z.string()).optional(),
-  customAttributes: z.record(z.string()).optional(),
+  customAttributes: z.record(z.string(), z.string()).optional(),
   active: z.boolean().optional().default(true),
 });
 
@@ -117,7 +119,7 @@ export async function POST(request: NextRequest) {
         availabilityDays: validatedData.availabilityDays,
         urgency: validatedData.urgency,
         tags: validatedData.tags || [],
-        customAttributes: validatedData.customAttributes || {},
+        customAttributes: (validatedData.customAttributes || {}) as Prisma.InputJsonValue,
         active: validatedData.active,
         companyId: user.userId,
       },
@@ -137,7 +139,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation error", details: error.errors },
+        { error: "Validation error", details: error.issues },
         { status: 400 }
       );
     }

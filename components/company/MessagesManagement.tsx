@@ -52,7 +52,7 @@ export function MessagesManagement() {
     try {
       setLoading(true);
       const response = await api.getMessages({ limit: 100 });
-      const allMessages = response.messages || [];
+      const allMessages = (response.messages || []) as ApiMessage[];
 
       // Transform API response
       interface ApiMessage {
@@ -81,8 +81,6 @@ export function MessagesManagement() {
         createdAt: msg.createdAt,
         read: msg.read,
       }));
-
-      setMessages(transformed);
 
       // Group by conversation
       const grouped: typeof conversations = {};

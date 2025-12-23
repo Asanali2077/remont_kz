@@ -102,9 +102,15 @@ export function PersonalAccount() {
         api.getTransactions(),
       ]);
       setSubscription(subData);
-      setTransactions(transData.transactions || []);
+      const normalized = (transData.transactions || []).map((tx) => ({
+        ...tx,
+        type: tx.type.toLowerCase() as Transaction["type"],
+        status: tx.status.toLowerCase() as Transaction["status"],
+      }));
+      setTransactions(normalized);
     } catch (error) {
-      toast.error(error.message || "Ошибка загрузки данных");
+      const message = error instanceof Error ? error.message : "Ошибка загрузки данных";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -119,7 +125,8 @@ export function PersonalAccount() {
       toast.success("Подписка успешно оформлена");
       loadData();
     } catch (error) {
-      toast.error(error.message || "Ошибка оформления подписки");
+      const message = error instanceof Error ? error.message : "Ошибка оформления подписки";
+      toast.error(message);
     }
   };
 

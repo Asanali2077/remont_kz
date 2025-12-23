@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAuth, requireCompany } from "@/lib/middleware";
-import { RequestStatus } from "@prisma/client";
+import { RequestStatus, Prisma } from "@prisma/client";
 
 const updateRequestSchema = z.object({
   status: z.enum(["new", "in_progress", "completed"]).optional(),
@@ -174,7 +174,7 @@ export async function PUT(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation error", details: error.errors },
+        { error: "Validation error", details: error.issues },
         { status: 400 }
       );
     }

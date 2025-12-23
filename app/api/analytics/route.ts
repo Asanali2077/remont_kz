@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireCompany } from "@/lib/middleware";
-import { RequestStatus, Prisma } from "@prisma/client";
+import { RequestStatus, Prisma, ServiceCategory } from "@prisma/client";
 
 // GET /api/analytics - Get analytics data (Company only)
 export async function GET(request: NextRequest) {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const totalServices = await prisma.service.count({
       where: {
         companyId: user.userId,
-        ...(category && { category: category.toUpperCase() }),
+        ...(category && { category: category.toUpperCase() as ServiceCategory }),
         ...(city && { city }),
       },
     });
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // Requests statistics
     const requestWhere: Prisma.RequestWhereInput = {
       companyId: user.userId,
-      ...(dateFilter && Object.keys(dateFilter).length > 0 && { createdAt: dateFilter }),
+      ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter }),
     };
 
     const [completedRequests, pendingRequests] = await Promise.all([
@@ -53,9 +53,6 @@ export async function GET(request: NextRequest) {
           ...requestWhere,
           status: { in: [RequestStatus.NEW, RequestStatus.IN_PROGRESS] },
         },
-      }),
-      prisma.request.count({
-        where: requestWhere,
       }),
     ]);
 

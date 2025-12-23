@@ -338,3 +338,4 @@ export function t(lang: Lang): Translations {
   return translations[lang];
 }
 
+

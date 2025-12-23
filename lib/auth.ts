@@ -20,7 +20,9 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 export function generateToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, JWT_SECRET as jwt.Secret, {
+    expiresIn: JWT_EXPIRES_IN,
+  } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string): JWTPayload {
@@ -37,4 +39,5 @@ export function extractTokenFromHeader(authHeader: string | null): string | null
   }
   return authHeader.substring(7);
 }
+
 

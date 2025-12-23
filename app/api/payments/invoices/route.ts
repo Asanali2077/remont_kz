@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/middleware";
-import { Prisma } from "@prisma/client";
+import { InvoiceStatus, Prisma } from "@prisma/client";
 
 // GET /api/payments/invoices - List invoices
 export async function GET(request: NextRequest) {
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (status) {
-      where.status = status.toUpperCase();
+      where.status = status.toUpperCase() as InvoiceStatus;
     }
 
     const [invoices, total] = await Promise.all([

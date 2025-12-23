@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import { ORGS, CITIES, SERVICES } from "@/lib/data";
 import { OrgCard } from "@/components/OrgCard";
-import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterBar, SortOption } from "@/components/filters/FilterBar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -18,7 +18,7 @@ export default function RepairPage() {
   const [minRating, setMinRating] = useState(0);
   const [licensedOnly, setLicensedOnly] = useState(false);
   const [canStartWithin7, setCanStartWithin7] = useState(false);
-  const [sortBy, setSortBy] = useState("relevance");
+  const [sortBy, setSortBy] = useState<SortOption>("relevance");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

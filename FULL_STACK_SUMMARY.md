@@ -351,3 +351,4 @@ The Remont.kz platform is now a **fully functional full-stack application** with
 
 All requirements have been met and the system is ready for deployment! 🎉
 
+

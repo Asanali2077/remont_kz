@@ -1,4 +1,5 @@
-import { ServiceCategory } from "./data";
+import { ServiceCategory as UiServiceCategory } from "./data";
+export type ServiceCategory = UiServiceCategory;
 
 export type RequestStatus = "new" | "in_progress" | "completed";
 
