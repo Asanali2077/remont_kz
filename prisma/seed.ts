@@ -4,10 +4,6 @@ import {
   ServiceCategory,
   RequestStatus,
   MessageType,
-  SubscriptionPlan,
-  SubscriptionStatus,
-  TransactionStatus,
-  TransactionType,
 } from "@prisma/client";
 import { hashPassword } from "../lib/auth";
 
@@ -31,20 +27,11 @@ async function main() {
       OR: [{ client: { email: { in: seedEmails } } }, { company: { email: { in: seedEmails } } }],
     },
   });
-  await prisma.review.deleteMany({
-    where: { client: { email: { in: seedEmails } } },
-  });
   await prisma.serviceImage.deleteMany({
     where: { service: { company: { email: { in: seedEmails } } } },
   });
   await prisma.service.deleteMany({
     where: { company: { email: { in: seedEmails } } },
-  });
-  await prisma.subscription.deleteMany({
-    where: { user: { email: { in: seedEmails } } },
-  });
-  await prisma.transaction.deleteMany({
-    where: { user: { email: { in: seedEmails } } },
   });
 
   // Create users
@@ -337,111 +324,6 @@ async function main() {
 
   console.log("✅ Messages seeded");
 
-  // Reviews
-  await prisma.review.createMany({
-    data: [
-      {
-        clientId: client1.id,
-        serviceId: serviceA1.id,
-        rating: 5,
-        comment: "Отлично справились, рекомендую.",
-      },
-      {
-        clientId: client2.id,
-        serviceId: serviceB1.id,
-        rating: 4,
-        comment: "Хороший сервис, всё по записи.",
-      },
-      {
-        clientId: client1.id,
-        serviceId: serviceB2.id,
-        rating: 5,
-        comment: "Детейлинг на уровне, блеск!",
-      },
-    ],
-  });
-
-  console.log("✅ Reviews seeded");
-
-  // Subscriptions (monthly, quarterly, semiannual, yearly equivalents mapped to plans)
-  const now = new Date();
-  const addDays = (days: number) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() + days);
-    return d;
-  };
-
-  await prisma.subscription.createMany({
-    data: [
-      {
-        userId: company1.id,
-        plan: SubscriptionPlan.BASIC, // monthly
-        status: SubscriptionStatus.ACTIVE,
-        startDate: now,
-        endDate: addDays(30),
-        autoRenew: true,
-      },
-      {
-        userId: company1.id,
-        plan: SubscriptionPlan.PREMIUM, // quarterly
-        status: SubscriptionStatus.ACTIVE,
-        startDate: now,
-        endDate: addDays(90),
-        autoRenew: true,
-      },
-      {
-        userId: company2.id,
-        plan: SubscriptionPlan.PREMIUM, // semiannual
-        status: SubscriptionStatus.ACTIVE,
-        startDate: now,
-        endDate: addDays(180),
-        autoRenew: true,
-      },
-      {
-        userId: company2.id,
-        plan: SubscriptionPlan.ENTERPRISE, // yearly
-        status: SubscriptionStatus.ACTIVE,
-        startDate: now,
-        endDate: addDays(365),
-        autoRenew: true,
-      },
-    ],
-  });
-
-  console.log("✅ Subscriptions seeded");
-
-  // Transactions & analytics-friendly data
-  await prisma.transaction.createMany({
-    data: [
-      {
-        userId: company1.id,
-        amount: 15000,
-        currency: "KZT",
-        type: TransactionType.SUBSCRIPTION,
-        status: TransactionStatus.COMPLETED,
-        description: "Подписка BASIC",
-      },
-      {
-        userId: company1.id,
-        amount: 45000,
-        currency: "KZT",
-        type: TransactionType.SUBSCRIPTION,
-        status: TransactionStatus.COMPLETED,
-        description: "Подписка PREMIUM",
-      },
-      {
-        userId: company2.id,
-        amount: 90000,
-        currency: "KZT",
-        type: TransactionType.SUBSCRIPTION,
-        status: TransactionStatus.COMPLETED,
-        description: "Подписка ENTERPRISE",
-      },
-    ],
-  });
-
-  console.log("✅ Transactions seeded");
-
   console.log("🎉 Seed completed!");
 }
 
@@ -453,5 +335,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-

@@ -15,7 +15,6 @@ import { Organization } from "@/lib/data";
 import { Stars } from "./Stars";
 import { Currency } from "./Currency";
 import Image from "next/image";
-import { FavoriteButton } from "@/components/favorites/FavoriteButton";
 
 interface OrgCardProps {
   org: Organization;
@@ -99,8 +98,6 @@ export function OrgCard({ org }: OrgCardProps) {
             <Globe className="h-4 w-4"/>
             Сайт
           </a>
-          <FavoriteButton id={org.id} />
-          
           <Dialog>
             <DialogTrigger asChild>
               <Button className="gap-2">

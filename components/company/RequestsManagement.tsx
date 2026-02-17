@@ -10,12 +10,8 @@ import { ClientRequest, RequestStatus } from "@/lib/types";
 import { RequestResponseModal } from "./RequestResponseModal";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { useLang } from "@/components/nav/LangSwitcher";
-import { t } from "@/lib/translations";
 
 export function RequestsManagement() {
-  const { lang } = useLang();
-  const tr = t(lang);
   const [requests, setRequests] = useState<ClientRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<ClientRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +40,6 @@ export function RequestsManagement() {
       const data = (await api.getRequests(
         statusFilter !== "all" ? { status: statusFilter } : undefined
       )) as ApiRequest[];
-      // Transform API response
       const transformed = data.map((r) => ({
         id: r.id,
         clientName: r.client.name || r.client.email,
@@ -59,7 +54,7 @@ export function RequestsManagement() {
       }));
       setRequests(transformed);
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr.common.error;
+      const message = error instanceof Error ? error.message : "Ошибка загрузки заявок";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -69,14 +64,10 @@ export function RequestsManagement() {
   const handleStatusChange = async (requestId: string, newStatus: RequestStatus) => {
     try {
       await api.updateRequest(requestId, { status: newStatus });
-      toast.success(
-        lang === "kaz"
-          ? "Күй өзгертілді"
-          : "Статус обновлен"
-      );
+      toast.success("Статус обновлен");
       loadRequests();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr.common.error;
+      const message = error instanceof Error ? error.message : "Ошибка обновления статуса";
       toast.error(message);
     }
   };
@@ -91,28 +82,32 @@ export function RequestsManagement() {
   );
 
   const getStatusBadge = (status: RequestStatus) => {
-    const variants: Record<RequestStatus, { label: { ru: string; kaz: string }; variant: "default" | "secondary" | "outline" }> = {
-      new: { label: { ru: "Новая", kaz: "Жаңа" }, variant: "default" },
-      in_progress: { label: { ru: "В работе", kaz: "Жұмыс істеуде" }, variant: "secondary" },
-      completed: { label: { ru: "Завершена", kaz: "Аяқталды" }, variant: "outline" },
+    const variants: Record<RequestStatus, { label: string; variant: "default" | "secondary" | "outline" }> = {
+      new: { label: "Новая", variant: "default" },
+      in_progress: { label: "В работе", variant: "secondary" },
+      completed: { label: "Завершена", variant: "outline" },
     };
     const config = variants[status];
     return (
       <Badge
         variant={config.variant}
-        className={status === "completed" ? "bg-green-600 text-white hover:bg-green-700 border-green-600" : ""}
+        className={
+          status === "completed"
+            ? "bg-green-600 text-white hover:bg-green-700 border-green-600"
+            : ""
+        }
       >
         {status === "new" && <Clock className="h-3 w-3 mr-1" />}
         {status === "in_progress" && <MessageSquare className="h-3 w-3 mr-1" />}
         {status === "completed" && <CheckCircle2 className="h-3 w-3 mr-1" />}
-        {config.label[lang]}
+        {config.label}
       </Badge>
     );
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(lang === "kaz" ? "kk-KZ" : "ru-RU", {
+    return date.toLocaleDateString("ru-RU", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -122,25 +117,25 @@ export function RequestsManagement() {
   };
 
   if (loading) {
-    return <div className="text-center py-12">{tr.common.loading}</div>;
+    return <div className="text-center py-12">Загрузка...</div>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">{tr.requests.title}</h2>
+        <h2 className="text-2xl font-semibold">Заявки</h2>
         <Select
           value={statusFilter}
           onValueChange={(value: RequestStatus | "all") => setStatusFilter(value)}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={tr.requests.filterByStatus} />
+            <SelectValue placeholder="Фильтр по статусу" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{tr.common.all}</SelectItem>
-            <SelectItem value="new">{tr.requests.new}</SelectItem>
-            <SelectItem value="in_progress">{tr.requests.inProgress}</SelectItem>
-            <SelectItem value="completed">{tr.requests.completed}</SelectItem>
+            <SelectItem value="all">Все</SelectItem>
+            <SelectItem value="new">Новые</SelectItem>
+            <SelectItem value="in_progress">В работе</SelectItem>
+            <SelectItem value="completed">Завершенные</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -148,11 +143,7 @@ export function RequestsManagement() {
       {filteredRequests.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">
-              {lang === "kaz"
-                ? "Таңдалған күйде өтініштер жоқ"
-                : "Нет заявок с выбранным статусом"}
-            </p>
+            <p className="text-muted-foreground">Нет заявок с выбранным статусом</p>
           </CardContent>
         </Card>
       ) : (
@@ -186,13 +177,9 @@ export function RequestsManagement() {
               <CardContent>
                 <p className="text-sm mb-4">{request.message}</p>
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
-                  <span>
-                    {lang === "kaz" ? "Құрылған:" : "Создана:"} {formatDate(request.createdAt)}
-                  </span>
+                  <span>Создана: {formatDate(request.createdAt)}</span>
                   {request.updatedAt !== request.createdAt && (
-                    <span>
-                      {lang === "kaz" ? "Жаңартылған:" : "Обновлена:"} {formatDate(request.updatedAt)}
-                    </span>
+                    <span>Обновлена: {formatDate(request.updatedAt)}</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -204,14 +191,14 @@ export function RequestsManagement() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="new">{tr.requests.new}</SelectItem>
-                      <SelectItem value="in_progress">{tr.requests.inProgress}</SelectItem>
-                      <SelectItem value="completed">{tr.requests.completed}</SelectItem>
+                      <SelectItem value="new">Новая</SelectItem>
+                      <SelectItem value="in_progress">В работе</SelectItem>
+                      <SelectItem value="completed">Завершена</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button variant="outline" size="sm" onClick={() => handleRespond(request)}>
                     <MessageSquare className="h-4 w-4 mr-1" />
-                    {tr.requests.respond}
+                    Ответить
                   </Button>
                 </div>
               </CardContent>

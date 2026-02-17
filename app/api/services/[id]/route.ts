@@ -42,24 +42,9 @@ export async function GET(
             phone: true,
           },
         },
-        reviews: {
-          include: {
-            client: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
         _count: {
           select: {
             requests: true,
-            reviews: true,
           },
         },
       },
@@ -221,4 +206,3 @@ export async function DELETE(
     );
   }
 }
-

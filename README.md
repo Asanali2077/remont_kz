@@ -1,168 +1,56 @@
-# Remont.kz - Недвижимость и ремонтные услуги
+# Remont.kz Marketplace (MVP)
 
-Полнофункциональная платформа для поиска недвижимости и ремонтных услуг в Казахстане, построенная с использованием современных технологий.
+## Project Overview
+Remont.kz is a marketplace that connects customers with local repair and service companies. The MVP focuses on a clean catalog, clear service offerings, and direct client-to-company communication.
 
-## 🚀 Технологии
+## Problem Statement
+Finding reliable ремонт/сервис providers is time‑consuming and fragmented. Clients struggle to compare options, and companies lack a simple channel to receive structured requests.
 
-- **Frontend**: Next.js 14 + React 18 + TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui компоненты
-- **Icons**: Lucide React
-- **Notifications**: Sonner
-- **Code Quality**: ESLint + Prettier
+## Solution Concept
+Provide a single platform where companies publish services and clients create requests, track status, and chat with providers in one place.
 
-## ✨ Возможности
+## Main Features (MVP)
+- Public catalog with filters (category, city, price, rating, tags)
+- Service cards with images, pricing, and company details
+- Client requests with status workflow (new → in progress → completed)
+- Client–company chat with file uploads (image/audio)
+- Company dashboard to manage services, requests, and messages
+- Role-based authentication (Client / Company)
 
-- 🏠 **Главная страница** с информацией о платформе
-- 🔧 **Страница ремонта** с фильтрами и поиском подрядчиков
-- 📞 **Страница контактов** с формой обратной связи
-- 🎨 **Современный UI** с поддержкой темной/светлой темы
-- 📱 **Адаптивный дизайн** для всех устройств
-- 🔍 **Продвинутые фильтры** поиска организаций
-- ⭐ **Рейтинговая система** с отзывами
-- 💬 **Модальные окна** для связи с подрядчиками
+## User Roles
+- **Client**: browse catalog, create requests, chat with companies
+- **Company**: manage services, respond to requests, communicate with clients
 
-## 🛠️ Установка и запуск
+## Tech Stack
+- **Frontend**: Next.js 14 (App Router), React, TypeScript
+- **Backend**: Next.js API Routes, JWT auth
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Styling**: Tailwind CSS + shadcn/ui
 
-### Предварительные требования
+## Architecture Summary
+Single Next.js application with App Router for UI and API routes for backend. Prisma handles database access. JWT-based auth secures protected endpoints. File uploads are stored locally under `public/uploads`.
 
-- Node.js 18+ 
-- npm или yarn
-
-### Установка зависимостей
-
-```bash
-npm install
+## Folder Structure (Key)
+```
+app/                 # App Router pages and API routes
+  api/               # REST endpoints (auth, services, requests, messages)
+  company/           # Company dashboard pages
+components/          # UI + feature components
+lib/                 # Helpers, API client, auth utilities
+prisma/              # Schema and seed script
 ```
 
-### Запуск в режиме разработки
+## Screenshots (Placeholders)
+- `![Home](docs/screenshots/home.png)`
+- `![Catalog](docs/screenshots/catalog.png)`
+- `![Request](docs/screenshots/request.png)`
+- `![Chat](docs/screenshots/chat.png)`
+- `![Company Dashboard](docs/screenshots/company-dashboard.png)`
 
-```bash
-npm run dev
-```
-
-Приложение будет доступно по адресу [http://localhost:3000](http://localhost:3000)
-
-### Сборка для продакшена
-
-```bash
-npm run build
-npm start
-```
-
-## 📁 Структура проекта
-
-```
-remont/
-├── app/                    # Next.js App Router
-│   ├── globals.css        # Глобальные стили
-│   ├── layout.tsx         # Корневой layout
-│   ├── page.tsx           # Главная страница
-│   ├── repair/            # Страница ремонта
-│   └── contacts/          # Страница контактов
-├── components/             # React компоненты
-│   ├── ui/                # shadcn/ui компоненты
-│   ├── Header.tsx         # Шапка сайта
-│   ├── Footer.tsx         # Подвал сайта
-│   ├── Stars.tsx          # Компонент рейтинга
-│   ├── Currency.tsx       # Компонент валюты
-│   └── OrgCard.tsx        # Карточка организации
-├── lib/                    # Утилиты и данные
-│   ├── data.ts            # Статические данные
-│   └── utils.ts           # Вспомогательные функции
-├── public/                 # Статические файлы
-└── package.json           # Зависимости и скрипты
-```
-
-## 🎯 Основные компоненты
-
-### Header
-- Логотип Remont.kz
-- Навигационное меню (Недвижимость, Ремонт, Контакты)
-- Индикатор демо-версии
-
-### Footer
-- Информация об авторских правах
-- Статус демо-версии
-
-### Страница ремонта
-- **Фильтры поиска**:
-  - Текстовый поиск
-  - Выбор города
-  - Выбор услуги
-  - Диапазон цен
-  - Минимальный рейтинг
-  - Только лицензированные
-  - Доступность в течение 7 дней
-- **Сортировка** по релевантности, рейтингу, цене, отзывам
-- **Карточки организаций** с полной информацией
-- **Модальные окна** для связи с подрядчиками
-
-## 🔧 Доступные скрипты
-
-- `npm run dev` - Запуск в режиме разработки
-- `npm run build` - Сборка для продакшена
-- `npm run start` - Запуск собранного приложения
-- `npm run lint` - Проверка кода ESLint
-- `npm run lint:fix` - Автоматическое исправление ошибок ESLint
-- `npm run format` - Форматирование кода Prettier
-- `npm run type-check` - Проверка типов TypeScript
-
-## 🎨 Кастомизация
-
-### Темы
-Проект поддерживает светлую и темную темы через CSS переменные в `app/globals.css`.
-
-### Цвета
-Основная цветовая схема определена в `tailwind.config.js` и использует CSS переменные для гибкости.
-
-### Компоненты
-Все UI компоненты находятся в `components/ui/` и следуют дизайн-системе shadcn/ui.
-
-## 🚀 Следующие шаги
-
-### Backend интеграция
-- [ ] **Next.js API Routes** для CRUD операций
-- [ ] **FastAPI** или **Express.js** для полноценного backend
-- [ ] **PostgreSQL** или **MongoDB** для базы данных
-- [ ] **Prisma** или **TypeORM** для ORM
-
-### Аутентификация и авторизация
-- [ ] **NextAuth.js** для аутентификации
-- [ ] **JWT токены** для API
-- [ ] **Роли пользователей** (клиент, подрядчик, администратор)
-
-### Дополнительные функции
-- [ ] **Система отзывов** и рейтингов
-- [ ] **Чат между клиентами** и подрядчиками
-- [ ] **Система уведомлений** (email, SMS)
-- [ ] **Платежная система** и эскроу
-- [ ] **Модерация** объявлений и отзывов
-- [ ] **Аналитика** и статистика
-
-### DevOps
-- [ ] **Docker** контейнеризация
-- [ ] **CI/CD** пайплайны
-- [ ] **Мониторинг** и логирование
-- [ ] **CDN** для статических ресурсов
-
-## 📝 Лицензия
-
-Этот проект создан в демонстрационных целях. Для коммерческого использования требуется доработка и интеграция с backend системами.
-
-## 🤝 Вклад в проект
-
-1. Форкните репозиторий
-2. Создайте ветку для новой функции (`git checkout -b feature/amazing-feature`)
-3. Зафиксируйте изменения (`git commit -m 'Add amazing feature'`)
-4. Отправьте в ветку (`git push origin feature/amazing-feature`)
-5. Откройте Pull Request
-
-## 📞 Поддержка
-
-По вопросам и предложениям обращайтесь:
-- Email: info@remont.kz
-- Телефон: +7 777 123 45 67
-
----
-
-**Remont.kz** - Ваш надежный партнер в мире недвижимости и ремонта! 🏠✨
+## Future Improvements
+- Real-time chat via WebSocket
+- Request detail page with embedded chat thread
+- Enhanced media gallery carousel on service/organization cards
+- Favorites and reviews (post‑MVP)
+- Deployment and monitoring tooling

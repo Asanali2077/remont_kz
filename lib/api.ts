@@ -1,5 +1,3 @@
-import { AnalyticsData } from "./types";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export interface ApiError {
@@ -69,16 +67,6 @@ interface Pagination {
   totalPages: number;
 }
 
-interface Transaction {
-  id: string;
-  userId: string;
-  amount: number;
-  currency: string;
-  type: string;
-  status: string;
-  description: string;
-  createdAt: string;
-}
 
 class ApiClient {
   private getToken(): string | null {
@@ -305,66 +293,7 @@ class ApiClient {
     return response.json();
   }
 
-  // Analytics
-  async getAnalytics(params?: {
-    startDate?: string;
-    endDate?: string;
-    category?: string;
-    city?: string;
-  }) {
-    const query = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value) query.append(key, String(value));
-      });
-    }
-    return this.request<AnalyticsData>(`/analytics?${query.toString()}`);
-  }
-
-  // Subscriptions
-  async getSubscription() {
-    return this.request<{
-      plan: string;
-      status: string;
-      startDate: string;
-      endDate: string;
-      autoRenew: boolean;
-    }>("/payments/subscription");
-  }
-
-  async createSubscription(data: { plan: string; autoRenew?: boolean }) {
-    return this.request<{
-      plan: string;
-      status: string;
-      startDate: string;
-      endDate: string;
-      autoRenew: boolean;
-    }>("/payments/subscription", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async getTransactions(params?: {
-    type?: string;
-    status?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const query = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          query.append(key, String(value));
-        }
-      });
-    }
-    return this.request<{
-      transactions: Transaction[];
-      pagination: Pagination;
-    }>(`/payments/transactions?${query.toString()}`);
-  }
+  // (analytics/payments removed for MVP)
 }
 
 export const api = new ApiClient();
-

@@ -9,13 +9,9 @@ import { ServiceEditModal } from "./ServiceEditModal";
 import { CompanyService, ServiceCategory } from "@/lib/types";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { useLang } from "@/components/nav/LangSwitcher";
-import { t } from "@/lib/translations";
 import Image from "next/image";
 
 export function ServicesManagement() {
-  const { lang } = useLang();
-  const tr = t(lang);
   const [services, setServices] = useState<CompanyService[]>([]);
   const [editingService, setEditingService] = useState<CompanyService | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +26,6 @@ export function ServicesManagement() {
     try {
       setLoading(true);
       const data = await api.getServices();
-      // Transform API response to match CompanyService type
       interface ApiService {
         id: string;
         name: string;
@@ -67,7 +62,7 @@ export function ServicesManagement() {
       }));
       setServices(transformed);
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr.common.error;
+      const message = error instanceof Error ? error.message : "Ошибка загрузки услуг";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -85,15 +80,15 @@ export function ServicesManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(lang === "kaz" ? "Қызметті жою керек пе?" : "Удалить услугу?")) {
+    if (!confirm("Удалить услугу?")) {
       return;
     }
     try {
       await api.deleteService(id);
-      toast.success(lang === "kaz" ? "Қызмет жойылды" : "Услуга удалена");
+      toast.success("Услуга удалена");
       loadServices();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr.common.error;
+      const message = error instanceof Error ? error.message : "Ошибка удаления услуги";
       toast.error(message);
     }
   };
@@ -116,7 +111,7 @@ export function ServicesManagement() {
           customAttributes: service.customAttributes,
           active: service.active,
         });
-        toast.success(lang === "kaz" ? "Қызмет сақталды" : "Услуга сохранена");
+        toast.success("Услуга сохранена");
       } else {
         await api.createService({
           name: service.name,
@@ -133,48 +128,46 @@ export function ServicesManagement() {
           customAttributes: service.customAttributes,
           active: service.active,
         });
-        toast.success(lang === "kaz" ? "Қызмет қосылды" : "Услуга добавлена");
+        toast.success("Услуга добавлена");
       }
       setIsModalOpen(false);
       setEditingService(null);
       loadServices();
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr.common.error;
+      const message = error instanceof Error ? error.message : "Ошибка сохранения услуги";
       toast.error(message);
     }
   };
 
   const getCategoryLabel = (category: ServiceCategory) => {
-    const labels: Record<ServiceCategory, { ru: string; kaz: string }> = {
-      "real-estate": { ru: "Недвижимость", kaz: "Меншік" },
-      automobiles: { ru: "Авто", kaz: "Авто" },
-      other: { ru: "Другое", kaz: "Басқа" },
+    const labels: Record<ServiceCategory, string> = {
+      "real-estate": "Недвижимость",
+      automobiles: "Авто",
+      other: "Другое",
     };
-    return labels[category][lang];
+    return labels[category];
   };
 
   if (loading) {
-    return <div className="text-center py-12">{tr.common.loading}</div>;
+    return <div className="text-center py-12">Загрузка...</div>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">{tr.services.title}</h2>
+        <h2 className="text-2xl font-semibold">Услуги</h2>
         <Button onClick={handleAdd} className="gap-2">
           <Plus className="h-4 w-4" />
-          {tr.services.addService}
+          Добавить услугу
         </Button>
       </div>
 
       {services.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              {lang === "kaz" ? "Сізде әлі қызметтер жоқ" : "У вас пока нет услуг"}
-            </p>
+            <p className="text-muted-foreground mb-4">У вас пока нет услуг</p>
             <Button onClick={handleAdd} variant="outline">
-              {lang === "kaz" ? "Бірінші қызметті қосу" : "Добавить первую услугу"}
+              Добавить первую услугу
             </Button>
           </CardContent>
         </Card>
@@ -196,7 +189,7 @@ export function ServicesManagement() {
                     ) : (
                       <XCircle className="h-3 w-3 mr-1" />
                     )}
-                    {service.active ? tr.services.active : tr.services.inactive}
+                    {service.active ? "Активна" : "Неактивна"}
                   </Badge>
                 </div>
               </CardHeader>
@@ -215,9 +208,7 @@ export function ServicesManagement() {
                   {service.description}
                 </p>
                 <div className="flex items-center justify-between text-sm mb-4">
-                  <span className="text-muted-foreground">
-                    {lang === "kaz" ? "Баға:" : "Цена:"}
-                  </span>
+                  <span className="text-muted-foreground">Цена:</span>
                   <span className="font-semibold">
                     {service.priceFrom.toLocaleString()} - {service.priceTo.toLocaleString()} ₸
                   </span>
@@ -230,7 +221,7 @@ export function ServicesManagement() {
                     onClick={() => handleEdit(service)}
                   >
                     <Edit className="h-3 w-3 mr-1" />
-                    {tr.common.edit}
+                    Редактировать
                   </Button>
                   <Button
                     variant="outline"

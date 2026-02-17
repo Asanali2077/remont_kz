@@ -67,7 +67,6 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             requests: true,
-            reviews: true,
           },
         },
       },
@@ -151,4 +150,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

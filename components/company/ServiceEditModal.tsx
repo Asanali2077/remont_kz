@@ -14,8 +14,6 @@ import { CompanyService, ServiceCategory } from "@/lib/types";
 import { CITIES } from "@/lib/data";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { useLang } from "@/components/nav/LangSwitcher";
-import { t } from "@/lib/translations";
 import Image from "next/image";
 
 interface ServiceEditModalProps {
@@ -31,8 +29,6 @@ export function ServiceEditModal({
   onOpenChange,
   onSave,
 }: ServiceEditModalProps) {
-  const { lang } = useLang();
-  const tr = t(lang);
   const [name, setName] = useState("");
   const [category, setCategory] = useState<ServiceCategory>("real-estate");
   const [description, setDescription] = useState("");
@@ -99,12 +95,10 @@ export function ServiceEditModal({
       const file = files[0];
       if (file && file.type.startsWith("image/")) {
         if (service?.id) {
-          // Upload to existing service
           const result = await api.uploadServiceImage(service.id, file);
           setImages([...images, result.url]);
-          toast.success(lang === "kaz" ? "Сурет жүктелді" : "Изображение загружено");
+          toast.success("Изображение загружено");
         } else {
-          // For new service, convert to base64 for now
           const reader = new FileReader();
           reader.onloadend = () => {
             const result = reader.result as string;
@@ -114,7 +108,7 @@ export function ServiceEditModal({
         }
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : tr.common.error;
+      const message = error instanceof Error ? error.message : "Ошибка загрузки";
       toast.error(message);
     } finally {
       setUploading(false);
@@ -123,13 +117,10 @@ export function ServiceEditModal({
 
   const handleRemoveImage = async (index: number) => {
     if (service?.id && images[index]?.startsWith("/uploads")) {
-      // If it's an uploaded image, delete from server
       try {
-        // Find image ID - this would need to be stored separately
-        // For now, just remove from local state
         setImages(images.filter((_, i) => i !== index));
       } catch (error) {
-        const message = error instanceof Error ? error.message : tr.common.error;
+        const message = error instanceof Error ? error.message : "Ошибка удаления изображения";
         toast.error(message);
       }
     } else {
@@ -149,9 +140,9 @@ export function ServiceEditModal({
   };
 
   const handleAddCustomAttribute = () => {
-    const key = prompt(lang === "kaz" ? "Атрибут кілті:" : "Введите ключ атрибута:");
+    const key = prompt("Введите ключ атрибута:");
     if (key && key.trim()) {
-      const value = prompt(lang === "kaz" ? "Мәні:" : "Введите значение:");
+      const value = prompt("Введите значение:");
       if (value !== null) {
         setCustomAttributes({ ...customAttributes, [key.trim()]: value });
       }
@@ -188,47 +179,46 @@ export function ServiceEditModal({
     onSave(serviceData);
   };
 
-  const isValid = name && description && priceFrom && priceTo && parseInt(priceFrom) <= parseInt(priceTo);
+  const isValid =
+    name && description && priceFrom && priceTo && parseInt(priceFrom) <= parseInt(priceTo);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {service ? tr.services.editService : tr.services.addService}
-          </DialogTitle>
+          <DialogTitle>{service ? "Редактировать услугу" : "Добавить услугу"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">{tr.services.name} *</Label>
+            <Label htmlFor="name">Название *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={lang === "kaz" ? "Мысалы: Толық жөндеу" : "Например: Ремонт под ключ"}
+              placeholder="Например: Ремонт под ключ"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">{tr.services.category} *</Label>
+              <Label htmlFor="category">Категория *</Label>
               <Select value={category} onValueChange={(value: ServiceCategory) => setCategory(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="real-estate">{lang === "kaz" ? "Меншік" : "Недвижимость"}</SelectItem>
-                  <SelectItem value="automobiles">{lang === "kaz" ? "Авто" : "Авто"}</SelectItem>
-                  <SelectItem value="other">{lang === "kaz" ? "Басқа" : "Другое"}</SelectItem>
+                  <SelectItem value="real-estate">Недвижимость</SelectItem>
+                  <SelectItem value="automobiles">Авто</SelectItem>
+                  <SelectItem value="other">Другое</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="city">{tr.services.city}</Label>
+              <Label htmlFor="city">Город</Label>
               <Select value={city} onValueChange={setCity}>
                 <SelectTrigger>
-                  <SelectValue placeholder={lang === "kaz" ? "Қаланы таңдаңыз" : "Выберите город"} />
+                  <SelectValue placeholder="Выберите город" />
                 </SelectTrigger>
                 <SelectContent>
                   {CITIES.map((c) => (
@@ -242,19 +232,19 @@ export function ServiceEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">{tr.services.description} *</Label>
+            <Label htmlFor="description">Описание *</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={lang === "kaz" ? "Қызметтің толық сипаттамасы" : "Подробное описание услуги"}
+              placeholder="Подробное описание услуги"
               rows={4}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="priceFrom">{tr.services.priceFrom} *</Label>
+              <Label htmlFor="priceFrom">Цена от *</Label>
               <Input
                 id="priceFrom"
                 type="number"
@@ -264,7 +254,7 @@ export function ServiceEditModal({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="priceTo">{tr.services.priceTo} *</Label>
+              <Label htmlFor="priceTo">Цена до *</Label>
               <Input
                 id="priceTo"
                 type="number"
@@ -277,7 +267,7 @@ export function ServiceEditModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="rating">{tr.services.rating}</Label>
+              <Label htmlFor="rating">Рейтинг</Label>
               <Input
                 id="rating"
                 type="number"
@@ -291,29 +281,27 @@ export function ServiceEditModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="availabilityDays">{tr.services.availabilityDays}</Label>
+              <Label htmlFor="availabilityDays">Доступность (дней)</Label>
               <Input
                 id="availabilityDays"
                 type="number"
                 value={availabilityDays}
                 onChange={(e) => setAvailabilityDays(e.target.value)}
-                placeholder={lang === "kaz" ? "Күн саны" : "Количество дней"}
+                placeholder="Количество дней"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="urgency">
-              {lang === "kaz" ? "Шұғылдық" : "Срочность"}
-            </Label>
+            <Label htmlFor="urgency">Срочность</Label>
             <Select value={urgency} onValueChange={(value: "low" | "medium" | "high") => setUrgency(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">{lang === "kaz" ? "Төмен" : "Низкая"}</SelectItem>
-                <SelectItem value="medium">{lang === "kaz" ? "Орташа" : "Средняя"}</SelectItem>
-                <SelectItem value="high">{lang === "kaz" ? "Жоғары" : "Высокая"}</SelectItem>
+                <SelectItem value="low">Низкая</SelectItem>
+                <SelectItem value="medium">Средняя</SelectItem>
+                <SelectItem value="high">Высокая</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -325,7 +313,7 @@ export function ServiceEditModal({
               onCheckedChange={(checked) => setLicensed(checked === true)}
             />
             <Label htmlFor="licensed" className="cursor-pointer">
-              {tr.services.licensed}
+              Лицензия
             </Label>
           </div>
 
@@ -336,17 +324,17 @@ export function ServiceEditModal({
               onCheckedChange={(checked) => setActive(checked === true)}
             />
             <Label htmlFor="active" className="cursor-pointer">
-              {tr.services.active}
+              Активна
             </Label>
           </div>
 
           <div className="space-y-2">
-            <Label>{tr.services.tags}</Label>
+            <Label>Теги</Label>
             <div className="flex gap-2">
               <Input
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
-                placeholder={lang === "kaz" ? "Тег қосу" : "Добавить тег"}
+                placeholder="Добавить тег"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -355,7 +343,7 @@ export function ServiceEditModal({
                 }}
               />
               <Button type="button" variant="outline" onClick={handleAddTag}>
-                {tr.common.add}
+                Добавить
               </Button>
             </div>
             {tags.length > 0 && (
@@ -363,10 +351,7 @@ export function ServiceEditModal({
                 {tags.map((tag) => (
                   <Badge key={tag} variant="secondary" className="flex items-center gap-1">
                     {tag}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => handleRemoveTag(tag)}
-                    />
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveTag(tag)} />
                   </Badge>
                 ))}
               </div>
@@ -374,11 +359,9 @@ export function ServiceEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label>
-              {lang === "kaz" ? "Пайдаланушы атрибуттары" : "Пользовательские атрибуты"}
-            </Label>
+            <Label>Пользовательские атрибуты</Label>
             <Button type="button" variant="outline" size="sm" onClick={handleAddCustomAttribute}>
-              {tr.common.add} {lang === "kaz" ? "атрибут" : "атрибут"}
+              Добавить атрибут
             </Button>
             {Object.keys(customAttributes).length > 0 && (
               <div className="space-y-2 mt-2">
@@ -401,7 +384,7 @@ export function ServiceEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label>{tr.services.images}</Label>
+            <Label>Изображения</Label>
             <input
               ref={fileInputRef}
               type="file"
@@ -418,7 +401,7 @@ export function ServiceEditModal({
               disabled={uploading}
             >
               <Upload className="h-4 w-4 mr-2" />
-              {uploading ? tr.common.loading : tr.services.uploadImages}
+              {uploading ? "Загрузка..." : "Загрузить изображения"}
             </Button>
             {images.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
@@ -442,10 +425,10 @@ export function ServiceEditModal({
 
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {tr.common.cancel}
+              Отмена
             </Button>
             <Button onClick={handleSubmit} disabled={!isValid || uploading}>
-              {uploading ? tr.common.loading : service ? tr.common.save : tr.common.add}
+              {uploading ? "Загрузка..." : service ? "Сохранить" : "Добавить"}
             </Button>
           </div>
         </div>
