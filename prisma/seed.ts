@@ -1,40 +1,63 @@
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 import {
-  PrismaClient,
-  UserRole,
-  ServiceCategory,
-  RequestStatus,
   MessageType,
+  PrismaClient,
+  RequestStatus,
+  ServiceCategory,
+  UserRole,
 } from "@prisma/client";
+import { Pool } from "pg";
 import { hashPassword } from "../lib/auth";
 
-const prisma = new PrismaClient();
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(pool),
+});
 
 async function main() {
-  console.log("🌱 Starting seed...");
+  console.log("Starting seed...");
 
-  // Clean previous seed data for idempotency
   const seedEmails = [
     "client1@remont.kz",
     "client2@remont.kz",
     "company1@remont.kz",
     "company2@remont.kz",
   ];
+
   await prisma.message.deleteMany({
-    where: { sender: { email: { in: seedEmails } } },
-  });
-  await prisma.request.deleteMany({
     where: {
-      OR: [{ client: { email: { in: seedEmails } } }, { company: { email: { in: seedEmails } } }],
+      OR: [
+        { sender: { email: { in: seedEmails } } },
+        { receiver: { email: { in: seedEmails } } },
+      ],
     },
   });
-  await prisma.serviceImage.deleteMany({
-    where: { service: { company: { email: { in: seedEmails } } } },
-  });
-  await prisma.service.deleteMany({
-    where: { company: { email: { in: seedEmails } } },
+
+  await prisma.request.deleteMany({
+    where: {
+      OR: [
+        { client: { email: { in: seedEmails } } },
+        { company: { email: { in: seedEmails } } },
+      ],
+    },
   });
 
-  // Create users
+  await prisma.serviceImage.deleteMany({
+    where: {
+      service: { company: { email: { in: seedEmails } } },
+    },
+  });
+
+  await prisma.service.deleteMany({
+    where: {
+      company: { email: { in: seedEmails } },
+    },
+  });
+
   const client1 = await prisma.user.upsert({
     where: { email: "client1@remont.kz" },
     update: {},
@@ -42,7 +65,7 @@ async function main() {
       email: "client1@remont.kz",
       password: await hashPassword("Client123!"),
       role: UserRole.CLIENT,
-      name: "Client One",
+      name: "Aruzhan Client",
       phone: "+7 701 123 45 67",
     },
   });
@@ -54,7 +77,7 @@ async function main() {
       email: "client2@remont.kz",
       password: await hashPassword("Client123!"),
       role: UserRole.CLIENT,
-      name: "Client Two",
+      name: "Dias Client",
       phone: "+7 702 555 77 88",
     },
   });
@@ -83,62 +106,61 @@ async function main() {
     },
   });
 
-  console.log("✅ Users ready");
+  console.log("Users ready");
 
-  // Seed services for each company
   const companyServices = [
     {
       companyId: company1.id,
       items: [
         {
-          name: "Ремонт квартир под ключ",
+          name: "Apartment renovation turnkey",
           category: ServiceCategory.REAL_ESTATE,
-          description: "Полный ремонт квартир. Дизайн, материалы, контроль качества.",
+          description: "Full apartment renovation with planning, materials, and supervision.",
           priceFrom: 12000,
           priceTo: 30000,
-          city: "Алматы",
+          city: "Almaty",
           rating: 4.8,
           licensed: true,
           availabilityDays: 5,
           urgency: "medium",
-          tags: ["Гарантия 12 мес", "Договор"],
-          customAttributes: { warranty: "12 месяцев", payment: "Без предоплаты" },
+          tags: ["warranty", "contract"],
+          customAttributes: { warranty: "12 months", payment: "No prepayment" },
           images: [
             "https://images.unsplash.com/photo-1560185127-6ed189bf02f4",
             "https://images.unsplash.com/photo-1505691938895-1758d7feb511",
           ],
         },
         {
-          name: "Ремонт кухни",
+          name: "Kitchen renovation",
           category: ServiceCategory.REAL_ESTATE,
-          description: "Кухни под ключ: электрика, плитка, мебель.",
+          description: "Kitchen renovation with electrical, tile, and furniture work.",
           priceFrom: 8000,
           priceTo: 20000,
-          city: "Астана",
+          city: "Astana",
           rating: 4.6,
           licensed: true,
           availabilityDays: 7,
           urgency: "medium",
-          tags: ["Дизайн", "Материалы включены"],
-          customAttributes: { design: "Включен", supervision: "Да" },
+          tags: ["design", "materials included"],
+          customAttributes: { design: "Included", supervision: "Yes" },
           images: [
             "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
             "https://images.unsplash.com/photo-1505691938895-1758d7feb511",
           ],
         },
         {
-          name: "Клининг после ремонта",
+          name: "Post-renovation cleaning",
           category: ServiceCategory.OTHER,
-          description: "Глубокая уборка после ремонта, вывоз мусора.",
+          description: "Deep cleaning after renovation with waste removal.",
           priceFrom: 5000,
           priceTo: 12000,
-          city: "Шымкент",
+          city: "Shymkent",
           rating: 4.4,
           licensed: false,
           availabilityDays: 2,
           urgency: "high",
-          tags: ["Выезд быстро", "Химчистка"],
-          customAttributes: { crew: "2-3 человека" },
+          tags: ["fast arrival", "chemicals included"],
+          customAttributes: { crew: "2-3 people" },
           images: [
             "https://images.unsplash.com/photo-1505691938895-1758d7feb511",
           ],
@@ -149,53 +171,53 @@ async function main() {
       companyId: company2.id,
       items: [
         {
-          name: "ТО автомобилей",
+          name: "Car maintenance",
           category: ServiceCategory.AUTOMOBILES,
-          description: "Диагностика, замена масел и фильтров, ходовая.",
+          description: "Diagnostics, oil change, and suspension service.",
           priceFrom: 7000,
           priceTo: 25000,
-          city: "Алматы",
+          city: "Almaty",
           rating: 4.5,
           licensed: true,
           availabilityDays: 3,
           urgency: "high",
-          tags: ["Гарантия", "Оригинальные запчасти"],
-          customAttributes: { parts: "OEM", warranty: "6 месяцев" },
+          tags: ["warranty", "OEM parts"],
+          customAttributes: { parts: "OEM", warranty: "6 months" },
           images: [
             "https://images.unsplash.com/photo-1515920010264-05a0f6a4c28f",
             "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d",
           ],
         },
         {
-          name: "Детейлинг",
+          name: "Car detailing",
           category: ServiceCategory.AUTOMOBILES,
-          description: "Полный детейлинг, полировка, керамика.",
+          description: "Interior and exterior detailing with ceramic coating.",
           priceFrom: 15000,
           priceTo: 45000,
-          city: "Астана",
+          city: "Astana",
           rating: 4.7,
           licensed: true,
           availabilityDays: 4,
           urgency: "medium",
-          tags: ["Керамика", "Полировка"],
-          customAttributes: { wash: "2-фазная", coating: "Керамика 3 года" },
+          tags: ["ceramic", "polish"],
+          customAttributes: { wash: "2-step", coating: "3-year ceramic" },
           images: [
             "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d",
           ],
         },
         {
-          name: "Эвакуатор 24/7",
+          name: "Tow truck 24/7",
           category: ServiceCategory.OTHER,
-          description: "Круглосуточный эвакуатор по городу и трассе.",
+          description: "Round-the-clock tow truck across city and highway routes.",
           priceFrom: 8000,
           priceTo: 18000,
-          city: "Караганда",
+          city: "Karagandy",
           rating: 4.3,
           licensed: false,
           availabilityDays: 1,
           urgency: "high",
-          tags: ["24/7", "Страховка"],
-          customAttributes: { distance: "до 300 км" },
+          tags: ["24/7", "insured"],
+          customAttributes: { distance: "up to 300 km" },
           images: [
             "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d",
           ],
@@ -209,129 +231,151 @@ async function main() {
     for (const item of group.items) {
       const service = await prisma.service.create({
         data: {
-          ...item,
+          name: item.name,
+          category: item.category,
+          description: item.description,
+          priceFrom: item.priceFrom,
+          priceTo: item.priceTo,
+          city: item.city,
+          rating: item.rating,
+          licensed: item.licensed,
+          availabilityDays: item.availabilityDays,
+          urgency: item.urgency,
+          tags: item.tags,
+          customAttributes: item.customAttributes,
           companyId: group.companyId,
           images: {
             create: item.images.map((url, order) => ({ url, order })),
           },
         },
       });
+
       services.push(service);
     }
   }
 
-  console.log("✅ Services seeded");
+  console.log("Services seeded");
 
-  // Requests across cities and statuses
   const [serviceA1, serviceA2, serviceA3, serviceB1, serviceB2, serviceB3] = services;
 
-  const requestData = [
-    {
-      clientId: client1.id,
-      serviceId: serviceA1.id,
-      companyId: company1.id,
-      message: "Нужен ремонт квартиры 60 кв.м. в Алматы. Сроки 2 месяца.",
-      status: RequestStatus.NEW,
-    },
-    {
-      clientId: client2.id,
-      serviceId: serviceA2.id,
-      companyId: company1.id,
-      message: "Кухня под ключ, Астана. Бюджет до 2 млн.",
-      status: RequestStatus.IN_PROGRESS,
-    },
-    {
-      clientId: client1.id,
-      serviceId: serviceA3.id,
-      companyId: company1.id,
-      message: "Уборка после ремонта, Шымкент.",
-      status: RequestStatus.COMPLETED,
-    },
-    {
-      clientId: client2.id,
-      serviceId: serviceB1.id,
-      companyId: company2.id,
-      message: "ТО Camry 2021, Алматы.",
-      status: RequestStatus.NEW,
-    },
-    {
-      clientId: client1.id,
-      serviceId: serviceB2.id,
-      companyId: company2.id,
-      message: "Детейлинг, Астана. Нужна керамика.",
-      status: RequestStatus.IN_PROGRESS,
-    },
-    {
-      clientId: client2.id,
-      serviceId: serviceB3.id,
-      companyId: company2.id,
-      message: "Эвакуатор из Караганды в Астану.",
-      status: RequestStatus.COMPLETED,
-    },
-  ];
-
-  const requests = await prisma.request.createMany({
-    data: requestData,
-  });
-
-  console.log("✅ Requests seeded");
-
-  // Messages (text, image, audio placeholders)
-  const createdRequests = await prisma.request.findMany({
-    where: { clientId: { in: [client1.id, client2.id] } },
-  });
-  const reqByStatus = Object.fromEntries(createdRequests.map((r) => [r.status, r.id]));
-  const anyRequestId = createdRequests[0]?.id;
-
-  await prisma.message.createMany({
+  await prisma.request.createMany({
     data: [
       {
-        requestId: anyRequestId,
-        senderId: client1.id,
-        receiverId: company1.id,
-        content: "Здравствуйте! Когда можем начать?",
-        type: MessageType.TEXT,
-        read: false,
+        clientId: client1.id,
+        serviceId: serviceA1.id,
+        companyId: company1.id,
+        description: "Need a full apartment renovation for 60 sq m.",
+        category: serviceA1.category,
+        city: serviceA1.city,
+        status: RequestStatus.NEW,
       },
       {
-        requestId: anyRequestId,
-        senderId: company1.id,
-        receiverId: client1.id,
-        content: "Есть слот на следующей неделе.",
-        type: MessageType.TEXT,
-        read: true,
+        clientId: client2.id,
+        serviceId: serviceA2.id,
+        companyId: company1.id,
+        description: "Need a kitchen renovation with a fixed budget.",
+        category: serviceA2.category,
+        city: serviceA2.city,
+        status: RequestStatus.ACCEPTED,
       },
       {
-        requestId: anyRequestId,
-        senderId: client1.id,
-        receiverId: company1.id,
-        content: "Фото помещения",
-        type: MessageType.IMAGE,
-        imageUrl: "https://placehold.co/600x400?text=Room",
-        read: true,
+        clientId: client1.id,
+        serviceId: serviceA3.id,
+        companyId: company1.id,
+        description: "Need post-renovation cleaning for a two-room apartment.",
+        category: serviceA3.category,
+        city: serviceA3.city,
+        status: RequestStatus.COMPLETED,
       },
       {
-        requestId: anyRequestId,
-        senderId: company1.id,
-        receiverId: client1.id,
-        content: "Аудио комментарий",
-        type: MessageType.AUDIO,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-        read: true,
+        clientId: client2.id,
+        serviceId: serviceB1.id,
+        companyId: company2.id,
+        description: "Need maintenance for a 2021 Camry.",
+        category: serviceB1.category,
+        city: serviceB1.city,
+        status: RequestStatus.NEW,
+      },
+      {
+        clientId: client1.id,
+        serviceId: serviceB2.id,
+        companyId: company2.id,
+        description: "Need detailing and ceramic coating this week.",
+        category: serviceB2.category,
+        city: serviceB2.city,
+        status: RequestStatus.IN_PROGRESS,
+      },
+      {
+        clientId: client2.id,
+        serviceId: serviceB3.id,
+        companyId: company2.id,
+        description: "Need a tow truck from Karagandy to Astana.",
+        category: serviceB3.category,
+        city: serviceB3.city,
+        status: RequestStatus.COMPLETED,
+      },
+      {
+        clientId: client1.id,
+        description: "Need urgent plumbing repair, pipe leak in the bathroom.",
+        category: ServiceCategory.OTHER,
+        city: "Almaty",
+        imageUrl: "https://images.unsplash.com/photo-1581090467213-8cba0e09a49a",
+        status: RequestStatus.NEW,
       },
     ],
   });
 
-  console.log("✅ Messages seeded");
+  console.log("Requests seeded");
 
-  console.log("🎉 Seed completed!");
+  const createdRequests = await prisma.request.findMany({
+    where: { clientId: { in: [client1.id, client2.id] } },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const anyRequestId = createdRequests[0]?.id;
+
+  if (anyRequestId) {
+    await prisma.message.createMany({
+      data: [
+        {
+          requestId: anyRequestId,
+          senderId: client1.id,
+          receiverId: company1.id,
+          content: "Hello! When can you start?",
+          type: MessageType.TEXT,
+          read: false,
+        },
+        {
+          requestId: anyRequestId,
+          senderId: company1.id,
+          receiverId: client1.id,
+          content: "We have an opening next week.",
+          type: MessageType.TEXT,
+          read: true,
+        },
+        {
+          requestId: anyRequestId,
+          senderId: client1.id,
+          receiverId: company1.id,
+          content: "Photo of the room",
+          type: MessageType.IMAGE,
+          imageUrl: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4",
+          read: true,
+        },
+      ],
+    });
+  }
+
+  console.log("Messages seeded");
+  console.log("Seed completed");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
+  .catch((error) => {
+    console.error(error);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

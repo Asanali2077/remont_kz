@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma, ServiceCategory } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCompany } from "@/lib/middleware";
-import { ServiceCategory, Prisma } from "@prisma/client";
 
 const serviceCategories = ["automobiles", "real-estate", "other"] as const;
+const urgencyLevels = ["low", "medium", "high"] as const;
+
+const categoryMap: Record<(typeof serviceCategories)[number], ServiceCategory> = {
+  automobiles: ServiceCategory.AUTOMOBILES,
+  "real-estate": ServiceCategory.REAL_ESTATE,
+  other: ServiceCategory.OTHER,
+};
 
 const createServiceSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -16,13 +23,21 @@ const createServiceSchema = z.object({
   rating: z.number().min(0).max(5).optional(),
   licensed: z.boolean().optional(),
   availabilityDays: z.number().int().positive().optional(),
-  urgency: z.enum(["low", "medium", "high"]).optional(),
+  urgency: z.enum(urgencyLevels).optional(),
   tags: z.array(z.string()).optional(),
   customAttributes: z.record(z.string(), z.string()).optional(),
   active: z.boolean().optional().default(true),
+  imageUrl: z.union([z.string().url("Image URL must be a valid URL"), z.literal(""), z.null()]).optional(),
 });
 
-// GET /api/services - List services (public or filtered by company)
+function toPrismaCategory(category: string | null): ServiceCategory | null {
+  if (!category) {
+    return null;
+  }
+
+  return categoryMap[category as keyof typeof categoryMap] ?? null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -38,17 +53,46 @@ export async function GET(request: NextRequest) {
 
     const where: Prisma.ServiceWhereInput = {};
 
-    if (companyId) where.companyId = companyId;
-    if (category) where.category = category.toUpperCase() as ServiceCategory;
-    if (city) where.city = city;
-    if (active !== null) where.active = active === "true";
-    if (minPrice) where.priceFrom = { gte: parseFloat(minPrice) };
-    if (maxPrice) where.priceTo = { lte: parseFloat(maxPrice) };
-    if (minRating) where.rating = { gte: parseFloat(minRating) };
-    if (licensed === "true") where.licensed = true;
+    if (companyId) {
+      where.companyId = companyId;
+    }
+
+    if (category) {
+      const mappedCategory = toPrismaCategory(category);
+      if (!mappedCategory) {
+        return NextResponse.json({ error: "Invalid category" }, { status: 400 });
+      }
+      where.category = mappedCategory;
+    }
+
+    if (city) {
+      where.city = city;
+    }
+
+    if (active !== null) {
+      where.active = active === "true";
+    } else if (!companyId) {
+      where.active = true;
+    }
+
+    if (minPrice) {
+      where.priceFrom = { gte: parseFloat(minPrice) };
+    }
+
+    if (maxPrice) {
+      where.priceTo = { lte: parseFloat(maxPrice) };
+    }
+
+    if (minRating) {
+      where.rating = { gte: parseFloat(minRating) };
+    }
+
+    if (licensed === "true") {
+      where.licensed = true;
+    }
+
     if (tags) {
-      const tagArray = tags.split(",");
-      where.tags = { hasSome: tagArray };
+      where.tags = { hasSome: tags.split(",").filter(Boolean) };
     }
 
     const services = await prisma.service.findMany({
@@ -62,6 +106,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         _count: {
@@ -70,22 +115,16 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [{ active: "desc" }, { createdAt: "desc" }],
     });
 
     return NextResponse.json(services);
   } catch (error) {
     console.error("Get services error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// POST /api/services - Create service (Company only)
 export async function POST(request: NextRequest) {
   try {
     const authResult = await requireCompany()(request);
@@ -93,11 +132,9 @@ export async function POST(request: NextRequest) {
       return authResult.error;
     }
 
-    const { user } = authResult;
     const body = await request.json();
     const validatedData = createServiceSchema.parse(body);
 
-    // Validate price range
     if (validatedData.priceFrom > validatedData.priceTo) {
       return NextResponse.json(
         { error: "priceFrom must be less than or equal to priceTo" },
@@ -108,7 +145,7 @@ export async function POST(request: NextRequest) {
     const service = await prisma.service.create({
       data: {
         name: validatedData.name,
-        category: validatedData.category.toUpperCase() as ServiceCategory,
+        category: categoryMap[validatedData.category],
         description: validatedData.description,
         priceFrom: validatedData.priceFrom,
         priceTo: validatedData.priceTo,
@@ -117,18 +154,36 @@ export async function POST(request: NextRequest) {
         licensed: validatedData.licensed ?? false,
         availabilityDays: validatedData.availabilityDays,
         urgency: validatedData.urgency,
-        tags: validatedData.tags || [],
-        customAttributes: (validatedData.customAttributes || {}) as Prisma.InputJsonValue,
+        tags: validatedData.tags ?? [],
+        customAttributes: validatedData.customAttributes as Prisma.InputJsonValue | undefined,
         active: validatedData.active,
-        companyId: user.userId,
+        companyId: authResult.user.userId,
+        images: validatedData.imageUrl
+          ? {
+              create: [
+                {
+                  url: validatedData.imageUrl,
+                  order: 0,
+                },
+              ],
+            }
+          : undefined,
       },
       include: {
-        images: true,
+        images: {
+          orderBy: { order: "asc" },
+        },
         company: {
           select: {
             id: true,
             name: true,
             email: true,
+            phone: true,
+          },
+        },
+        _count: {
+          select: {
+            requests: true,
           },
         },
       },
@@ -144,9 +199,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.error("Create service error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

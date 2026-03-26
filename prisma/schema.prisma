@@ -23,6 +23,7 @@ enum ServiceCategory {
 
 enum RequestStatus {
   NEW
+  ACCEPTED
   IN_PROGRESS
   COMPLETED
 }
@@ -99,23 +100,28 @@ model ServiceImage {
 model Request {
   id          String        @id @default(uuid())
   clientId    String
-  serviceId   String
-  companyId   String
-  message     String        @db.Text
+  serviceId   String?
+  companyId   String?
+  description String        @db.Text
+  category    ServiceCategory?
+  city        String?
+  imageUrl    String?
   status      RequestStatus @default(NEW)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
   // Relations
   client      User          @relation("ClientRequests", fields: [clientId], references: [id], onDelete: Cascade)
-  service     Service        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  company     User          @relation("CompanyRequests", fields: [companyId], references: [id], onDelete: Cascade)
+  service     Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  company     User?         @relation("CompanyRequests", fields: [companyId], references: [id], onDelete: SetNull)
   messages    Message[]
 
   @@index([clientId])
   @@index([companyId])
   @@index([serviceId])
   @@index([status])
+  @@index([category])
+  @@index([city])
 }
 
 model Message {

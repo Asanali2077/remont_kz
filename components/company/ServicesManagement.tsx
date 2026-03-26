@@ -1,173 +1,135 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, CheckCircle2, XCircle } from "lucide-react";
-import { ServiceEditModal } from "./ServiceEditModal";
-import { CompanyService, ServiceCategory } from "@/lib/types";
-import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Edit, Plus, Trash2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
+import { api } from "@/lib/api";
+import {
+  SERVICE_CATEGORY_LABELS,
+  ServiceFormValues,
+  ServiceRecord,
+} from "@/lib/types";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { ServiceEditModal } from "./ServiceEditModal";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ServicesManagement() {
-  const [services, setServices] = useState<CompanyService[]>([]);
-  const [editingService, setEditingService] = useState<CompanyService | null>(null);
+  const { user } = useAuth();
+  const [services, setServices] = useState<ServiceRecord[]>([]);
+  const [editingService, setEditingService] = useState<ServiceRecord | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadServices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
 
-  const loadServices = async () => {
+    void loadServices(user.id);
+  }, [user?.id]);
+
+  async function loadServices(companyId: string) {
     try {
       setLoading(true);
-      const data = await api.getServices();
-      interface ApiService {
-        id: string;
-        name: string;
-        category: string;
-        description: string;
-        priceFrom: number;
-        priceTo: number;
-        active: boolean;
-        city?: string;
-        rating?: number;
-        licensed?: boolean;
-        availabilityDays?: number;
-        urgency?: string;
-        tags?: string[];
-        customAttributes?: Record<string, string>;
-        images?: Array<{ url: string }>;
-      }
-      const transformed = data.map((s: ApiService) => ({
-        id: s.id,
-        name: s.name,
-        category: s.category.toLowerCase() as ServiceCategory,
-        description: s.description,
-        priceFrom: s.priceFrom,
-        priceTo: s.priceTo,
-        active: s.active,
-        city: s.city,
-        rating: s.rating,
-        licensed: s.licensed,
-        availabilityDays: s.availabilityDays,
-        urgency: s.urgency?.toLowerCase() as "low" | "medium" | "high" | undefined,
-        tags: s.tags || [],
-        customAttributes: s.customAttributes || {},
-        images: s.images?.map((img) => img.url) || [],
-      }));
-      setServices(transformed);
+      const data = await api.getServices({ companyId });
+      setServices(data);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка загрузки услуг";
+      const message = error instanceof Error ? error.message : "Failed to load services";
       toast.error(message);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleAdd = () => {
+  function handleAdd() {
     setEditingService(null);
     setIsModalOpen(true);
-  };
+  }
 
-  const handleEdit = (service: CompanyService) => {
+  function handleEdit(service: ServiceRecord) {
     setEditingService(service);
     setIsModalOpen(true);
-  };
+  }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Удалить услугу?")) {
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this service?")) {
       return;
     }
+
     try {
       await api.deleteService(id);
-      toast.success("Услуга удалена");
-      loadServices();
+      toast.success("Service deleted");
+      if (user?.id) {
+        await loadServices(user.id);
+      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка удаления услуги";
+      const message = error instanceof Error ? error.message : "Failed to delete service";
       toast.error(message);
     }
-  };
+  }
 
-  const handleSave = async (service: CompanyService) => {
+  async function handleSave(service: ServiceFormValues) {
     try {
-      if (editingService) {
-        await api.updateService(service.id, {
-          name: service.name,
-          category: service.category,
-          description: service.description,
-          priceFrom: service.priceFrom,
-          priceTo: service.priceTo,
-          city: service.city,
-          rating: service.rating,
-          licensed: service.licensed,
-          availabilityDays: service.availabilityDays,
-          urgency: service.urgency,
-          tags: service.tags,
-          customAttributes: service.customAttributes,
-          active: service.active,
-        });
-        toast.success("Услуга сохранена");
+      const payload = {
+        name: service.name,
+        category: service.category,
+        description: service.description,
+        priceFrom: service.priceFrom,
+        priceTo: service.priceTo,
+        city: service.city,
+        rating: service.rating,
+        licensed: service.licensed,
+        availabilityDays: service.availabilityDays,
+        urgency: service.urgency,
+        tags: service.tags,
+        customAttributes: service.customAttributes,
+        active: service.active,
+        imageUrl: service.imageUrl,
+      };
+
+      if (service.id) {
+        await api.updateService(service.id, payload);
+        toast.success("Service updated");
       } else {
-        await api.createService({
-          name: service.name,
-          category: service.category,
-          description: service.description,
-          priceFrom: service.priceFrom,
-          priceTo: service.priceTo,
-          city: service.city,
-          rating: service.rating,
-          licensed: service.licensed,
-          availabilityDays: service.availabilityDays,
-          urgency: service.urgency,
-          tags: service.tags,
-          customAttributes: service.customAttributes,
-          active: service.active,
-        });
-        toast.success("Услуга добавлена");
+        await api.createService(payload);
+        toast.success("Service created");
       }
+
       setIsModalOpen(false);
       setEditingService(null);
-      loadServices();
+      if (user?.id) {
+        await loadServices(user.id);
+      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка сохранения услуги";
+      const message = error instanceof Error ? error.message : "Failed to save service";
       toast.error(message);
     }
-  };
-
-  const getCategoryLabel = (category: ServiceCategory) => {
-    const labels: Record<ServiceCategory, string> = {
-      "real-estate": "Недвижимость",
-      automobiles: "Авто",
-      other: "Другое",
-    };
-    return labels[category];
-  };
+  }
 
   if (loading) {
-    return <div className="text-center py-12">Загрузка...</div>;
+    return <div className="py-12 text-center">Loading services...</div>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Услуги</h2>
+        <h2 className="text-2xl font-semibold">Services</h2>
         <Button onClick={handleAdd} className="gap-2">
           <Plus className="h-4 w-4" />
-          Добавить услугу
+          Add service
         </Button>
       </div>
 
       {services.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">У вас пока нет услуг</p>
-            <Button onClick={handleAdd} variant="outline">
-              Добавить первую услугу
+            <p className="mb-4 text-muted-foreground">No services yet.</p>
+            <Button variant="outline" onClick={handleAdd}>
+              Add your first service
             </Button>
           </CardContent>
         </Card>
@@ -176,43 +138,51 @@ export function ServicesManagement() {
           {services.map((service) => (
             <Card key={service.id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <CardTitle className="text-lg">{service.name}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {getCategoryLabel(service.category)}
-                    </CardDescription>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {SERVICE_CATEGORY_LABELS[service.category]}
+                    </p>
                   </div>
                   <Badge variant={service.active ? "default" : "secondary"}>
                     {service.active ? (
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      <CheckCircle2 className="mr-1 h-3 w-3" />
                     ) : (
-                      <XCircle className="h-3 w-3 mr-1" />
+                      <XCircle className="mr-1 h-3 w-3" />
                     )}
-                    {service.active ? "Активна" : "Неактивна"}
+                    {service.active ? "Active" : "Inactive"}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                {service.images && service.images.length > 0 && (
-                  <div className="relative aspect-video w-full mb-4 rounded-md overflow-hidden">
-                    <Image
-                      src={service.images[0]}
+                {service.images[0] ? (
+                  <div className="relative mb-4 aspect-video w-full overflow-hidden rounded-md">
+                    <img
+                      src={service.images[0].url}
                       alt={service.name}
-                      fill
-                      className="object-cover"
+                      className="h-full w-full object-cover"
+                      loading="lazy"
                     />
                   </div>
-                )}
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                ) : null}
+
+                <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
                   {service.description}
                 </p>
-                <div className="flex items-center justify-between text-sm mb-4">
-                  <span className="text-muted-foreground">Цена:</span>
+
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Price</span>
                   <span className="font-semibold">
-                    {service.priceFrom.toLocaleString()} - {service.priceTo.toLocaleString()} ₸
+                    {service.priceFrom.toLocaleString()} - {service.priceTo.toLocaleString()} KZT
                   </span>
                 </div>
+
+                <div className="mb-4 flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Requests</span>
+                  <span className="font-semibold">{service._count?.requests ?? 0}</span>
+                </div>
+
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -220,14 +190,10 @@ export function ServicesManagement() {
                     className="flex-1"
                     onClick={() => handleEdit(service)}
                   >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Редактировать
+                    <Edit className="mr-1 h-3 w-3" />
+                    Edit
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(service.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleDelete(service.id)}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>

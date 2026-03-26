@@ -1,63 +1,19 @@
+"use client";
+
+import type {
+  MessageRecord,
+  RequestRecord,
+  RequestStatus,
+  ServiceCategory,
+  ServiceRecord,
+  UserSummary,
+} from "./types";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export interface ApiError {
   error: string;
   details?: unknown;
-}
-
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  name?: string;
-  phone?: string;
-}
-
-interface Service {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  priceFrom: number;
-  priceTo: number;
-  active: boolean;
-  city?: string;
-  rating?: number;
-  licensed?: boolean;
-  availabilityDays?: number;
-  urgency?: string;
-  tags?: string[];
-  customAttributes?: Record<string, string>;
-  images?: Array<{ url: string }>;
-}
-
-interface Request {
-  id: string;
-  clientId: string;
-  serviceId: string;
-  companyId: string;
-  message: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  client?: User;
-  service?: { id: string; name: string; category: string };
-  company?: User;
-}
-
-interface Message {
-  id: string;
-  requestId?: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-  type: string;
-  imageUrl?: string;
-  audioUrl?: string;
-  read: boolean;
-  createdAt: string;
-  sender?: User;
-  receiver?: User;
 }
 
 interface Pagination {
@@ -67,26 +23,44 @@ interface Pagination {
   totalPages: number;
 }
 
+export interface AuthResponse {
+  user: UserSummary;
+  token: string;
+}
+
+export interface CreateRequestPayload {
+  serviceId?: string;
+  companyId?: string | null;
+  description: string;
+  category?: ServiceCategory;
+  city?: string;
+  imageUrl?: string;
+}
 
 class ApiClient {
-  private getToken(): string | null {
-    if (typeof window === "undefined") return null;
-    const user = localStorage.getItem("session:user");
-    if (user) {
-      try {
-        const userData = JSON.parse(user);
-        return userData.token || null;
-      } catch {
-        return null;
-      }
-    }
-    return null;
+  private buildUrl(endpoint: string): string {
+    const url = `${API_URL}${endpoint}`;
+    console.log("API:", url);
+    return url;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private getToken(): string | null {
+    if (typeof window === "undefined") return null;
+
+    const rawUser = localStorage.getItem("session:user");
+    if (!rawUser) {
+      return null;
+    }
+
+    try {
+      const user = JSON.parse(rawUser);
+      return user.token || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -97,22 +71,27 @@ class ApiClient {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    const url = this.buildUrl(endpoint);
+    let response: Response;
+
+    try {
+      response = await fetch(url, {
+        ...options,
+        headers,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown fetch error";
+      throw new Error(`API request failed for ${url}: ${message}`);
+    }
 
     if (!response.ok) {
-      const error: ApiError = await response.json().catch(() => ({
-        error: "Network error",
-      }));
-      throw new Error(error.error || "Request failed");
+      const text = await response.text();
+      throw new Error(`API error: ${response.status} ${text || response.statusText}`);
     }
 
     return response.json();
   }
 
-  // Auth
   async register(data: {
     email: string;
     password: string;
@@ -120,27 +99,26 @@ class ApiClient {
     name?: string;
     phone?: string;
   }) {
-    return this.request<{ user: User; token: string }>("/auth/register", {
+    return this.request<AuthResponse>("/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });
   }
 
   async login(email: string, password: string) {
-    return this.request<{ user: User; token: string }>("/auth/login", {
+    return this.request<AuthResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
   }
 
   async getMe() {
-    return this.request<User>("/auth/me");
+    return this.request<UserSummary>("/auth/me");
   }
 
-  // Services
   async getServices(params?: {
     companyId?: string;
-    category?: string;
+    category?: ServiceCategory;
     city?: string;
     active?: boolean;
     minPrice?: number;
@@ -152,30 +130,35 @@ class ApiClient {
     const query = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null && value !== "") {
           query.append(key, String(value));
         }
       });
     }
-    return this.request<Service[]>(`/services?${query.toString()}`);
+
+    const services = await this.request<Record<string, unknown>[]>(`/services?${query.toString()}`);
+    return services.map(normalizeService);
   }
 
   async getService(id: string) {
-    return this.request<Service>(`/services/${id}`);
+    const service = await this.request<Record<string, unknown>>(`/services/${id}`);
+    return normalizeService(service);
   }
 
-  async createService(data: Partial<Service>) {
-    return this.request<Service>("/services", {
+  async createService(data: Partial<ServiceRecord>) {
+    const service = await this.request<Record<string, unknown>>("/services", {
       method: "POST",
       body: JSON.stringify(data),
     });
+    return normalizeService(service);
   }
 
-  async updateService(id: string, data: Partial<Service>) {
-    return this.request<Service>(`/services/${id}`, {
+  async updateService(id: string, data: Partial<ServiceRecord>) {
+    const service = await this.request<Record<string, unknown>>(`/services/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
+    return normalizeService(service);
   }
 
   async deleteService(id: string) {
@@ -184,63 +167,47 @@ class ApiClient {
     });
   }
 
-  async uploadServiceImage(serviceId: string, file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-    const token = this.getToken();
-    const response = await fetch(`${API_URL}/services/${serviceId}/images`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Upload failed");
-    }
-    return response.json();
-  }
-
-  async deleteServiceImage(serviceId: string, imageId: string) {
-    return this.request<{ message: string }>(
-      `/services/${serviceId}/images/${imageId}`,
-      {
-        method: "DELETE",
-      }
-    );
-  }
-
-  // Requests
-  async getRequests(params?: { status?: string; serviceId?: string }) {
+  async getRequests(params?: {
+    status?: RequestStatus;
+    serviceId?: string;
+    category?: ServiceCategory;
+    city?: string;
+    scope?: "assigned" | "unassigned" | "all";
+  }) {
     const query = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value) query.append(key, String(value));
+        if (value !== undefined && value !== null && value !== "") {
+          query.append(key, String(value));
+        }
       });
     }
-    return this.request<Request[]>(`/requests?${query.toString()}`);
+
+    const requests = await this.request<Record<string, unknown>[]>(`/requests?${query.toString()}`);
+    return requests.map(normalizeRequest);
   }
 
   async getRequest(id: string) {
-    return this.request<Request>(`/requests/${id}`);
+    const request = await this.request<Record<string, unknown>>(`/requests/${id}`);
+    return normalizeRequest(request);
   }
 
-  async createRequest(data: { serviceId: string; message: string }) {
-    return this.request<Request>("/requests", {
+  async createRequest(data: CreateRequestPayload) {
+    const request = await this.request<Record<string, unknown>>("/requests", {
       method: "POST",
       body: JSON.stringify(data),
     });
+    return normalizeRequest(request);
   }
 
-  async updateRequest(id: string, data: { status?: string }) {
-    return this.request<Request>(`/requests/${id}`, {
+  async updateRequest(id: string, data: { status: RequestStatus }) {
+    const request = await this.request<Record<string, unknown>>(`/requests/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
+    return normalizeRequest(request);
   }
 
-  // Messages
   async getMessages(params?: {
     requestId?: string;
     receiverId?: string;
@@ -255,8 +222,9 @@ class ApiClient {
         }
       });
     }
+
     return this.request<{
-      messages: Message[];
+      messages: MessageRecord[];
       pagination: Pagination;
     }>(`/messages?${query.toString()}`);
   }
@@ -269,7 +237,7 @@ class ApiClient {
     imageUrl?: string;
     audioUrl?: string;
   }) {
-    return this.request<Message>("/messages", {
+    return this.request<MessageRecord>("/messages", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -279,21 +247,104 @@ class ApiClient {
     const formData = new FormData();
     formData.append("file", file);
     const token = this.getToken();
-    const response = await fetch(`${API_URL}/messages/upload?type=${type}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Upload failed");
-    }
-    return response.json();
-  }
+    const headers: Record<string, string> = {};
 
-  // (analytics/payments removed for MVP)
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const url = this.buildUrl(`/messages/upload?type=${type}`);
+    let response: Response;
+
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown fetch error";
+      throw new Error(`API request failed for ${url}: ${message}`);
+    }
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`API error: ${response.status} ${text || response.statusText}`);
+    }
+
+    return response.json() as Promise<{
+      url: string;
+      type: "image" | "audio";
+      size: number;
+      mimetype: string;
+    }>;
+  }
+}
+
+function fromDbCategory(value: string): ServiceCategory {
+  switch (value) {
+    case "AUTOMOBILES":
+      return "automobiles";
+    case "REAL_ESTATE":
+      return "real-estate";
+    default:
+      return "other";
+  }
+}
+
+function fromDbStatus(value: string): RequestStatus {
+  switch (value) {
+    case "ACCEPTED":
+      return "accepted";
+    case "IN_PROGRESS":
+      return "in_progress";
+    case "COMPLETED":
+      return "completed";
+    default:
+      return "new";
+  }
+}
+
+function normalizeService(service: Record<string, unknown>): ServiceRecord {
+  const rawService = service as unknown as ServiceRecord & {
+    category: string;
+    urgency?: string | null;
+    customAttributes?: Record<string, string> | null;
+  };
+
+  return {
+    ...rawService,
+    category: fromDbCategory(rawService.category),
+    urgency: rawService.urgency?.toLowerCase() as "low" | "medium" | "high" | null | undefined,
+    tags: rawService.tags || [],
+    images: rawService.images || [],
+    customAttributes: rawService.customAttributes || null,
+  };
+}
+
+function normalizeRequest(request: Record<string, unknown>): RequestRecord {
+  const rawRequest = request as unknown as RequestRecord & {
+    status: string;
+    category?: string | null;
+    service?: {
+      id: string;
+      name: string;
+      category: string;
+      city?: string | null;
+    } | null;
+  };
+
+  return {
+    ...rawRequest,
+    status: fromDbStatus(rawRequest.status),
+    category: rawRequest.category ? fromDbCategory(rawRequest.category) : null,
+    service: rawRequest.service
+      ? {
+          ...rawRequest.service,
+          category: fromDbCategory(rawRequest.service.category),
+        }
+      : null,
+  };
 }
 
 export const api = new ApiClient();

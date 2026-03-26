@@ -10,19 +10,27 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    if (loading) {
+      return;
+    }
+
     if (!user) {
       router.push("/");
       return;
     }
+
     if (requiredRole && user.role !== requiredRole) {
       router.push("/");
-      return;
     }
-  }, [user, requiredRole, router]);
+  }, [loading, requiredRole, router, user]);
+
+  if (loading) {
+    return <div className="py-16 text-center">Loading...</div>;
+  }
 
   if (!user) {
     return null;
@@ -34,10 +42,3 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   return <>{children}</>;
 }
-
-
-
-
-
-
-

@@ -1,10 +1,9 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
-import { ServicesManagement } from "@/components/company/ServicesManagement";
 import { RequestsManagement } from "@/components/company/RequestsManagement";
-import { MessagesManagement } from "@/components/company/MessagesManagement";
+import { ServicesManagement } from "@/components/company/ServicesManagement";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function CompanyDashboardPage() {
   return (
@@ -12,17 +11,16 @@ export default function CompanyDashboardPage() {
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
         <div className="mx-auto max-w-7xl px-4 py-8">
           <div className="mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Панель управления</h1>
+            <h1 className="mb-2 text-3xl font-bold md:text-4xl">Company dashboard</h1>
             <p className="text-muted-foreground">
-              Управляйте услугами, заявками и сообщениями
+              Manage your services and process client requests end to end.
             </p>
           </div>
 
           <Tabs defaultValue="services" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="services">Услуги</TabsTrigger>
-              <TabsTrigger value="requests">Заявки</TabsTrigger>
-              <TabsTrigger value="messages">Сообщения</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="services">Services</TabsTrigger>
+              <TabsTrigger value="requests">Requests</TabsTrigger>
             </TabsList>
 
             <TabsContent value="services" className="mt-6">
@@ -31,10 +29,6 @@ export default function CompanyDashboardPage() {
 
             <TabsContent value="requests" className="mt-6">
               <RequestsManagement />
-            </TabsContent>
-
-            <TabsContent value="messages" className="mt-6">
-              <MessagesManagement />
             </TabsContent>
           </Tabs>
         </div>

@@ -10,8 +10,8 @@ export type User = {
   id: string;
   email: string;
   role: UserRole;
-  name?: string;
-  phone?: string;
+  name?: string | null;
+  phone?: string | null;
   token?: string;
 } | null;
 

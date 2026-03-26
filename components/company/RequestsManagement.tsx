@@ -1,217 +1,243 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Clock, CheckCircle2, User, Phone, Mail } from "lucide-react";
-import { ClientRequest, RequestStatus } from "@/lib/types";
-import { RequestResponseModal } from "./RequestResponseModal";
-import { api } from "@/lib/api";
+import { useEffect, useMemo, useState } from "react";
+import { Clock, CheckCircle2, PlayCircle, User, Phone, Mail, Briefcase } from "lucide-react";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
+import {
+  REQUEST_STATUS_LABELS,
+  RequestRecord,
+  RequestStatus,
+  SERVICE_CATEGORY_LABELS,
+} from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type RequestFilter = RequestStatus | "all";
+
+const filterOptions: RequestFilter[] = ["all", "new", "accepted", "in_progress", "completed"];
+
+async function fetchRequests(statusFilter: RequestFilter) {
+  return api.getRequests({
+    scope: "all",
+    status: statusFilter === "all" ? undefined : statusFilter,
+  });
+}
 
 export function RequestsManagement() {
-  const [requests, setRequests] = useState<ClientRequest[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<ClientRequest | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("all");
+  const [requests, setRequests] = useState<RequestRecord[]>([]);
+  const [statusFilter, setStatusFilter] = useState<RequestFilter>("all");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadRequests();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const run = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchRequests(statusFilter);
+        setRequests(data);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to load requests";
+        toast.error(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void run();
   }, [statusFilter]);
 
-  interface ApiRequest {
-    id: string;
-    client: { name?: string; email: string; phone?: string };
-    service: { name: string };
-    serviceId: string;
-    message: string;
-    status: string;
-    createdAt: string;
-    updatedAt: string;
+  async function updateStatus(requestId: string, status: RequestStatus) {
+    try {
+      await api.updateRequest(requestId, { status });
+      toast.success("Request updated");
+      const data = await fetchRequests(statusFilter);
+      setRequests(data);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update request";
+      toast.error(message);
+    }
   }
 
-  const loadRequests = async () => {
-    try {
-      setLoading(true);
-      const data = (await api.getRequests(
-        statusFilter !== "all" ? { status: statusFilter } : undefined
-      )) as ApiRequest[];
-      const transformed = data.map((r) => ({
-        id: r.id,
-        clientName: r.client.name || r.client.email,
-        clientEmail: r.client.email,
-        clientPhone: r.client.phone || "",
-        serviceId: r.serviceId,
-        serviceName: r.service.name,
-        message: r.message,
-        status: r.status.toLowerCase() as RequestStatus,
-        createdAt: r.createdAt,
-        updatedAt: r.updatedAt,
-      }));
-      setRequests(transformed);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка загрузки заявок";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (requestId: string, newStatus: RequestStatus) => {
-    try {
-      await api.updateRequest(requestId, { status: newStatus });
-      toast.success("Статус обновлен");
-      loadRequests();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка обновления статуса";
-      toast.error(message);
-    }
-  };
-
-  const handleRespond = (request: ClientRequest) => {
-    setSelectedRequest(request);
-    setIsModalOpen(true);
-  };
-
-  const filteredRequests = requests.filter(
-    (r) => statusFilter === "all" || r.status === statusFilter
+  const assignedRequests = useMemo(
+    () => requests.filter((request) => Boolean(request.companyId)),
+    [requests]
   );
 
-  const getStatusBadge = (status: RequestStatus) => {
-    const variants: Record<RequestStatus, { label: string; variant: "default" | "secondary" | "outline" }> = {
-      new: { label: "Новая", variant: "default" },
-      in_progress: { label: "В работе", variant: "secondary" },
-      completed: { label: "Завершена", variant: "outline" },
-    };
-    const config = variants[status];
-    return (
-      <Badge
-        variant={config.variant}
-        className={
-          status === "completed"
-            ? "bg-green-600 text-white hover:bg-green-700 border-green-600"
-            : ""
-        }
-      >
-        {status === "new" && <Clock className="h-3 w-3 mr-1" />}
-        {status === "in_progress" && <MessageSquare className="h-3 w-3 mr-1" />}
-        {status === "completed" && <CheckCircle2 className="h-3 w-3 mr-1" />}
-        {config.label}
-      </Badge>
-    );
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const unassignedRequests = useMemo(
+    () => requests.filter((request) => !request.companyId),
+    [requests]
+  );
 
   if (loading) {
-    return <div className="text-center py-12">Загрузка...</div>;
+    return <div className="py-12 text-center">Loading requests...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Заявки</h2>
-        <Select
-          value={statusFilter}
-          onValueChange={(value: RequestStatus | "all") => setStatusFilter(value)}
-        >
+        <h2 className="text-2xl font-semibold">Requests</h2>
+        <Select value={statusFilter} onValueChange={(value: RequestFilter) => setStatusFilter(value)}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Фильтр по статусу" />
+            <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Все</SelectItem>
-            <SelectItem value="new">Новые</SelectItem>
-            <SelectItem value="in_progress">В работе</SelectItem>
-            <SelectItem value="completed">Завершенные</SelectItem>
+            {filterOptions.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option === "all" ? "All" : REQUEST_STATUS_LABELS[option]}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
-      {filteredRequests.length === 0 ? (
+      <RequestSection
+        title="Assigned to your company"
+        emptyText="No assigned requests."
+        requests={assignedRequests}
+        onUpdateStatus={updateStatus}
+      />
+
+      <RequestSection
+        title="Unassigned requests"
+        emptyText="No unassigned requests."
+        requests={unassignedRequests}
+        onUpdateStatus={updateStatus}
+      />
+    </div>
+  );
+}
+
+function RequestSection({
+  title,
+  emptyText,
+  requests,
+  onUpdateStatus,
+}: {
+  title: string;
+  emptyText: string;
+  requests: RequestRecord[];
+  onUpdateStatus: (requestId: string, status: RequestStatus) => Promise<void>;
+}) {
+  return (
+    <section className="space-y-4">
+      <h3 className="text-lg font-semibold">{title}</h3>
+
+      {requests.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Нет заявок с выбранным статусом</p>
-          </CardContent>
+          <CardContent className="py-8 text-center text-muted-foreground">{emptyText}</CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredRequests.map((request) => (
+          {requests.map((request) => (
             <Card key={request.id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{request.serviceName}</CardTitle>
-                    <CardDescription className="flex items-center gap-4 flex-wrap mt-2">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <CardTitle className="text-lg">
+                      {request.service?.name || "Custom request"}
+                    </CardTitle>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <User className="h-4 w-4" />
-                        {request.clientName}
+                        {request.client?.name || request.client?.email || "Client"}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-4 w-4" />
-                        {request.clientEmail}
-                      </span>
-                      {request.clientPhone && (
+                      {request.client?.email ? (
+                        <span className="flex items-center gap-1">
+                          <Mail className="h-4 w-4" />
+                          {request.client.email}
+                        </span>
+                      ) : null}
+                      {request.client?.phone ? (
                         <span className="flex items-center gap-1">
                           <Phone className="h-4 w-4" />
-                          {request.clientPhone}
+                          {request.client.phone}
                         </span>
-                      )}
-                    </CardDescription>
+                      ) : null}
+                      {request.company?.name ? (
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-4 w-4" />
+                          {request.company.name}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-                  {getStatusBadge(request.status)}
+                  <StatusBadge status={request.status} />
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4">{request.message}</p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
-                  <span>Создана: {formatDate(request.createdAt)}</span>
-                  {request.updatedAt !== request.createdAt && (
-                    <span>Обновлена: {formatDate(request.updatedAt)}</span>
-                  )}
+              <CardContent className="space-y-4">
+                <p className="text-sm">{request.description}</p>
+
+                <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                  {request.category ? (
+                    <span>Category: {SERVICE_CATEGORY_LABELS[request.category]}</span>
+                  ) : null}
+                  {request.city ? <span>City: {request.city}</span> : null}
+                  <span>Created: {formatDate(request.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Select
-                    value={request.status}
-                    onValueChange={(value: RequestStatus) => handleStatusChange(request.id, value)}
-                  >
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="new">Новая</SelectItem>
-                      <SelectItem value="in_progress">В работе</SelectItem>
-                      <SelectItem value="completed">Завершена</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="sm" onClick={() => handleRespond(request)}>
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    Ответить
-                  </Button>
+
+                <div className="flex flex-wrap gap-2">
+                  {!request.companyId && request.status === "new" ? (
+                    <Button size="sm" onClick={() => void onUpdateStatus(request.id, "accepted")}>
+                      Accept request
+                    </Button>
+                  ) : null}
+
+                  {request.companyId && request.status === "new" ? (
+                    <Button size="sm" onClick={() => void onUpdateStatus(request.id, "accepted")}>
+                      Accept
+                    </Button>
+                  ) : null}
+
+                  {request.companyId && request.status === "accepted" ? (
+                    <Button size="sm" variant="outline" onClick={() => void onUpdateStatus(request.id, "in_progress")}>
+                      Start work
+                    </Button>
+                  ) : null}
+
+                  {request.companyId && request.status === "in_progress" ? (
+                    <Button size="sm" variant="outline" onClick={() => void onUpdateStatus(request.id, "completed")}>
+                      Complete
+                    </Button>
+                  ) : null}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
-
-      <RequestResponseModal
-        request={selectedRequest}
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-      />
-    </div>
+    </section>
   );
+}
+
+function StatusBadge({ status }: { status: RequestStatus }) {
+  if (status === "completed") {
+    return (
+      <Badge className="bg-green-600 text-white hover:bg-green-700">
+        <CheckCircle2 className="mr-1 h-3 w-3" />
+        {REQUEST_STATUS_LABELS[status]}
+      </Badge>
+    );
+  }
+
+  if (status === "in_progress") {
+    return (
+      <Badge variant="secondary">
+        <PlayCircle className="mr-1 h-3 w-3" />
+        {REQUEST_STATUS_LABELS[status]}
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge variant="default">
+      <Clock className="mr-1 h-3 w-3" />
+      {REQUEST_STATUS_LABELS[status]}
+    </Badge>
+  );
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleString();
 }

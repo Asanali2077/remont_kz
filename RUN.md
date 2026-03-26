@@ -23,7 +23,7 @@ ALLOWED_AUDIO_TYPES=audio/mpeg,audio/wav,audio/ogg
 
 # App
 NODE_ENV="development"
-NEXT_PUBLIC_API_URL="http://localhost:3000/api"
+NEXT_PUBLIC_API_URL="/api"
 ```
 
 ## Install

@@ -20,10 +20,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const subfolder = type === "image" ? "images" : "audio";
+
     const uploadResult = await handleFileUpload(
       request,
       "file",
-      type as "images" | "audio"
+      subfolder
     );
 
     if (!uploadResult) {

@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Filter, Search, Calendar, X } from "lucide-react";
 
-export type SortOption = "relevance" | "rating" | "price" | "reviews";
+export type SortOption = "relevance" | "rating" | "price" | "requests";
 
 export interface FilterBarProps {
   // Values
@@ -230,7 +230,7 @@ export function FilterBar(props: FilterBarProps) {
                     <SelectItem value="relevance">По релевантности</SelectItem>
                     <SelectItem value="rating">По рейтингу</SelectItem>
                     <SelectItem value="price">Сначала дешевле</SelectItem>
-                    <SelectItem value="reviews">По отзывам</SelectItem>
+                    <SelectItem value="requests">By demand</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

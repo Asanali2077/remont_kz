@@ -1,15 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma, RequestStatus, ServiceCategory } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAuth, requireClient } from "@/lib/middleware";
-import { RequestStatus, Prisma } from "@prisma/client";
 
-const createRequestSchema = z.object({
-  serviceId: z.string().uuid("Invalid service ID"),
-  message: z.string().min(1, "Message is required"),
-});
+const requestStatuses = ["new", "accepted", "in_progress", "completed"] as const;
+const requestScopes = ["assigned", "unassigned", "all"] as const;
+const serviceCategories = ["automobiles", "real-estate", "other"] as const;
 
-// GET /api/requests - List requests (filtered by role)
+const requestStatusMap: Record<(typeof requestStatuses)[number], RequestStatus> = {
+  new: RequestStatus.NEW,
+  accepted: RequestStatus.ACCEPTED,
+  in_progress: RequestStatus.IN_PROGRESS,
+  completed: RequestStatus.COMPLETED,
+};
+
+const categoryMap: Record<(typeof serviceCategories)[number], ServiceCategory> = {
+  automobiles: ServiceCategory.AUTOMOBILES,
+  "real-estate": ServiceCategory.REAL_ESTATE,
+  other: ServiceCategory.OTHER,
+};
+
+const createRequestSchema = z
+  .object({
+    serviceId: z.string().uuid("Invalid service ID").optional(),
+    companyId: z.string().uuid("Invalid company ID").nullable().optional(),
+    description: z.string().min(1, "Description is required"),
+    category: z.enum(serviceCategories).optional(),
+    city: z.string().min(1, "City is required").optional(),
+    imageUrl: z.string().min(1).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.serviceId) {
+      if (!data.category) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Category is required for a custom request",
+          path: ["category"],
+        });
+      }
+
+      if (!data.city) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "City is required for a custom request",
+          path: ["city"],
+        });
+      }
+    }
+  });
+
+function toRequestStatus(status: string | null): RequestStatus | null {
+  if (!status) {
+    return null;
+  }
+
+  return requestStatusMap[status as keyof typeof requestStatusMap] ?? null;
+}
+
+function toServiceCategory(category: string | null): ServiceCategory | null {
+  if (!category) {
+    return null;
+  }
+
+  return categoryMap[category as keyof typeof categoryMap] ?? null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAuth()(request);
@@ -21,21 +77,52 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const serviceId = searchParams.get("serviceId");
+    const category = searchParams.get("category");
+    const city = searchParams.get("city");
+    const scope = searchParams.get("scope");
 
     const where: Prisma.RequestWhereInput = {};
 
-    // Filter by role
     if (user.role === "CLIENT") {
       where.clientId = user.userId;
-    } else if (user.role === "COMPANY") {
-      where.companyId = user.userId;
+    } else {
+      const resolvedScope = (scope ?? "assigned") as (typeof requestScopes)[number];
+
+      if (!requestScopes.includes(resolvedScope)) {
+        return NextResponse.json({ error: "Invalid scope" }, { status: 400 });
+      }
+
+      if (resolvedScope === "assigned") {
+        where.companyId = user.userId;
+      } else if (resolvedScope === "unassigned") {
+        where.companyId = null;
+      } else {
+        where.OR = [{ companyId: user.userId }, { companyId: null }];
+      }
     }
 
     if (status) {
-      where.status = status.toUpperCase() as RequestStatus;
+      const mappedStatus = toRequestStatus(status);
+      if (!mappedStatus) {
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      }
+      where.status = mappedStatus;
     }
+
     if (serviceId) {
       where.serviceId = serviceId;
+    }
+
+    if (category) {
+      const mappedCategory = toServiceCategory(category);
+      if (!mappedCategory) {
+        return NextResponse.json({ error: "Invalid category" }, { status: 400 });
+      }
+      where.category = mappedCategory;
+    }
+
+    if (city) {
+      where.city = city;
     }
 
     const requests = await prisma.request.findMany({
@@ -54,6 +141,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             category: true,
+            city: true,
           },
         },
         company: {
@@ -61,11 +149,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             email: true,
-          },
-        },
-        _count: {
-          select: {
-            messages: true,
+            phone: true,
           },
         },
       },
@@ -77,14 +161,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(requests);
   } catch (error) {
     console.error("Get requests error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// POST /api/requests - Create request (Client only)
 export async function POST(request: NextRequest) {
   try {
     const authResult = await requireClient()(request);
@@ -92,39 +172,40 @@ export async function POST(request: NextRequest) {
       return authResult.error;
     }
 
-    const { user } = authResult;
     const body = await request.json();
     const validatedData = createRequestSchema.parse(body);
 
-    // Check if service exists
-    const service = await prisma.service.findUnique({
-      where: { id: validatedData.serviceId },
-      include: {
-        company: true,
-      },
-    });
+    let service = null;
+    if (validatedData.serviceId) {
+      service = await prisma.service.findUnique({
+        where: { id: validatedData.serviceId },
+      });
 
-    if (!service) {
-      return NextResponse.json(
-        { error: "Service not found" },
-        { status: 404 }
-      );
+      if (!service) {
+        return NextResponse.json({ error: "Service not found" }, { status: 404 });
+      }
+
+      if (!service.active) {
+        return NextResponse.json({ error: "Service is not active" }, { status: 400 });
+      }
+
+      if (validatedData.companyId && validatedData.companyId !== service.companyId) {
+        return NextResponse.json(
+          { error: "companyId must match the selected service" },
+          { status: 400 }
+        );
+      }
     }
 
-    if (!service.active) {
-      return NextResponse.json(
-        { error: "Service is not active" },
-        { status: 400 }
-      );
-    }
-
-    // Create request
-    const newRequest = await prisma.request.create({
+    const createdRequest = await prisma.request.create({
       data: {
-        clientId: user.userId,
-        serviceId: validatedData.serviceId,
-        companyId: service.companyId,
-        message: validatedData.message,
+        clientId: authResult.user.userId,
+        serviceId: service?.id ?? null,
+        companyId: service?.companyId ?? validatedData.companyId ?? null,
+        description: validatedData.description,
+        category: service?.category ?? categoryMap[validatedData.category as keyof typeof categoryMap],
+        city: validatedData.city ?? service?.city ?? null,
+        imageUrl: validatedData.imageUrl,
         status: RequestStatus.NEW,
       },
       include: {
@@ -141,6 +222,7 @@ export async function POST(request: NextRequest) {
             id: true,
             name: true,
             category: true,
+            city: true,
           },
         },
         company: {
@@ -148,12 +230,13 @@ export async function POST(request: NextRequest) {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
       },
     });
 
-    return NextResponse.json(newRequest, { status: 201 });
+    return NextResponse.json(createdRequest, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -163,10 +246,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.error("Create request error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-

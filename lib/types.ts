@@ -1,10 +1,69 @@
-import { ServiceCategory as UiServiceCategory } from "./data";
-export type ServiceCategory = UiServiceCategory;
+export type UserRole = "client" | "company";
 
-export type RequestStatus = "new" | "in_progress" | "completed";
+export type ServiceCategory = "automobiles" | "real-estate" | "other";
 
-export interface CompanyService {
+export type RequestStatus = "new" | "accepted" | "in_progress" | "completed";
+
+export type MessageType = "text" | "image" | "audio";
+
+export const SERVICE_CATEGORY_OPTIONS: ServiceCategory[] = [
+  "automobiles",
+  "real-estate",
+  "other",
+];
+
+export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
+  automobiles: "Automobiles",
+  "real-estate": "Real estate",
+  other: "Other",
+};
+
+export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
+  new: "New",
+  accepted: "Accepted",
+  in_progress: "In progress",
+  completed: "Completed",
+};
+
+export interface UserSummary {
   id: string;
+  email: string;
+  role: string;
+  name?: string | null;
+  phone?: string | null;
+}
+
+export interface ServiceImageRecord {
+  id: string;
+  url: string;
+  order: number;
+}
+
+export interface ServiceRecord {
+  id: string;
+  name: string;
+  category: ServiceCategory;
+  description: string;
+  priceFrom: number;
+  priceTo: number;
+  active: boolean;
+  city?: string | null;
+  rating?: number | null;
+  licensed?: boolean;
+  availabilityDays?: number | null;
+  urgency?: "low" | "medium" | "high" | null;
+  tags: string[];
+  customAttributes?: Record<string, string> | null;
+  companyId: string;
+  company: UserSummary;
+  images: ServiceImageRecord[];
+  _count?: {
+    requests: number;
+  };
+}
+
+export interface ServiceFormValues {
+  id?: string;
   name: string;
   category: ServiceCategory;
   description: string;
@@ -18,34 +77,44 @@ export interface CompanyService {
   urgency?: "low" | "medium" | "high";
   tags?: string[];
   customAttributes?: Record<string, string>;
-  images?: string[];
+  imageUrl?: string;
 }
 
-export interface ClientRequest {
+export interface RequestServiceSummary {
   id: string;
-  clientName: string;
-  clientEmail: string;
-  clientPhone: string;
-  serviceId: string;
-  serviceName: string;
-  message: string;
+  name: string;
+  category: ServiceCategory;
+  city?: string | null;
+}
+
+export interface RequestRecord {
+  id: string;
+  clientId: string;
+  serviceId?: string | null;
+  companyId?: string | null;
+  description: string;
+  category?: ServiceCategory | null;
+  city?: string | null;
+  imageUrl?: string | null;
   status: RequestStatus;
   createdAt: string;
   updatedAt: string;
+  client?: UserSummary;
+  service?: RequestServiceSummary | null;
+  company?: UserSummary | null;
 }
 
-export type MessageType = "text" | "image" | "audio";
-
-export interface Message {
+export interface MessageRecord {
   id: string;
-  requestId?: string;
-  clientName: string;
-  clientEmail: string;
+  requestId?: string | null;
+  senderId: string;
+  receiverId: string;
   content: string;
   type: MessageType;
-  imageUrl?: string;
-  audioUrl?: string;
-  isFromCompany: boolean;
-  createdAt: string;
+  imageUrl?: string | null;
+  audioUrl?: string | null;
   read: boolean;
+  createdAt: string;
+  sender?: UserSummary;
+  receiver?: UserSummary;
 }

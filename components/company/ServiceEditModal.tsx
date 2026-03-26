@@ -1,27 +1,35 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
-
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import {
+  SERVICE_CATEGORY_LABELS,
+  SERVICE_CATEGORY_OPTIONS,
+  ServiceCategory,
+  ServiceFormValues,
+  ServiceRecord,
+} from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { X, Upload } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { CompanyService, ServiceCategory } from "@/lib/types";
-import { CITIES } from "@/lib/data";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
-import Image from "next/image";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ServiceEditModalProps {
-  service: CompanyService | null;
+  service: ServiceRecord | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (service: CompanyService) => void;
+  onSave: (service: ServiceFormValues) => void;
 }
+
+const urgencyOptions = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+] as const;
 
 export function ServiceEditModal({
   service,
@@ -43,11 +51,13 @@ export function ServiceEditModal({
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [customAttributes, setCustomAttributes] = useState<Record<string, string>>({});
-  const [images, setImages] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
+    if (!open) {
+      return;
+    }
+
     if (service) {
       setName(service.name);
       setCategory(service.category);
@@ -57,18 +67,20 @@ export function ServiceEditModal({
       setActive(service.active);
       setCity(service.city || "");
       setRating(service.rating?.toString() || "");
-      setLicensed(service.licensed || false);
+      setLicensed(Boolean(service.licensed));
       setAvailabilityDays(service.availabilityDays?.toString() || "");
-      setUrgency(service.urgency || "medium");
+      setUrgency((service.urgency as "low" | "medium" | "high" | null) ?? "medium");
       setTags(service.tags || []);
       setCustomAttributes(service.customAttributes || {});
-      setImages(service.images || []);
-    } else {
-      resetForm();
+      setImageUrl(service.images[0]?.url || "");
+      setTagInput("");
+      return;
     }
-  }, [service, open]);
 
-  const resetForm = () => {
+    resetForm();
+  }, [open, service]);
+
+  function resetForm() {
     setName("");
     setCategory("real-estate");
     setDescription("");
@@ -83,191 +95,150 @@ export function ServiceEditModal({
     setTags([]);
     setTagInput("");
     setCustomAttributes({});
-    setImages([]);
-  };
+    setImageUrl("");
+  }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    setUploading(true);
-    try {
-      const file = files[0];
-      if (file && file.type.startsWith("image/")) {
-        if (service?.id) {
-          const result = await api.uploadServiceImage(service.id, file);
-          setImages([...images, result.url]);
-          toast.success("Изображение загружено");
-        } else {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const result = reader.result as string;
-            setImages([...images, result]);
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка загрузки";
-      toast.error(message);
-    } finally {
-      setUploading(false);
+  function handleAddTag() {
+    const value = tagInput.trim();
+    if (!value || tags.includes(value)) {
+      return;
     }
-  };
 
-  const handleRemoveImage = async (index: number) => {
-    if (service?.id && images[index]?.startsWith("/uploads")) {
-      try {
-        setImages(images.filter((_, i) => i !== index));
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Ошибка удаления изображения";
-        toast.error(message);
-      }
-    } else {
-      setImages(images.filter((_, i) => i !== index));
+    setTags((current) => [...current, value]);
+    setTagInput("");
+  }
+
+  function handleRemoveTag(tag: string) {
+    setTags((current) => current.filter((item) => item !== tag));
+  }
+
+  function handleAddCustomAttribute() {
+    const key = prompt("Attribute key");
+    if (!key?.trim()) {
+      return;
     }
-  };
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput("");
+    const value = prompt("Attribute value");
+    if (value === null) {
+      return;
     }
-  };
 
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
+    setCustomAttributes((current) => ({
+      ...current,
+      [key.trim()]: value,
+    }));
+  }
 
-  const handleAddCustomAttribute = () => {
-    const key = prompt("Введите ключ атрибута:");
-    if (key && key.trim()) {
-      const value = prompt("Введите значение:");
-      if (value !== null) {
-        setCustomAttributes({ ...customAttributes, [key.trim()]: value });
-      }
+  function handleRemoveCustomAttribute(key: string) {
+    setCustomAttributes((current) => {
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  }
+
+  function handleSubmit() {
+    if (!name || !description || !priceFrom || !priceTo) {
+      return;
     }
-  };
 
-  const handleRemoveCustomAttribute = (key: string) => {
-    const newAttrs = { ...customAttributes };
-    delete newAttrs[key];
-    setCustomAttributes(newAttrs);
-  };
-
-  const handleSubmit = () => {
-    if (!name || !description || !priceFrom || !priceTo) return;
-
-    const serviceData: CompanyService = {
-      id: service?.id || "",
+    onSave({
+      id: service?.id,
       name,
       category,
       description,
-      priceFrom: parseInt(priceFrom),
-      priceTo: parseInt(priceTo),
+      priceFrom: parseInt(priceFrom, 10),
+      priceTo: parseInt(priceTo, 10),
       active,
       city: city || undefined,
       rating: rating ? parseFloat(rating) : undefined,
-      licensed: licensed || undefined,
-      availabilityDays: availabilityDays ? parseInt(availabilityDays) : undefined,
+      licensed,
+      availabilityDays: availabilityDays ? parseInt(availabilityDays, 10) : undefined,
       urgency,
       tags: tags.length > 0 ? tags : undefined,
-      customAttributes: Object.keys(customAttributes).length > 0 ? customAttributes : undefined,
-      images: images.length > 0 ? images : undefined,
-    };
-
-    onSave(serviceData);
-  };
+      customAttributes:
+        Object.keys(customAttributes).length > 0 ? customAttributes : undefined,
+      imageUrl: imageUrl.trim() || "",
+    });
+  }
 
   const isValid =
-    name && description && priceFrom && priceTo && parseInt(priceFrom) <= parseInt(priceTo);
+    Boolean(name) &&
+    Boolean(description) &&
+    Boolean(priceFrom) &&
+    Boolean(priceTo) &&
+    parseInt(priceFrom || "0", 10) <= parseInt(priceTo || "0", 10);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>{service ? "Редактировать услугу" : "Добавить услугу"}</DialogTitle>
+          <DialogTitle>{service ? "Edit service" : "Add service"}</DialogTitle>
         </DialogHeader>
+
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Название *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Например: Ремонт под ключ"
-            />
+            <Label htmlFor="name">Name *</Label>
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Категория *</Label>
+              <Label htmlFor="category">Category *</Label>
               <Select value={category} onValueChange={(value: ServiceCategory) => setCategory(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="real-estate">Недвижимость</SelectItem>
-                  <SelectItem value="automobiles">Авто</SelectItem>
-                  <SelectItem value="other">Другое</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">Город</Label>
-              <Select value={city} onValueChange={setCity}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите город" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CITIES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
+                  {SERVICE_CATEGORY_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {SERVICE_CATEGORY_LABELS[option]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} />
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Описание *</Label>
+            <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Подробное описание услуги"
               rows={4}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="priceFrom">Цена от *</Label>
+              <Label htmlFor="priceFrom">Price from *</Label>
               <Input
                 id="priceFrom"
                 type="number"
                 value={priceFrom}
                 onChange={(e) => setPriceFrom(e.target.value)}
-                placeholder="0"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="priceTo">Цена до *</Label>
+              <Label htmlFor="priceTo">Price to *</Label>
               <Input
                 id="priceTo"
                 type="number"
                 value={priceTo}
                 onChange={(e) => setPriceTo(e.target.value)}
-                placeholder="0"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="rating">Рейтинг</Label>
+              <Label htmlFor="rating">Rating</Label>
               <Input
                 id="rating"
                 type="number"
@@ -276,32 +247,34 @@ export function ServiceEditModal({
                 step="0.1"
                 value={rating}
                 onChange={(e) => setRating(e.target.value)}
-                placeholder="0.0 - 5.0"
               />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="availabilityDays">Доступность (дней)</Label>
+              <Label htmlFor="availabilityDays">Availability (days)</Label>
               <Input
                 id="availabilityDays"
                 type="number"
                 value={availabilityDays}
                 onChange={(e) => setAvailabilityDays(e.target.value)}
-                placeholder="Количество дней"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="urgency">Срочность</Label>
-            <Select value={urgency} onValueChange={(value: "low" | "medium" | "high") => setUrgency(value)}>
+            <Label htmlFor="urgency">Urgency</Label>
+            <Select
+              value={urgency}
+              onValueChange={(value: "low" | "medium" | "high") => setUrgency(value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Низкая</SelectItem>
-                <SelectItem value="medium">Средняя</SelectItem>
-                <SelectItem value="high">Высокая</SelectItem>
+                {urgencyOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -312,9 +285,7 @@ export function ServiceEditModal({
               checked={licensed}
               onCheckedChange={(checked) => setLicensed(checked === true)}
             />
-            <Label htmlFor="licensed" className="cursor-pointer">
-              Лицензия
-            </Label>
+            <Label htmlFor="licensed">Licensed</Label>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -323,31 +294,28 @@ export function ServiceEditModal({
               checked={active}
               onCheckedChange={(checked) => setActive(checked === true)}
             />
-            <Label htmlFor="active" className="cursor-pointer">
-              Активна
-            </Label>
+            <Label htmlFor="active">Active</Label>
           </div>
 
           <div className="space-y-2">
-            <Label>Теги</Label>
+            <Label>Tags</Label>
             <div className="flex gap-2">
               <Input
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
-                placeholder="Добавить тег"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
                     handleAddTag();
                   }
                 }}
               />
               <Button type="button" variant="outline" onClick={handleAddTag}>
-                Добавить
+                Add
               </Button>
             </div>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
+            {tags.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-2">
                 {tags.map((tag) => (
                   <Badge key={tag} variant="secondary" className="flex items-center gap-1">
                     {tag}
@@ -355,80 +323,50 @@ export function ServiceEditModal({
                   </Badge>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="space-y-2">
-            <Label>Пользовательские атрибуты</Label>
+            <Label>Custom attributes</Label>
             <Button type="button" variant="outline" size="sm" onClick={handleAddCustomAttribute}>
-              Добавить атрибут
+              Add attribute
             </Button>
-            {Object.keys(customAttributes).length > 0 && (
-              <div className="space-y-2 mt-2">
-                {Object.entries(customAttributes).map(([key, value]) => (
-                  <div key={key} className="flex items-center gap-2 p-2 bg-muted rounded">
-                    <span className="text-sm font-medium">{key}:</span>
-                    <span className="text-sm flex-1">{value}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveCustomAttribute(key)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+            {Object.entries(customAttributes).map(([key, value]) => (
+              <div key={key} className="mt-2 flex items-center gap-2 rounded bg-muted p-2">
+                <span className="text-sm font-medium">{key}:</span>
+                <span className="flex-1 text-sm">{value}</span>
+                <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveCustomAttribute(key)}>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-            )}
+            ))}
           </div>
 
           <div className="space-y-2">
-            <Label>Изображения</Label>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
+            <Label htmlFor="imageUrl">Image URL</Label>
+            <Input
+              id="imageUrl"
+              type="url"
+              placeholder="https://example.com/image.jpg"
+              value={imageUrl}
+              onChange={(event) => setImageUrl(event.target.value)}
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full"
-              disabled={uploading}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              {uploading ? "Загрузка..." : "Загрузить изображения"}
-            </Button>
-            {images.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {images.map((img, index) => (
-                  <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
-                    <Image src={img} alt={`Upload ${index + 1}`} fill className="object-cover" />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-1 right-1 h-6 w-6 p-0"
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+            <p className="text-xs text-muted-foreground">
+              MVP mode: use a direct image URL instead of uploading a file.
+            </p>
+            {imageUrl ? (
+              <div className="relative mt-2 aspect-video w-full overflow-hidden rounded-md border">
+                <img src={imageUrl} alt={name || "Service image"} className="h-full w-full object-cover" />
               </div>
-            )}
+            ) : null}
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex justify-end gap-2 border-t pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Отмена
+              Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={!isValid || uploading}>
-              {uploading ? "Загрузка..." : service ? "Сохранить" : "Добавить"}
+            <Button onClick={handleSubmit} disabled={!isValid}>
+              {service ? "Save" : "Create"}
             </Button>
           </div>
         </div>
