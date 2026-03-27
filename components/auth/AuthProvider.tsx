@@ -91,9 +91,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         phone: response.user.phone,
         token: response.token,
       });
-      toast.success("Успешный вход");
+      toast.success("Signed in");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка входа";
+      const message = error instanceof Error ? error.message : "Sign in failed";
       toast.error(message);
       throw error;
     }
@@ -116,9 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         phone: response.user.phone,
         token: response.token,
       });
-      toast.success("Регистрация успешна");
+      toast.success("Registration successful");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ошибка регистрации";
+      const message = error instanceof Error ? error.message : "Registration failed";
       toast.error(message);
       throw error;
     }
@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    toast.success("Выход выполнен");
+    toast.success("Signed out");
   };
 
   return (

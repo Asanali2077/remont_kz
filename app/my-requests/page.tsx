@@ -36,6 +36,18 @@ export default function MyRequestsPage() {
     }
   }
 
+  async function handleCancel(id: string) {
+    if (!confirm("Cancel this request?")) return;
+    try {
+      await api.deleteRequest(id);
+      toast.success("Request cancelled");
+      await loadRequests();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to cancel request";
+      toast.error(message);
+    }
+  }
+
   return (
     <ProtectedRoute requiredRole="client">
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -86,8 +98,19 @@ export default function MyRequestsPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="text-sm">{request.description}</p>
-                    <div className="text-sm text-muted-foreground">
-                      Assigned company: {request.company?.name || "Not assigned yet"}
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        Assigned company: {request.company?.name || "Not assigned yet"}
+                      </div>
+                      {request.status === "new" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void handleCancel(request.id)}
+                        >
+                          Cancel
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

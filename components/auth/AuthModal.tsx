@@ -54,22 +54,22 @@ export function AuthModal({ trigger }: { trigger?: ReactNode }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ? trigger : <Button variant="outline" size="sm">Войти</Button>}
+        {trigger ? trigger : <Button variant="outline" size="sm">Log In</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>{mode === "login" ? "Войти" : "Регистрация"}</DialogTitle>
+          <DialogTitle>{mode === "login" ? "Log In" : "Register"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="role">Роль</Label>
+            <Label htmlFor="role">Role</Label>
             <Select value={role} onValueChange={(value: UserRole) => setRole(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="client">Клиент</SelectItem>
-                <SelectItem value="company">Компания</SelectItem>
+                <SelectItem value="client">Client</SelectItem>
+                <SelectItem value="company">Company</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -81,7 +81,7 @@ export function AuthModal({ trigger }: { trigger?: ReactNode }) {
             onChange={(e) => setEmail(e.target.value)}
           />
           <Input
-            placeholder="Пароль"
+            placeholder="Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -89,18 +89,18 @@ export function AuthModal({ trigger }: { trigger?: ReactNode }) {
           {mode === "register" && (
             <>
               <Input
-                placeholder="Подтвердите пароль"
+                placeholder="Confirm password"
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
               />
               <Input
-                placeholder="Имя / Аты"
+                placeholder="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
               <Input
-                placeholder="Телефон / Телефон"
+                placeholder="Phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
@@ -111,10 +111,10 @@ export function AuthModal({ trigger }: { trigger?: ReactNode }) {
               variant="ghost"
               onClick={() => setMode(mode === "login" ? "register" : "login")}
             >
-              {mode === "login" ? "Нет аккаунта?" : "Уже есть аккаунт?"}
+              {mode === "login" ? "Don't have an account?" : "Already have an account?"}
             </Button>
             <Button onClick={submit} disabled={!isValid || loading}>
-              {loading ? "Загрузка..." : "Продолжить"}
+              {loading ? "Loading..." : "Continue"}
             </Button>
           </div>
         </div>

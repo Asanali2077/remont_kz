@@ -1,6 +1,7 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
+import { CompanyProfile } from "@/components/company/CompanyProfile";
 import { RequestsManagement } from "@/components/company/RequestsManagement";
 import { ServicesManagement } from "@/components/company/ServicesManagement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,9 +19,10 @@ export default function CompanyDashboardPage() {
           </div>
 
           <Tabs defaultValue="services" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="services">Services</TabsTrigger>
               <TabsTrigger value="requests">Requests</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
             </TabsList>
 
             <TabsContent value="services" className="mt-6">
@@ -29,6 +31,10 @@ export default function CompanyDashboardPage() {
 
             <TabsContent value="requests" className="mt-6">
               <RequestsManagement />
+            </TabsContent>
+
+            <TabsContent value="profile" className="mt-6">
+              <CompanyProfile />
             </TabsContent>
           </Tabs>
         </div>

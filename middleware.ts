@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
+const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
 const ALLOWED_METHODS = "GET,POST,PUT,PATCH,DELETE,OPTIONS";
 const ALLOWED_HEADERS = "Content-Type, Authorization";
 

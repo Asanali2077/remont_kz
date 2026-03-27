@@ -14,14 +14,14 @@ export const SERVICE_CATEGORY_OPTIONS: ServiceCategory[] = [
 
 export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
   automobiles: "Automobiles",
-  "real-estate": "Real estate",
+  "real-estate": "Real Estate",
   other: "Other",
 };
 
 export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
   new: "New",
   accepted: "Accepted",
-  in_progress: "In progress",
+  in_progress: "In Progress",
   completed: "Completed",
 };
 
@@ -69,14 +69,7 @@ export interface ServiceFormValues {
   description: string;
   priceFrom: number;
   priceTo: number;
-  active: boolean;
   city?: string;
-  rating?: number;
-  licensed?: boolean;
-  availabilityDays?: number;
-  urgency?: "low" | "medium" | "high";
-  tags?: string[];
-  customAttributes?: Record<string, string>;
   imageUrl?: string;
 }
 

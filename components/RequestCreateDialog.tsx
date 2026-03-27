@@ -3,18 +3,20 @@
 import { ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import {
-  SERVICE_CATEGORY_LABELS,
-  SERVICE_CATEGORY_OPTIONS,
-  ServiceCategory,
-  ServiceRecord,
-} from "@/lib/types";
+import type { ServiceRecord } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
+
+// Маппинг TopCategory → ServiceCategory (для API)
+const CATEGORY_MAP: Record<string, "automobiles" | "real-estate" | "other"> = {
+  AUTOMOBILES: "automobiles",
+  REAL_ESTATE: "real-estate",
+  OTHER: "other",
+};
 
 interface RequestCreateDialogProps {
   trigger: ReactNode;
@@ -22,41 +24,28 @@ interface RequestCreateDialogProps {
   onCreated?: () => Promise<void> | void;
 }
 
-export function RequestCreateDialog({
-  trigger,
-  service,
-  onCreated,
-}: RequestCreateDialogProps) {
+export function RequestCreateDialog({ trigger, service, onCreated }: RequestCreateDialogProps) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<ServiceCategory>("real-estate");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>({});
   const [city, setCity] = useState(service?.city || "");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const isCustomRequest = !service;
+
   const canSubmit = useMemo(() => {
-    if (!description.trim()) {
-      return false;
-    }
-
-    if (!isCustomRequest) {
-      return true;
-    }
-
-    return Boolean(category && city.trim());
-  }, [category, city, description, isCustomRequest]);
+    if (!description.trim()) return false;
+    if (!isCustomRequest) return true;
+    return Boolean(categoryFilter.category && city.trim());
+  }, [categoryFilter.category, city, description, isCustomRequest]);
 
   async function handleSubmit() {
-    if (!canSubmit || submitting) {
-      return;
-    }
+    if (!canSubmit || submitting) return;
 
     setSubmitting(true);
-
     try {
       let imageUrl: string | undefined;
-
       if (file) {
         const upload = await api.uploadMessageFile(file, "image");
         imageUrl = upload.url;
@@ -70,17 +59,18 @@ export function RequestCreateDialog({
           imageUrl,
         });
       } else {
+        const apiCategory = categoryFilter.category ? CATEGORY_MAP[categoryFilter.category] : undefined;
         await api.createRequest({
           description: description.trim(),
-          category,
+          category: apiCategory,
           city: city.trim(),
           imageUrl,
         });
       }
 
-      toast.success("Request created");
+      toast.success("Request submitted");
       setDescription("");
-      setCategory("real-estate");
+      setCategoryFilter({});
       setCity(service?.city || "");
       setFile(null);
       setOpen(false);
@@ -98,7 +88,9 @@ export function RequestCreateDialog({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[560px]">
         <DialogHeader>
-          <DialogTitle>{service ? "Create request from service" : "Create custom request"}</DialogTitle>
+          <DialogTitle>
+            {service ? "Request for service" : "Submit a request"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -106,35 +98,25 @@ export function RequestCreateDialog({
             <div className="rounded-md border bg-muted/30 p-3 text-sm">
               <div className="font-medium">{service.name}</div>
               <div className="text-muted-foreground">{service.company.name}</div>
-              {service.city ? <div className="text-muted-foreground">{service.city}</div> : null}
+              {service.city && <div className="text-muted-foreground">{service.city}</div>}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="request-category">Category</Label>
-                <Select
-                  value={category}
-                  onValueChange={(value: ServiceCategory) => setCategory(value)}
-                >
-                  <SelectTrigger id="request-category">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SERVICE_CATEGORY_OPTIONS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {SERVICE_CATEGORY_LABELS[option]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Service Category</Label>
+                <CategoryFilter
+                  value={categoryFilter}
+                  onChange={setCategoryFilter}
+                  showAll={false}
+                />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="request-city">City</Label>
                 <Input
                   id="request-city"
+                  placeholder="Almaty"
                   value={city}
-                  onChange={(event) => setCity(event.target.value)}
+                  onChange={(e) => setCity(e.target.value)}
                 />
               </div>
             </div>
@@ -146,18 +128,18 @@ export function RequestCreateDialog({
               id="request-description"
               rows={5}
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Describe the work that needs to be done"
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your task in more detail..."
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="request-image">Optional image</Label>
+            <Label htmlFor="request-image">Photo (optional)</Label>
             <Input
               id="request-image"
               type="file"
               accept="image/*"
-              onChange={(event) => setFile(event.target.files?.[0] || null)}
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
           </div>
 
@@ -166,7 +148,7 @@ export function RequestCreateDialog({
               Cancel
             </Button>
             <Button disabled={!canSubmit || submitting} onClick={() => void handleSubmit()}>
-              {submitting ? "Saving..." : "Create request"}
+              {submitting ? "Saving..." : "Submit request"}
             </Button>
           </div>
         </div>

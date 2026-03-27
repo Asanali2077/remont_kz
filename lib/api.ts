@@ -40,7 +40,6 @@ export interface CreateRequestPayload {
 class ApiClient {
   private buildUrl(endpoint: string): string {
     const url = `${API_URL}${endpoint}`;
-    console.log("API:", url);
     return url;
   }
 
@@ -163,6 +162,19 @@ class ApiClient {
 
   async deleteService(id: string) {
     return this.request<{ message: string }>(`/services/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  async updateCompanyProfile(data: { name?: string; phone?: string }) {
+    return this.request<{ id: string; email: string; name: string | null; phone: string | null; role: string }>(
+      "/company/profile",
+      { method: "PUT", body: JSON.stringify(data) }
+    );
+  }
+
+  async deleteRequest(id: string) {
+    return this.request<{ message: string }>(`/requests/${id}`, {
       method: "DELETE",
     });
   }

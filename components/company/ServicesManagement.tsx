@@ -55,6 +55,18 @@ export function ServicesManagement() {
     setIsModalOpen(true);
   }
 
+  async function handleToggleActive(id: string, active: boolean) {
+    try {
+      await api.updateService(id, { active: !active });
+      if (user?.id) {
+        await loadServices(user.id);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update service";
+      toast.error(message);
+    }
+  }
+
   async function handleDelete(id: string) {
     if (!confirm("Delete this service?")) {
       return;
@@ -81,13 +93,6 @@ export function ServicesManagement() {
         priceFrom: service.priceFrom,
         priceTo: service.priceTo,
         city: service.city,
-        rating: service.rating,
-        licensed: service.licensed,
-        availabilityDays: service.availabilityDays,
-        urgency: service.urgency,
-        tags: service.tags,
-        customAttributes: service.customAttributes,
-        active: service.active,
         imageUrl: service.imageUrl,
       };
 
@@ -145,7 +150,12 @@ export function ServicesManagement() {
                       {SERVICE_CATEGORY_LABELS[service.category]}
                     </p>
                   </div>
-                  <Badge variant={service.active ? "default" : "secondary"}>
+                  <Badge
+                    variant={service.active ? "default" : "secondary"}
+                    className="cursor-pointer select-none"
+                    title="Click to toggle"
+                    onClick={() => void handleToggleActive(service.id, service.active)}
+                  >
                     {service.active ? (
                       <CheckCircle2 className="mr-1 h-3 w-3" />
                     ) : (

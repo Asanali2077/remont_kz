@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Filter, Search, Calendar, X } from "lucide-react";
+import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
 
 export type SortOption = "relevance" | "rating" | "price" | "requests";
 
@@ -29,7 +30,12 @@ export interface FilterBarProps {
   cityOptions?: string[];
   serviceOptions?: string[];
 
+  // Category filter
+  categoryFilter?: CategoryFilterValue;
+  onChangeCategoryFilter?: (v: CategoryFilterValue) => void;
+
   // Visibility toggles
+  showCategory?: boolean;
   showQuery?: boolean;
   showCity?: boolean;
   showService?: boolean;
@@ -64,6 +70,9 @@ export interface FilterBarProps {
 export function FilterBar(props: FilterBarProps) {
   const {
     // values
+    categoryFilter,
+    onChangeCategoryFilter,
+    showCategory = true,
     query = "",
     city,
     service,
@@ -100,7 +109,7 @@ export function FilterBar(props: FilterBarProps) {
     onApply,
 
     // labels
-    title = "Фильтры",
+    title = "Filters",
     description,
 
     // limits
@@ -113,15 +122,26 @@ export function FilterBar(props: FilterBarProps) {
 
   const Content = (
     <CardContent className="space-y-6">
+      {showCategory && (
+        <div>
+          <Label>Service Category</Label>
+          <div className="mt-1">
+            <CategoryFilter
+              value={categoryFilter ?? {}}
+              onChange={(v) => onChangeCategoryFilter && onChangeCategoryFilter(v)}
+            />
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {showQuery && (
           <div className="md:col-span-2">
-            <Label htmlFor="search">Поиск</Label>
+            <Label htmlFor="search">Search</Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="search"
-                placeholder="Название, услуга, тег…"
+                placeholder="Name, service, tag…"
                 value={query}
                 onChange={(e) => onChangeQuery && onChangeQuery(e.target.value)}
                 className="pl-9"
@@ -131,10 +151,10 @@ export function FilterBar(props: FilterBarProps) {
         )}
         {showCity && (
           <div>
-            <Label>Город</Label>
+            <Label>City</Label>
             <Select value={city} onValueChange={(v) => onChangeCity && onChangeCity(v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Любой" />
+                <SelectValue placeholder="Any" />
               </SelectTrigger>
               <SelectContent>
                 {cityOptions.map((c) => (
@@ -148,10 +168,10 @@ export function FilterBar(props: FilterBarProps) {
         )}
         {showService && (
           <div>
-            <Label>Услуга</Label>
+            <Label>Service</Label>
             <Select value={service} onValueChange={(v) => onChangeService && onChangeService(v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Любая" />
+                <SelectValue placeholder="Any" />
               </SelectTrigger>
               <SelectContent>
                 {serviceOptions.map((s) => (
@@ -167,7 +187,7 @@ export function FilterBar(props: FilterBarProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div className="md:col-span-2">
-          <Label>Диапазон цены (₸)</Label>
+          <Label>Price Range (₸)</Label>
           <div className="px-1 py-2">
             <Slider
               min={priceMin}
@@ -178,11 +198,11 @@ export function FilterBar(props: FilterBarProps) {
             />
           </div>
           <div className="text-sm text-muted-foreground">
-            от {priceRange[0].toLocaleString("ru-RU")} ₸ до {priceRange[1].toLocaleString("ru-RU")} ₸
+            from {priceRange[0].toLocaleString()} ₸ to {priceRange[1].toLocaleString()} ₸
           </div>
         </div>
         <div>
-          <Label>Мин. рейтинг</Label>
+          <Label>Min. Rating</Label>
           <div className="px-1 py-2">
             <Slider
               min={0}
@@ -199,7 +219,7 @@ export function FilterBar(props: FilterBarProps) {
             <div className="flex items-center space-x-2">
               <Checkbox id="licensed" checked={licensedOnly} onCheckedChange={(v) => onChangeLicensed && onChangeLicensed(Boolean(v))} />
               <Label htmlFor="licensed" className="cursor-pointer">
-                Только лицензированные
+                Licensed only
               </Label>
             </div>
           )}
@@ -214,23 +234,23 @@ export function FilterBar(props: FilterBarProps) {
                 <Checkbox id="start7" checked={canStartWithin7} onCheckedChange={(v) => onChangeAvailability && onChangeAvailability(Boolean(v))} />
                 <Label htmlFor="start7" className="cursor-pointer flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  Начало работ ≤ 7 дней
+                  Starts within 7 days
                 </Label>
               </div>
             )}
             {showAvailability && <Separator orientation="vertical" className="h-6" />}
             {showSort && (
               <div className="w-48">
-                <Label>Сортировка</Label>
+                <Label>Sort by</Label>
                 <Select value={sortBy} onValueChange={(v) => onChangeSort && onChangeSort(v as SortOption)}>
                   <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="relevance">По релевантности</SelectItem>
-                    <SelectItem value="rating">По рейтингу</SelectItem>
-                    <SelectItem value="price">Сначала дешевле</SelectItem>
-                    <SelectItem value="requests">By demand</SelectItem>
+                    <SelectItem value="relevance">Relevance</SelectItem>
+                    <SelectItem value="rating">Rating</SelectItem>
+                    <SelectItem value="price">Price: low to high</SelectItem>
+                    <SelectItem value="requests">Popularity</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -240,12 +260,12 @@ export function FilterBar(props: FilterBarProps) {
             {onReset && (
               <Button variant="ghost" onClick={onReset} className="gap-1">
                 <X className="h-4 w-4" />
-                Сбросить
+                Reset
               </Button>
             )}
             {onApply && (
               <Button className="gap-1" onClick={onApply}>
-                Показать
+                Apply
               </Button>
             )}
           </div>
@@ -275,14 +295,14 @@ export function FilterBar(props: FilterBarProps) {
             <Button size="sm" variant="secondary" className="gap-2" asChild>
               <DialogTrigger>
                 <>
-                  <Filter className="h-4 w-4" /> Фильтры
+                  <Filter className="h-4 w-4" /> Filters
                 </>
               </DialogTrigger>
             </Button>
           </div>
           <DialogContent className="max-w-[640px]">
             <DialogHeader>
-              <DialogTitle>Фильтры</DialogTitle>
+              <DialogTitle>Filters</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               {/* Reuse same content inside dialog */}
@@ -293,7 +313,7 @@ export function FilterBar(props: FilterBarProps) {
                 {onReset && (
                   <Button variant="ghost" onClick={onReset} className="gap-1">
                     <X className="h-4 w-4" />
-                    Сбросить
+                    Reset
                   </Button>
                 )}
                 <Button
@@ -302,7 +322,7 @@ export function FilterBar(props: FilterBarProps) {
                     setMobileOpen(false);
                   }}
                 >
-                  Показать
+                  Apply
                 </Button>
               </div>
             </div>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma, RequestStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireAuth, requireCompany } from "@/lib/middleware";
+import { requireAuth, requireClient, requireCompany } from "@/lib/middleware";
 
 const requestStatuses = ["accepted", "in_progress", "completed"] as const;
 
@@ -117,7 +117,7 @@ export async function PUT(
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
     }
 
-    if (existingRequest.companyId && existingRequest.companyId !== authResult.user.userId) {
+    if (existingRequest.companyId !== null && existingRequest.companyId !== authResult.user.userId) {
       return NextResponse.json(
         { error: "Forbidden: You can only update requests assigned to you" },
         { status: 403 }
@@ -218,6 +218,41 @@ export async function PUT(
     }
 
     console.error("Update request error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const authResult = await requireClient()(request);
+    if ("error" in authResult) {
+      return authResult.error;
+    }
+
+    const existingRequest = await prisma.request.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existingRequest) {
+      return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    }
+
+    if (existingRequest.clientId !== authResult.user.userId) {
+      return NextResponse.json({ error: "Forbidden: You can only cancel your own requests" }, { status: 403 });
+    }
+
+    if (existingRequest.status !== RequestStatus.NEW) {
+      return NextResponse.json({ error: "Only new requests can be cancelled" }, { status: 400 });
+    }
+
+    await prisma.request.delete({ where: { id: params.id } });
+
+    return NextResponse.json({ message: "Request cancelled" });
+  } catch (error) {
+    console.error("Delete request error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
