@@ -8,7 +8,7 @@ import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/C
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { CitySelect } from "@/components/ui/CitySelect";
 import { Label } from "@/components/ui/label";
 import { Footer } from "@/components/Footer";
 import { api } from "@/lib/api";
@@ -114,9 +114,7 @@ function CatalogContent() {
             : "other")
         : true;
 
-      const matchesCity = city.trim()
-        ? (r.city || "").toLowerCase().includes(city.trim().toLowerCase())
-        : true;
+      const matchesCity = city ? r.city === city : true;
 
       return matchesCategory && matchesCity;
     });
@@ -145,11 +143,7 @@ function CatalogContent() {
               </div>
               <div className="space-y-1">
                 <Label>City</Label>
-                <Input
-                  placeholder="Almaty"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
+                <CitySelect value={city} onChange={setCity} allowAny />
               </div>
             </div>
             {(categoryFilter.category || city) && (

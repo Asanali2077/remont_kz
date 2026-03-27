@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Filter, Search, Calendar, X } from "lucide-react";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
+import { KZ_CITIES } from "@/lib/cities";
 
 export type SortOption = "relevance" | "rating" | "price" | "requests";
 
@@ -27,7 +28,6 @@ export interface FilterBarProps {
   sortBy?: SortOption;
 
   // Options
-  cityOptions?: string[];
   serviceOptions?: string[];
 
   // Category filter
@@ -83,7 +83,6 @@ export function FilterBar(props: FilterBarProps) {
     sortBy = "relevance",
 
     // options
-    cityOptions = [],
     serviceOptions = [],
 
     // visibility
@@ -152,12 +151,13 @@ export function FilterBar(props: FilterBarProps) {
         {showCity && (
           <div>
             <Label>City</Label>
-            <Select value={city} onValueChange={(v) => onChangeCity && onChangeCity(v)}>
+            <Select value={city || "__any__"} onValueChange={(v) => onChangeCity && onChangeCity(v === "__any__" ? undefined : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
               <SelectContent>
-                {cityOptions.map((c) => (
+                <SelectItem value="__any__">Any</SelectItem>
+                {KZ_CITIES.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
                   </SelectItem>
@@ -169,11 +169,12 @@ export function FilterBar(props: FilterBarProps) {
         {showService && (
           <div>
             <Label>Service</Label>
-            <Select value={service} onValueChange={(v) => onChangeService && onChangeService(v)}>
+            <Select value={service || "__any__"} onValueChange={(v) => onChangeService && onChangeService(v === "__any__" ? undefined : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="__any__">Any</SelectItem>
                 {serviceOptions.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}

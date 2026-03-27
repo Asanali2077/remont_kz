@@ -54,11 +54,6 @@ function RepairContent() {
     }
   }
 
-  const cityOptions = useMemo(
-    () => Array.from(new Set(services.map((s) => s.city).filter(Boolean))) as string[],
-    [services]
-  );
-
   const serviceOptions = useMemo(
     () => Array.from(new Set(services.map((s) => s.name))),
     [services]
@@ -210,7 +205,6 @@ function RepairContent() {
           licensedOnly={licensedOnly}
           canStartWithin7={canStartWithin7}
           sortBy={sortBy}
-          cityOptions={cityOptions}
           serviceOptions={serviceOptions}
           priceMin={0}
           priceMax={maxPrice}

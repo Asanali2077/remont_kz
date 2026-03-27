@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ServiceCategory, ServiceFormValues, ServiceRecord } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CitySelect } from "@/components/ui/CitySelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +43,7 @@ export function ServiceEditModal({
   const [description, setDescription] = useState("");
   const [priceFrom, setPriceFrom] = useState("");
   const [priceTo, setPriceTo] = useState("");
+  const [fixedPrice, setFixedPrice] = useState(false);
   const [city, setCity] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -58,6 +61,7 @@ export function ServiceEditModal({
       setDescription(service.description);
       setPriceFrom(service.priceFrom.toString());
       setPriceTo(service.priceTo.toString());
+      setFixedPrice(service.priceFrom === service.priceTo);
       setCity(service.city || "");
       setImageFile(null);
       setImagePreview(service.images[0]?.url || null);
@@ -73,6 +77,7 @@ export function ServiceEditModal({
     setDescription("");
     setPriceFrom("");
     setPriceTo("");
+    setFixedPrice(false);
     setCity("");
     setImageFile(null);
     setImagePreview(null);
@@ -89,9 +94,10 @@ export function ServiceEditModal({
   }
 
   async function handleSubmit() {
-    if (!name || !description || !priceFrom || !priceTo || !categoryFilter.category) {
+    if (!name || !description || !priceFrom || !categoryFilter.category) {
       return;
     }
+    if (!fixedPrice && !priceTo) return;
 
     setSubmitting(true);
     try {
@@ -104,6 +110,7 @@ export function ServiceEditModal({
       }
 
       const apiCategory: ServiceCategory = CATEGORY_MAP[categoryFilter.category];
+      const resolvedPriceTo = fixedPrice ? parseInt(priceFrom, 10) : parseInt(priceTo, 10);
 
       onSave({
         id: service?.id,
@@ -111,7 +118,7 @@ export function ServiceEditModal({
         category: apiCategory,
         description,
         priceFrom: parseInt(priceFrom, 10),
-        priceTo: parseInt(priceTo, 10),
+        priceTo: resolvedPriceTo,
         city: city || undefined,
         imageUrl,
       });
@@ -120,13 +127,14 @@ export function ServiceEditModal({
     }
   }
 
+  const priceFromNum = parseInt(priceFrom || "0", 10);
+  const priceToNum = parseInt(priceTo || "0", 10);
   const isValid =
     Boolean(name) &&
     Boolean(description) &&
     Boolean(priceFrom) &&
-    Boolean(priceTo) &&
     Boolean(categoryFilter.category) &&
-    parseInt(priceFrom || "0", 10) <= parseInt(priceTo || "0", 10);
+    (fixedPrice ? priceFromNum > 0 : (Boolean(priceTo) && priceFromNum <= priceToNum));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -151,8 +159,8 @@ export function ServiceEditModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Almaty" />
+            <Label>City</Label>
+            <CitySelect value={city} onChange={setCity} />
           </div>
 
           <div className="space-y-2">
@@ -165,25 +173,51 @@ export function ServiceEditModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="priceFrom">Price From (₸) *</Label>
-              <Input
-                id="priceFrom"
-                type="number"
-                value={priceFrom}
-                onChange={(e) => setPriceFrom(e.target.value)}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="fixedPrice"
+                checked={fixedPrice}
+                onCheckedChange={(checked) => setFixedPrice(Boolean(checked))}
               />
+              <Label htmlFor="fixedPrice" className="cursor-pointer font-normal">
+                Fixed price (single rate)
+              </Label>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="priceTo">Price To (₸) *</Label>
-              <Input
-                id="priceTo"
-                type="number"
-                value={priceTo}
-                onChange={(e) => setPriceTo(e.target.value)}
-              />
-            </div>
+
+            {fixedPrice ? (
+              <div className="space-y-2">
+                <Label htmlFor="priceFixed">Price (₸) *</Label>
+                <Input
+                  id="priceFixed"
+                  type="number"
+                  value={priceFrom}
+                  onChange={(e) => setPriceFrom(e.target.value)}
+                  placeholder="e.g. 5000"
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="priceFrom">Price From (₸) *</Label>
+                  <Input
+                    id="priceFrom"
+                    type="number"
+                    value={priceFrom}
+                    onChange={(e) => setPriceFrom(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="priceTo">Price To (₸) *</Label>
+                  <Input
+                    id="priceTo"
+                    type="number"
+                    value={priceTo}
+                    onChange={(e) => setPriceTo(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -29,6 +29,8 @@ const createRequestSchema = z
     category: z.enum(serviceCategories).optional(),
     city: z.string().min(1, "City is required").optional(),
     imageUrl: z.string().min(1).optional(),
+    budgetFrom: z.number().positive().optional(),
+    budgetTo: z.number().positive().optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.serviceId) {
@@ -206,6 +208,8 @@ export async function POST(request: NextRequest) {
         category: service?.category ?? categoryMap[validatedData.category as keyof typeof categoryMap],
         city: validatedData.city ?? service?.city ?? null,
         imageUrl: validatedData.imageUrl,
+        budgetFrom: validatedData.budgetFrom ?? null,
+        budgetTo: validatedData.budgetTo ?? null,
         status: RequestStatus.NEW,
       },
       include: {

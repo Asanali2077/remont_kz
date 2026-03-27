@@ -35,6 +35,8 @@ export interface CreateRequestPayload {
   category?: ServiceCategory;
   city?: string;
   imageUrl?: string;
+  budgetFrom?: number;
+  budgetTo?: number;
 }
 
 class ApiClient {
@@ -208,6 +210,14 @@ class ApiClient {
     const request = await this.request<Record<string, unknown>>("/requests", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+    return normalizeRequest(request);
+  }
+
+  async rateRequest(id: string, rating: number) {
+    const request = await this.request<Record<string, unknown>>(`/requests/${id}/rate`, {
+      method: "POST",
+      body: JSON.stringify({ rating }),
     });
     return normalizeRequest(request);
   }

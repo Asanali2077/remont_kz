@@ -90,6 +90,9 @@ export interface RequestRecord {
   city?: string | null;
   imageUrl?: string | null;
   status: RequestStatus;
+  rating?: number | null;
+  budgetFrom?: number | null;
+  budgetTo?: number | null;
   createdAt: string;
   updatedAt: string;
   client?: UserSummary;

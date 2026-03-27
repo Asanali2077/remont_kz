@@ -27,7 +27,7 @@ const updateServiceSchema = z.object({
   tags: z.array(z.string()).optional(),
   customAttributes: z.record(z.string(), z.string()).optional(),
   active: z.boolean().optional(),
-  imageUrl: z.union([z.string().url("Image URL must be a valid URL"), z.literal(""), z.null()]).optional(),
+  imageUrl: z.union([z.string().min(1), z.literal(""), z.null()]).optional(),
 });
 
 export async function GET(

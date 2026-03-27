@@ -168,12 +168,28 @@ function RequestSection({
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm">{request.description}</p>
+                {request.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={request.imageUrl}
+                    alt="Request photo"
+                    className="max-h-48 rounded-md object-cover"
+                  />
+                )}
 
                 <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                   {request.category ? (
                     <span>Category: {SERVICE_CATEGORY_LABELS[request.category]}</span>
                   ) : null}
                   {request.city ? <span>City: {request.city}</span> : null}
+                  {(request.budgetFrom || request.budgetTo) ? (
+                    <span>
+                      Budget:{" "}
+                      {request.budgetFrom === request.budgetTo
+                        ? `${request.budgetFrom?.toLocaleString()} ₸`
+                        : `${request.budgetFrom?.toLocaleString()} – ${request.budgetTo?.toLocaleString()} ₸`}
+                    </span>
+                  ) : null}
                   <span>Created: {formatDate(request.createdAt)}</span>
                 </div>
 

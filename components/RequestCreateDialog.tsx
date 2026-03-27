@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { ServiceRecord } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CitySelect } from "@/components/ui/CitySelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +32,9 @@ export function RequestCreateDialog({ trigger, service, onCreated }: RequestCrea
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>({});
   const [city, setCity] = useState(service?.city || "");
   const [file, setFile] = useState<File | null>(null);
+  const [budgetFrom, setBudgetFrom] = useState("");
+  const [budgetTo, setBudgetTo] = useState("");
+  const [fixedBudget, setFixedBudget] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const isCustomRequest = !service;
@@ -51,12 +56,17 @@ export function RequestCreateDialog({ trigger, service, onCreated }: RequestCrea
         imageUrl = upload.url;
       }
 
+      const budgetFromNum = budgetFrom ? parseFloat(budgetFrom) : undefined;
+      const budgetToNum = fixedBudget ? budgetFromNum : (budgetTo ? parseFloat(budgetTo) : undefined);
+
       if (service) {
         await api.createRequest({
           serviceId: service.id,
           companyId: service.companyId,
           description: description.trim(),
           imageUrl,
+          budgetFrom: budgetFromNum,
+          budgetTo: budgetToNum,
         });
       } else {
         const apiCategory = categoryFilter.category ? CATEGORY_MAP[categoryFilter.category] : undefined;
@@ -65,6 +75,8 @@ export function RequestCreateDialog({ trigger, service, onCreated }: RequestCrea
           category: apiCategory,
           city: city.trim(),
           imageUrl,
+          budgetFrom: budgetFromNum,
+          budgetTo: budgetToNum,
         });
       }
 
@@ -73,6 +85,9 @@ export function RequestCreateDialog({ trigger, service, onCreated }: RequestCrea
       setCategoryFilter({});
       setCity(service?.city || "");
       setFile(null);
+      setBudgetFrom("");
+      setBudgetTo("");
+      setFixedBudget(false);
       setOpen(false);
       await onCreated?.();
     } catch (error) {
@@ -111,13 +126,8 @@ export function RequestCreateDialog({ trigger, service, onCreated }: RequestCrea
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="request-city">City</Label>
-                <Input
-                  id="request-city"
-                  placeholder="Almaty"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
+                <Label>City</Label>
+                <CitySelect value={city} onChange={setCity} />
               </div>
             </div>
           )}
@@ -131,6 +141,44 @@ export function RequestCreateDialog({ trigger, service, onCreated }: RequestCrea
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your task in more detail..."
             />
+          </div>
+
+          <div className="space-y-3">
+            <Label>Budget (optional)</Label>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="fixedBudget"
+                checked={fixedBudget}
+                onCheckedChange={(checked) => setFixedBudget(Boolean(checked))}
+              />
+              <Label htmlFor="fixedBudget" className="cursor-pointer font-normal">
+                Fixed budget (single amount)
+              </Label>
+            </div>
+
+            {fixedBudget ? (
+              <Input
+                type="number"
+                placeholder="Budget (₸)"
+                value={budgetFrom}
+                onChange={(e) => setBudgetFrom(e.target.value)}
+              />
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  type="number"
+                  placeholder="From (₸)"
+                  value={budgetFrom}
+                  onChange={(e) => setBudgetFrom(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="To (₸)"
+                  value={budgetTo}
+                  onChange={(e) => setBudgetTo(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

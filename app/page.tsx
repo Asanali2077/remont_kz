@@ -1,6 +1,7 @@
 "use client";
 
 import { Footer } from "@/components/Footer";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,6 +16,10 @@ import {
 import Link from "next/link";
 
 export default function HomePage() {
+  const { user } = useAuth();
+  const isCompany = user?.role === "company";
+  const catalogHref = isCompany ? "/company/catalog" : "/repair";
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <main className="mx-auto max-w-6xl px-4">
@@ -28,7 +33,7 @@ export default function HomePage() {
             Automobiles, real estate, appliances — hundreds of verified service providers
             in your city. Submit a request and get a direct response.
           </p>
-          <Link href="/repair">
+          <Link href={catalogHref}>
             <Button size="lg" className="px-10 text-base">
               Open catalog
             </Button>
@@ -39,39 +44,73 @@ export default function HomePage() {
         <section className="pb-16">
           <h2 className="text-2xl font-semibold mb-6 text-center">Popular categories</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link href="/repair?category=AUTOMOBILES">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-                <CardHeader className="text-center">
-                  <Car className="h-10 w-10 mx-auto text-primary mb-2" />
-                  <CardTitle className="text-lg">Automobiles</CardTitle>
-                  <CardDescription>
-                    Repair, maintenance, detailing, tuning, and diagnostics
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-            <Link href="/repair?category=REAL_ESTATE">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-                <CardHeader className="text-center">
-                  <Home className="h-10 w-10 mx-auto text-primary mb-2" />
-                  <CardTitle className="text-lg">Real Estate</CardTitle>
-                  <CardDescription>
-                    Apartment renovation, plumbing, electrical, cleaning, and moving
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-            <Link href="/repair?category=OTHER">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-                <CardHeader className="text-center">
-                  <Wrench className="h-10 w-10 mx-auto text-primary mb-2" />
-                  <CardTitle className="text-lg">Other</CardTitle>
-                  <CardDescription>
-                    Gadgets, appliances, furniture, clothing, and any other repair
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
+            {isCompany ? (
+              <>
+                <Card className="opacity-50 cursor-not-allowed h-full">
+                  <CardHeader className="text-center">
+                    <Car className="h-10 w-10 mx-auto text-primary mb-2" />
+                    <CardTitle className="text-lg">Automobiles</CardTitle>
+                    <CardDescription>
+                      Repair, maintenance, detailing, tuning, and diagnostics
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                <Card className="opacity-50 cursor-not-allowed h-full">
+                  <CardHeader className="text-center">
+                    <Home className="h-10 w-10 mx-auto text-primary mb-2" />
+                    <CardTitle className="text-lg">Real Estate</CardTitle>
+                    <CardDescription>
+                      Apartment renovation, plumbing, electrical, cleaning, and moving
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                <Card className="opacity-50 cursor-not-allowed h-full">
+                  <CardHeader className="text-center">
+                    <Wrench className="h-10 w-10 mx-auto text-primary mb-2" />
+                    <CardTitle className="text-lg">Other</CardTitle>
+                    <CardDescription>
+                      Gadgets, appliances, furniture, clothing, and any other repair
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </>
+            ) : (
+              <>
+                <Link href="/repair?category=AUTOMOBILES">
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+                    <CardHeader className="text-center">
+                      <Car className="h-10 w-10 mx-auto text-primary mb-2" />
+                      <CardTitle className="text-lg">Automobiles</CardTitle>
+                      <CardDescription>
+                        Repair, maintenance, detailing, tuning, and diagnostics
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+                <Link href="/repair?category=REAL_ESTATE">
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+                    <CardHeader className="text-center">
+                      <Home className="h-10 w-10 mx-auto text-primary mb-2" />
+                      <CardTitle className="text-lg">Real Estate</CardTitle>
+                      <CardDescription>
+                        Apartment renovation, plumbing, electrical, cleaning, and moving
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+                <Link href="/repair?category=OTHER">
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+                    <CardHeader className="text-center">
+                      <Wrench className="h-10 w-10 mx-auto text-primary mb-2" />
+                      <CardTitle className="text-lg">Other</CardTitle>
+                      <CardDescription>
+                        Gadgets, appliances, furniture, clothing, and any other repair
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              </>
+            )}
           </div>
         </section>
 
@@ -112,11 +151,6 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-5">
-                <Link href="/repair">
-                  <Button size="sm" variant="outline">Go to catalog</Button>
-                </Link>
-              </div>
             </div>
 
             {/* For companies */}
@@ -150,11 +184,6 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="mt-5">
-                <Link href="/company/dashboard">
-                  <Button size="sm" variant="outline">Go to dashboard</Button>
-                </Link>
               </div>
             </div>
           </div>

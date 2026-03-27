@@ -107,6 +107,9 @@ model Request {
   city        String?
   imageUrl    String?
   status      RequestStatus @default(NEW)
+  rating      Int?
+  budgetFrom  Float?
+  budgetTo    Float?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 

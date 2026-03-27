@@ -144,8 +144,8 @@ export function ServicesManagement() {
             <Card key={service.id}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{service.name}</CardTitle>
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg truncate">{service.name}</CardTitle>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {SERVICE_CATEGORY_LABELS[service.category]}
                     </p>
