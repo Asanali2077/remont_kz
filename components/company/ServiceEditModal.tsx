@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import type { TopCategory } from "@/lib/categories";
 
@@ -45,6 +46,8 @@ export function ServiceEditModal({
   const [priceTo, setPriceTo] = useState("");
   const [fixedPrice, setFixedPrice] = useState(false);
   const [city, setCity] = useState("");
+  const [availabilityDays, setAvailabilityDays] = useState("");
+  const [urgency, setUrgency] = useState<"low" | "medium" | "high" | "">("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -63,6 +66,8 @@ export function ServiceEditModal({
       setPriceTo(service.priceTo.toString());
       setFixedPrice(service.priceFrom === service.priceTo);
       setCity(service.city || "");
+      setAvailabilityDays(service.availabilityDays?.toString() ?? "");
+      setUrgency((service.urgency as "low" | "medium" | "high" | "") ?? "");
       setImageFile(null);
       setImagePreview(service.images[0]?.url || null);
       return;
@@ -79,6 +84,8 @@ export function ServiceEditModal({
     setPriceTo("");
     setFixedPrice(false);
     setCity("");
+    setAvailabilityDays("");
+    setUrgency("");
     setImageFile(null);
     setImagePreview(null);
   }
@@ -121,6 +128,8 @@ export function ServiceEditModal({
         priceTo: resolvedPriceTo,
         city: city || undefined,
         imageUrl,
+        availabilityDays: availabilityDays ? parseInt(availabilityDays, 10) : undefined,
+        urgency: urgency || undefined,
       });
     } finally {
       setSubmitting(false);
@@ -161,6 +170,35 @@ export function ServiceEditModal({
           <div className="space-y-2">
             <Label>City</Label>
             <CitySelect value={city} onChange={setCity} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="availabilityDays">Can start in (days)</Label>
+              <Input
+                id="availabilityDays"
+                type="number"
+                min={1}
+                max={60}
+                placeholder="e.g. 7"
+                value={availabilityDays}
+                onChange={(e) => setAvailabilityDays(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Urgency</Label>
+              <Select value={urgency || "__none__"} onValueChange={(v) => setUrgency(v === "__none__" ? "" : v as "low" | "medium" | "high")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Not specified" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Not specified</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">

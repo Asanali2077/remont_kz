@@ -137,6 +137,13 @@ export async function PUT(
         );
       }
 
+      if (existingRequest.companyId === null) {
+        return NextResponse.json(
+          { error: "Use the offer system for unassigned requests" },
+          { status: 400 }
+        );
+      }
+
       updateData.company = { connect: { id: authResult.user.userId } };
       updateData.status = RequestStatus.ACCEPTED;
     }

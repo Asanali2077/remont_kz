@@ -199,7 +199,7 @@ export function FilterBar(props: FilterBarProps) {
             />
           </div>
           <div className="text-sm text-muted-foreground">
-            from {priceRange[0].toLocaleString()} ₸ to {priceRange[1].toLocaleString()} ₸
+            from {priceRange[0].toLocaleString("ru-RU")} ₸ to {priceRange[1].toLocaleString("ru-RU")} ₸
           </div>
         </div>
         <div>

@@ -50,7 +50,7 @@ export function MainNavbar() {
                   Dashboard
                 </Link>
               )}
-              <span className="text-sm text-muted-foreground">{user.email}</span>
+              <span className="max-w-[160px] truncate text-sm text-muted-foreground">{user.email}</span>
               <Button variant="outline" size="sm" onClick={logout} className="gap-2">
                 <LogOut className="h-4 w-4" />
                 Log Out

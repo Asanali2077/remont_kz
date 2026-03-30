@@ -10,7 +10,7 @@ export default function CompanyDashboardPage() {
   return (
     <ProtectedRoute requiredRole="company">
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 overflow-x-hidden">
-        <div className="mx-auto max-w-7xl px-4 py-8 min-w-0">
+        <div className="mx-auto max-w-6xl px-4 py-8 min-w-0">
           <div className="mb-6">
             <h1 className="mb-2 text-3xl font-bold md:text-4xl">Company dashboard</h1>
             <p className="text-muted-foreground">

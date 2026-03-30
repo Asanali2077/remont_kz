@@ -2,6 +2,7 @@
 
 import type {
   MessageRecord,
+  RequestOfferRecord,
   RequestRecord,
   RequestStatus,
   ServiceCategory,
@@ -230,6 +231,27 @@ class ApiClient {
     return normalizeRequest(request);
   }
 
+  async createOffer(requestId: string, data: { price: number; message?: string }) {
+    return this.request<RequestOfferRecord>(`/requests/${requestId}/offer`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteOffer(requestId: string) {
+    return this.request<{ message: string }>(`/requests/${requestId}/offer`, {
+      method: "DELETE",
+    });
+  }
+
+  async acceptOffer(requestId: string, companyId: string) {
+    const request = await this.request<Record<string, unknown>>(`/requests/${requestId}/accept-offer`, {
+      method: "POST",
+      body: JSON.stringify({ companyId }),
+    });
+    return normalizeRequest(request);
+  }
+
   async getMessages(params?: {
     requestId?: string;
     receiverId?: string;
@@ -366,6 +388,7 @@ function normalizeRequest(request: Record<string, unknown>): RequestRecord {
           category: fromDbCategory(rawRequest.service.category),
         }
       : null,
+    offers: rawRequest.offers ?? [],
   };
 }
 

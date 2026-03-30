@@ -57,11 +57,11 @@ export async function POST(
       },
     });
 
-    // Recalculate service rating if linked to a service
-    if (existingRequest.serviceId) {
+    // Recalculate company-wide rating and apply to all company services
+    if (existingRequest.companyId) {
       const ratedRequests = await prisma.request.findMany({
         where: {
-          serviceId: existingRequest.serviceId,
+          companyId: existingRequest.companyId,
           rating: { not: null },
         },
         select: { rating: true },
@@ -71,8 +71,8 @@ export async function POST(
         ratedRequests.reduce((sum, r) => sum + (r.rating ?? 0), 0) /
         ratedRequests.length;
 
-      await prisma.service.update({
-        where: { id: existingRequest.serviceId },
+      await prisma.service.updateMany({
+        where: { companyId: existingRequest.companyId },
         data: { rating: avg },
       });
     }

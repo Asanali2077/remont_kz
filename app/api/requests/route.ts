@@ -68,6 +68,37 @@ function toServiceCategory(category: string | null): ServiceCategory | null {
   return categoryMap[category as keyof typeof categoryMap] ?? null;
 }
 
+const requestInclude = {
+  client: { select: { id: true, name: true, email: true, phone: true } },
+  service: { select: { id: true, name: true, category: true, city: true } },
+  company: { select: { id: true, name: true, email: true, phone: true } },
+} as const;
+
+function buildUnassignedCondition(
+  companyCategories: ServiceCategory[],
+  companyCities: string[],
+  minPrice: number
+): Prisma.RequestWhereInput {
+  const now = new Date();
+  const cityCondition: Prisma.RequestWhereInput =
+    companyCities.length > 0
+      ? { OR: [{ city: null }, { city: { in: companyCities } }] }
+      : {};
+  const budgetCondition: Prisma.RequestWhereInput =
+    minPrice > 0
+      ? { OR: [{ budgetTo: null }, { budgetTo: { gte: minPrice } }] }
+      : {};
+
+  return {
+    companyId: null,
+    category: { in: companyCategories },
+    OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+    AND: [cityCondition, budgetCondition].filter(
+      (c) => Object.keys(c).length > 0
+    ) as Prisma.RequestWhereInput[],
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAuth()(request);
@@ -96,10 +127,26 @@ export async function GET(request: NextRequest) {
 
       if (resolvedScope === "assigned") {
         where.companyId = user.userId;
-      } else if (resolvedScope === "unassigned") {
-        where.companyId = null;
       } else {
-        where.OR = [{ companyId: user.userId }, { companyId: null }];
+        const companyServices = await prisma.service.findMany({
+          where: { companyId: user.userId },
+          select: { category: true, priceFrom: true, city: true },
+        });
+
+        const companyCategories = Array.from(new Set(companyServices.map((s) => s.category)));
+        const companyCities = Array.from(new Set(companyServices.map((s) => s.city).filter((c): c is string => Boolean(c))));
+        const minPrice = companyServices.length > 0
+          ? Math.min(...companyServices.map((s) => s.priceFrom))
+          : 0;
+
+        if (resolvedScope === "unassigned") {
+          Object.assign(where, buildUnassignedCondition(companyCategories, companyCities, minPrice));
+        } else {
+          where.OR = [
+            { companyId: user.userId },
+            buildUnassignedCondition(companyCategories, companyCities, minPrice),
+          ];
+        }
       }
     }
 
@@ -127,37 +174,22 @@ export async function GET(request: NextRequest) {
       where.city = city;
     }
 
+    const isClient = user.role === "CLIENT";
+
     const requests = await prisma.request.findMany({
       where,
       include: {
-        client: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-        service: {
-          select: {
-            id: true,
-            name: true,
-            category: true,
-            city: true,
-          },
-        },
-        company: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
+        ...requestInclude,
+        ...(isClient
+          ? {
+              offers: {
+                include: { company: { select: { id: true, name: true, email: true, phone: true } } },
+                orderBy: { createdAt: "asc" },
+              },
+            }
+          : {}),
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(requests);
@@ -199,6 +231,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const isCustomRequest = !validatedData.serviceId;
+    const expiresAt = isCustomRequest
+      ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+      : null;
+
     const createdRequest = await prisma.request.create({
       data: {
         clientId: authResult.user.userId,
@@ -211,33 +248,9 @@ export async function POST(request: NextRequest) {
         budgetFrom: validatedData.budgetFrom ?? null,
         budgetTo: validatedData.budgetTo ?? null,
         status: RequestStatus.NEW,
+        expiresAt,
       },
-      include: {
-        client: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-        service: {
-          select: {
-            id: true,
-            name: true,
-            category: true,
-            city: true,
-          },
-        },
-        company: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-      },
+      include: requestInclude,
     });
 
     return NextResponse.json(createdRequest, { status: 201 });

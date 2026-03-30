@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Building2, CheckCircle2, Clock, MapPin, ShieldCheck } from "lucide-react";
+import { Building2, CheckCircle2, Clock, MapPin } from "lucide-react";
 import { useMemo } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -9,7 +9,6 @@ import { RequestCreateDialog } from "@/components/RequestCreateDialog";
 import { Currency } from "@/components/Currency";
 import { Stars } from "@/components/Stars";
 import { ServiceRecord, SERVICE_CATEGORY_LABELS } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -22,7 +21,7 @@ export function OrgCard({ service }: OrgCardProps) {
   const primaryImage = useMemo(
     () =>
       service.images[0]?.url ||
-      "https://images.unsplash.com/photo-1501183638710-841dd1904471",
+      "https://placehold.co/800x450/e2e8f0/94a3b8?text=No+photo",
     [service.images]
   );
 
@@ -93,7 +92,11 @@ export function OrgCard({ service }: OrgCardProps) {
           </div>
 
           <div className="text-right">
-            {typeof service.rating === "number" ? <Stars value={service.rating} /> : null}
+            {typeof service.rating === "number" ? (
+              <Stars value={service.rating} />
+            ) : (
+              <div className="text-xs text-muted-foreground">No ratings yet</div>
+            )}
             <div className="text-xs text-muted-foreground">
               {service._count?.requests ?? 0} requests
             </div>
@@ -104,20 +107,6 @@ export function OrgCard({ service }: OrgCardProps) {
       <CardContent className="space-y-3 pt-0">
         <div className="text-sm text-muted-foreground">{service.company.name}</div>
         <div className="line-clamp-3 text-sm text-muted-foreground">{service.description}</div>
-
-        <div className="flex flex-wrap gap-2">
-          {service.licensed ? (
-            <Badge variant="secondary">
-              <ShieldCheck className="mr-1 h-3 w-3" />
-              Licensed
-            </Badge>
-          ) : null}
-          {service.tags.slice(0, 4).map((tag) => (
-            <Badge key={tag} variant="outline">
-              {tag}
-            </Badge>
-          ))}
-        </div>
 
         <div className="flex items-center justify-between pt-1">
           <div className="text-sm">

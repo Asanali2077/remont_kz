@@ -71,6 +71,8 @@ export interface ServiceFormValues {
   priceTo: number;
   city?: string;
   imageUrl?: string;
+  availabilityDays?: number;
+  urgency?: "low" | "medium" | "high";
 }
 
 export interface RequestServiceSummary {
@@ -78,6 +80,16 @@ export interface RequestServiceSummary {
   name: string;
   category: ServiceCategory;
   city?: string | null;
+}
+
+export interface RequestOfferRecord {
+  id: string;
+  requestId: string;
+  companyId: string;
+  price: number;
+  message?: string | null;
+  createdAt: string;
+  company?: UserSummary;
 }
 
 export interface RequestRecord {
@@ -93,11 +105,13 @@ export interface RequestRecord {
   rating?: number | null;
   budgetFrom?: number | null;
   budgetTo?: number | null;
+  expiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
   client?: UserSummary;
   service?: RequestServiceSummary | null;
   company?: UserSummary | null;
+  offers?: RequestOfferRecord[];
 }
 
 export interface MessageRecord {

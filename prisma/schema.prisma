@@ -46,10 +46,11 @@ model User {
 
   // Relations
   services           Service[]
-  clientRequests     Request[]  @relation("ClientRequests")
-  companyRequests    Request[]  @relation("CompanyRequests")
-  sentMessages       Message[]  @relation("SentMessages")
-  receivedMessages   Message[]  @relation("ReceivedMessages")
+  clientRequests     Request[]       @relation("ClientRequests")
+  companyRequests    Request[]       @relation("CompanyRequests")
+  sentMessages       Message[]       @relation("SentMessages")
+  receivedMessages   Message[]       @relation("ReceivedMessages")
+  sentOffers         RequestOffer[]  @relation("CompanyOffers")
 
   @@index([email])
   @@index([role])
@@ -110,6 +111,7 @@ model Request {
   rating      Int?
   budgetFrom  Float?
   budgetTo    Float?
+  expiresAt   DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -118,6 +120,7 @@ model Request {
   service     Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   company     User?         @relation("CompanyRequests", fields: [companyId], references: [id], onDelete: SetNull)
   messages    Message[]
+  offers      RequestOffer[]
 
   @@index([clientId])
   @@index([companyId])
@@ -125,6 +128,23 @@ model Request {
   @@index([status])
   @@index([category])
   @@index([city])
+  @@index([expiresAt])
+}
+
+model RequestOffer {
+  id        String   @id @default(uuid())
+  requestId String
+  companyId String
+  price     Int
+  message   String?
+  createdAt DateTime @default(now())
+
+  request   Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  company   User     @relation("CompanyOffers", fields: [companyId], references: [id])
+
+  @@unique([requestId, companyId])
+  @@index([requestId])
+  @@index([companyId])
 }
 
 model Message {

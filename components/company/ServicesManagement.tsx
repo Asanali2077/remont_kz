@@ -12,6 +12,7 @@ import {
 } from "@/lib/types";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ServiceEditModal } from "./ServiceEditModal";
+import { Stars } from "@/components/Stars";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -94,6 +95,8 @@ export function ServicesManagement() {
         priceTo: service.priceTo,
         city: service.city,
         imageUrl: service.imageUrl,
+        availabilityDays: service.availabilityDays,
+        urgency: service.urgency,
       };
 
       if (service.id) {
@@ -188,9 +191,18 @@ export function ServicesManagement() {
                   </span>
                 </div>
 
-                <div className="mb-4 flex items-center justify-between text-sm">
+                <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Requests</span>
                   <span className="font-semibold">{service._count?.requests ?? 0}</span>
+                </div>
+
+                <div className="mb-4 flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Rating</span>
+                  {typeof service.rating === "number" ? (
+                    <Stars value={service.rating} />
+                  ) : (
+                    <span className="text-muted-foreground text-xs">No ratings yet</span>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
