@@ -40,6 +40,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint-type-test
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: remont_kz
+          POSTGRES_USER: remont
+          POSTGRES_PASSWORD: remont_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -55,10 +70,15 @@ jobs:
       - name: Generate Prisma client
         run: npm run db:generate
 
+      - name: Push DB schema
+        run: npm run db:push
+        env:
+          DATABASE_URL: postgresql://remont:remont_pass@localhost:5432/remont_kz
+
       - name: Build
         run: npm run build
         env:
-          DATABASE_URL: postgresql://user:pass@localhost:5432/remont_kz
+          DATABASE_URL: postgresql://remont:remont_pass@localhost:5432/remont_kz
           JWT_SECRET: ci-test-secret-32-characters-long
           NEXT_PUBLIC_APP_URL: http://localhost:3000
           ANTHROPIC_API_KEY: sk-ant-placeholder

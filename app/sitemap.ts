@@ -1,20 +1,29 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  const [services, companies] = await Promise.all([
-    prisma.service.findMany({
-      where: { active: true },
-      select: { id: true, updatedAt: true },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.user.findMany({
-      where: { role: "COMPANY", services: { some: { active: true } } },
-      select: { id: true, updatedAt: true },
-    }),
-  ]);
+  let services: { id: string; updatedAt: Date }[] = [];
+  let companies: { id: string; updatedAt: Date }[] = [];
+
+  try {
+    [services, companies] = await Promise.all([
+      prisma.service.findMany({
+        where: { active: true },
+        select: { id: true, updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+      }),
+      prisma.user.findMany({
+        where: { role: "COMPANY", services: { some: { active: true } } },
+        select: { id: true, updatedAt: true },
+      }),
+    ]);
+  } catch {
+    // DB unavailable during build — return static routes only
+  }
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base,                    lastModified: new Date(), changeFrequency: "weekly",  priority: 1.0 },
