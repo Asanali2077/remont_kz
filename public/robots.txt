@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /repair
+Allow: /repair/*
+Allow: /companies
+Allow: /company/*
+Allow: /guide
+Allow: /compare
+
+Disallow: /api/
+Disallow: /settings
+Disallow: /billing
+Disallow: /profile
+Disallow: /my-requests
+Disallow: /favorites
+Disallow: /notifications
+Disallow: /chat
+Disallow: /chat/*
+Disallow: /company/dashboard
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+Sitemap: https://remont.kz/sitemap.xml

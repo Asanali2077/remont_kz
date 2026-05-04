@@ -59,9 +59,10 @@ export async function POST(
     }
 
     // Accept offer: assign company, move to ACCEPTED, delete all other offers
+    // WHERE clause includes status=NEW to prevent race conditions (optimistic lock)
     const [updatedRequest] = await prisma.$transaction([
       prisma.request.update({
-        where: { id },
+        where: { id, status: RequestStatus.NEW, companyId: null },
         data: {
           companyId,
           status: RequestStatus.ACCEPTED,

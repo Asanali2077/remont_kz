@@ -3,6 +3,7 @@ import { Prisma, RequestStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAuth, requireClient, requireCompany } from "@/lib/middleware";
+import { sendRequestAcceptedEmail, sendJobCompletedEmail } from "@/lib/email";
 
 const requestStatuses = ["accepted", "in_progress", "completed"] as const;
 
@@ -214,6 +215,24 @@ export async function PUT(
         },
       },
     });
+
+    // Send email notifications (non-blocking)
+    if (nextStatus === RequestStatus.ACCEPTED && updatedRequest.client?.email) {
+      void sendRequestAcceptedEmail(
+        updatedRequest.client.email,
+        updatedRequest.client.name ?? "",
+        updatedRequest.company?.name ?? "Company",
+        `/chat/${updatedRequest.id}`
+      ).catch(() => null);
+    }
+    if (nextStatus === RequestStatus.COMPLETED && updatedRequest.client?.email) {
+      void sendJobCompletedEmail(
+        updatedRequest.client.email,
+        updatedRequest.client.name ?? "",
+        updatedRequest.company?.name ?? "Company",
+        "/my-requests"
+      ).catch(() => null);
+    }
 
     return NextResponse.json(updatedRequest);
   } catch (error) {

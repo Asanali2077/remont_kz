@@ -7,9 +7,26 @@ import { MainNavbar } from "@/components/nav/MainNavbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Remont.kz",
-  description: "Remont.kz — find repair and maintenance contractors in Kazakhstan",
-  keywords: ["repair", "services", "auto", "real estate", "maintenance", "Kazakhstan", "Remont"],
+  title: {
+    default: "Remont.kz — Repair & Renovation Services in Kazakhstan",
+    template: "%s | Remont.kz",
+  },
+  description: "Find trusted repair and renovation contractors in Kazakhstan. Compare prices, read reviews, and submit requests in minutes.",
+  keywords: ["repair", "renovation", "contractors", "Kazakhstan", "auto repair", "real estate", "maintenance", "Remont.kz"],
+  manifest: "/manifest.json",
+  openGraph: {
+    type: "website",
+    locale: "en_KZ",
+    url: "https://remont.kz",
+    siteName: "Remont.kz",
+    title: "Remont.kz — Repair & Renovation Services in Kazakhstan",
+    description: "Find trusted repair and renovation contractors in Kazakhstan. Compare prices, read reviews, and submit requests in minutes.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remont.kz",
+    description: "Find trusted repair and renovation contractors in Kazakhstan.",
+  },
 };
 
 export default function RootLayout({
@@ -18,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ClientProviders>
           <MainNavbar />

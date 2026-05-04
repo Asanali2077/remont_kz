@@ -1,120 +1,235 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Building2, CheckCircle2, Clock, MapPin } from "lucide-react";
-import { useMemo } from "react";
+import { useState } from "react";
+import { MapPin, Heart, GitCompare, Star, CheckCircle2, ArrowRight, Camera } from "lucide-react";
+import Link from "next/link";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
-import { Currency } from "@/components/Currency";
-import { Stars } from "@/components/Stars";
 import { ServiceRecord, SERVICE_CATEGORY_LABELS } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { useCompare } from "@/components/CompareContext";
+import { CATEGORY_COLORS, fmtNum } from "@/lib/utils";
 
 interface OrgCardProps {
   service: ServiceRecord;
+  initialFavorited?: boolean;
+  onUnfavorited?: (serviceId: string) => void;
 }
 
-export function OrgCard({ service }: OrgCardProps) {
+export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardProps) {
   const { user } = useAuth();
-  const primaryImage = useMemo(
-    () =>
-      service.images[0]?.url ||
-      "https://placehold.co/800x450/e2e8f0/94a3b8?text=No+photo",
-    [service.images]
-  );
+  const { toggle, isSelected } = useCompare();
+  const [imgError, setImgError] = useState(false);
+  const [isFav, setIsFav] = useState(initialFavorited ?? false);
+  const [favLoading, setFavLoading] = useState(false);
 
-  const requestButton = (() => {
-    if (!user) {
-      return (
-        <AuthModal
-          trigger={
-            <Button className="gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Log in to request
-            </Button>
-          }
-        />
-      );
+  const isClient = user?.role === "client";
+  const inCompare = isSelected(service.id);
+
+  const primaryImage = !imgError && service.images[0]?.url
+    ? service.images[0].url
+    : null;
+
+  async function toggleFavorite(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user || !isClient) return;
+    if (favLoading) return;
+    setFavLoading(true);
+    try {
+      if (isFav) {
+        await api.removeFavorite(service.id);
+        setIsFav(false);
+        toast.success("Removed from saved");
+        onUnfavorited?.(service.id);
+      } else {
+        await api.addFavorite(service.id);
+        setIsFav(true);
+        toast.success("Saved to favorites");
+      }
+    } catch {
+      toast.error("Failed to update favorites");
+    } finally {
+      setFavLoading(false);
     }
+  }
 
-    if (user.role !== "client") {
-      return (
-        <Button disabled className="gap-2">
-          Client account required
-        </Button>
-      );
-    }
+  const ratingNum = typeof service.rating === "number" ? service.rating : null;
+  const requestCount = service._count?.requests ?? 0;
 
-    return (
-      <RequestCreateDialog
-        service={service}
-        trigger={
-          <Button className="gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            Request service
-          </Button>
-        }
-      />
-    );
-  })();
+  const categoryColor = CATEGORY_COLORS[service.category] ?? CATEGORY_COLORS.other;
 
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-md">
-      <div className="relative aspect-[16/9] w-full">
-        <img src={primaryImage} alt={service.name} className="h-full w-full object-cover" loading="lazy" />
-      </div>
+    <article className="group flex bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-border dark:hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
 
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-2">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Building2 className="h-5 w-5" />
-              {service.name}
-            </CardTitle>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              <span>{SERVICE_CATEGORY_LABELS[service.category]}</span>
-              {service.city ? (
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  {service.city}
-                </span>
-              ) : null}
-              {service.availabilityDays ? (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  Start in {service.availabilityDays} days
-                </span>
-              ) : null}
-            </div>
+      {/* ── Photo column ── */}
+      <Link
+        href={`/repair/${service.id}`}
+        className="relative shrink-0 w-48 md:w-60 bg-muted overflow-hidden"
+      >
+        {primaryImage ? (
+          <img
+            src={primaryImage}
+            alt={service.name}
+            onError={() => setImgError(true)}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
+            <Camera className="h-8 w-8" />
+            <span className="text-xs">No photo</span>
           </div>
+        )}
 
-          <div className="text-right">
-            {typeof service.rating === "number" ? (
-              <Stars value={service.rating} />
+        {/* Photo count pill */}
+        {service.images.length > 1 && (
+          <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2 py-0.5 text-white text-[11px] font-medium">
+            <Camera className="h-2.5 w-2.5" />
+            {service.images.length}
+          </div>
+        )}
+
+        {/* Favorite overlay button */}
+        <div className="absolute top-2.5 right-2.5">
+          {isClient ? (
+            <button
+              onClick={(e) => void toggleFavorite(e)}
+              disabled={favLoading}
+              className={`flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 ${
+                isFav
+                  ? "bg-rose-500 text-white shadow-sm"
+                  : "bg-black/30 text-white hover:bg-black/50"
+              }`}
+              title={isFav ? "Remove from saved" : "Save"}
+            >
+              <Heart className={`h-3.5 w-3.5 ${isFav ? "fill-white" : ""}`} />
+            </button>
+          ) : !user ? (
+            <AuthModal trigger={
+              <button className="flex h-7 w-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors">
+                <Heart className="h-3.5 w-3.5" />
+              </button>
+            } />
+          ) : null}
+        </div>
+      </Link>
+
+      {/* ── Content column ── */}
+      <div className="flex flex-1 min-w-0 flex-col p-4 md:p-5">
+
+        {/* Row 1: Category + City + Date */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-wide ${categoryColor}`}>
+            {SERVICE_CATEGORY_LABELS[service.category]}
+          </span>
+          {service.city && (
+            <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3 text-muted-foreground/60" />
+              {service.city}
+            </span>
+          )}
+          {(service.startDate || service.endDate) && (
+            <span className="text-xs text-muted-foreground">
+              {service.startDate && new Date(service.startDate).toLocaleDateString("en", { month: "short", day: "numeric" })}
+              {service.startDate && service.endDate && " – "}
+              {service.endDate && new Date(service.endDate).toLocaleDateString("en", { month: "short", day: "numeric" })}
+            </span>
+          )}
+        </div>
+
+        {/* Row 2: Title */}
+        <Link href={`/repair/${service.id}`} className="block mb-1 group/title">
+          <h3 className="text-[15px] md:text-base font-semibold leading-snug line-clamp-2 group-hover/title:text-primary transition-colors">
+            {service.name}
+          </h3>
+        </Link>
+
+        {/* Row 3: Company */}
+        <p className="text-xs text-muted-foreground mb-2 truncate">
+          {service.company.name}
+        </p>
+
+        {/* Row 4: Description */}
+        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed flex-1">
+          {service.description}
+        </p>
+
+        {/* Divider */}
+        <div className="my-3 border-t border-border/60" />
+
+        {/* Row 5: Rating + Price + Actions */}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+
+          {/* Left: Rating + Price */}
+          <div className="flex flex-col gap-0.5">
+            {ratingNum !== null ? (
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className={`h-3.5 w-3.5 ${s <= Math.round(ratingNum) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`}
+                  />
+                ))}
+                <span className="ml-0.5 text-xs font-semibold text-foreground">{ratingNum.toFixed(1)}</span>
+                {requestCount > 0 && (
+                  <span className="text-xs text-muted-foreground">({requestCount})</span>
+                )}
+              </div>
             ) : (
-              <div className="text-xs text-muted-foreground">No ratings yet</div>
+              <span className="text-[11px] text-muted-foreground">No ratings yet</span>
             )}
-            <div className="text-xs text-muted-foreground">
-              {service._count?.requests ?? 0} requests
-            </div>
+            <p className="text-base font-bold text-foreground leading-tight">
+              {fmtNum(service.priceFrom)}
+              {service.priceTo !== service.priceFrom && (
+                <> – {fmtNum(service.priceTo)}</>
+              )}
+              <span className="ml-0.5 text-sm font-medium text-muted-foreground"> ₸</span>
+            </p>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Compare */}
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(service); }}
+              title={inCompare ? "Remove from compare" : "Compare"}
+              className={`h-8 w-8 flex items-center justify-center rounded-xl border transition-all duration-150 ${
+                inCompare
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5"
+              }`}
+            >
+              <GitCompare className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Details */}
+            <Link href={`/repair/${service.id}`}>
+              <Button variant="outline" size="sm" className="h-8 gap-1 text-xs font-medium">
+                Details <ArrowRight className="h-3 w-3" />
+              </Button>
+            </Link>
+
+            {/* Request */}
+            {!user ? (
+              <AuthModal trigger={
+                <Button size="sm" className="h-8 gap-1.5 text-xs font-medium">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Request
+                </Button>
+              } />
+            ) : isClient ? (
+              <RequestCreateDialog service={service} trigger={
+                <Button size="sm" className="h-8 gap-1.5 text-xs font-medium shadow-sm shadow-primary/20">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Request
+                </Button>
+              } />
+            ) : null}
           </div>
         </div>
-      </CardHeader>
-
-      <CardContent className="space-y-3 pt-0">
-        <div className="text-sm text-muted-foreground">{service.company.name}</div>
-        <div className="line-clamp-3 text-sm text-muted-foreground">{service.description}</div>
-
-        <div className="flex items-center justify-between pt-1">
-          <div className="text-sm">
-            Budget: <Currency value={service.priceFrom} /> - <Currency value={service.priceTo} />
-          </div>
-          {requestButton}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 }

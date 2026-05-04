@@ -1,337 +1,214 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Filter, Search, Calendar, X } from "lucide-react";
+import { Filter, Search, X, SlidersHorizontal, ImageIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
 import { KZ_CITIES } from "@/lib/cities";
 
-export type SortOption = "relevance" | "rating" | "price" | "requests";
+export type SortOption = "relevance" | "rating" | "price" | "price-desc" | "requests";
 
 export interface FilterBarProps {
-  // Values
   query?: string;
   city?: string;
-  service?: string;
   priceRange: [number, number];
   minRating: number;
+  hasPhotos?: boolean;
   licensedOnly?: boolean;
   canStartWithin7?: boolean;
   sortBy?: SortOption;
-
-  // Options
-  serviceOptions?: string[];
-
-  // Category filter
   categoryFilter?: CategoryFilterValue;
   onChangeCategoryFilter?: (v: CategoryFilterValue) => void;
-
-  // Visibility toggles
   showCategory?: boolean;
   showQuery?: boolean;
   showCity?: boolean;
-  showService?: boolean;
-  showLicensed?: boolean;
-  showAvailability?: boolean;
   showSort?: boolean;
-
-  // Callbacks
   onChangeQuery?: (q: string) => void;
   onChangeCity?: (c?: string) => void;
-  onChangeService?: (s?: string) => void;
   onChangePriceRange: (r: [number, number]) => void;
   onChangeMinRating: (r: number) => void;
-  onChangeLicensed?: (v: boolean) => void;
-  onChangeAvailability?: (v: boolean) => void;
+  onChangeHasPhotos?: (v: boolean) => void;
   onChangeSort?: (s: SortOption) => void;
-
-  // Actions
   onReset?: () => void;
   onApply?: () => void;
-
-  // Labels
   title?: string;
   description?: string;
-
-  // Limits
   priceMin?: number;
   priceMax?: number;
   priceStep?: number;
 }
 
-export function FilterBar(props: FilterBarProps) {
+function FilterContent(props: FilterBarProps) {
   const {
-    // values
-    categoryFilter,
-    onChangeCategoryFilter,
-    showCategory = true,
-    query = "",
-    city,
-    service,
-    priceRange,
-    minRating,
-    licensedOnly = false,
-    canStartWithin7 = false,
-    sortBy = "relevance",
-
-    // options
-    serviceOptions = [],
-
-    // visibility
-    showQuery = true,
-    showCity = true,
-    showService = true,
-    showLicensed = true,
-    showAvailability = true,
-    showSort = true,
-
-    // callbacks
-    onChangeQuery,
-    onChangeCity,
-    onChangeService,
-    onChangePriceRange,
-    onChangeMinRating,
-    onChangeLicensed,
-    onChangeAvailability,
-    onChangeSort,
-
-    // actions
+    categoryFilter, onChangeCategoryFilter, showCategory = true,
+    query = "", city,
+    priceRange, minRating, sortBy = "relevance",
+    hasPhotos = false,
+    showQuery = true, showCity = true, showSort = true,
+    onChangeQuery, onChangeCity,
+    onChangePriceRange, onChangeMinRating, onChangeSort, onChangeHasPhotos,
     onReset,
-    onApply,
-
-    // labels
-    title = "Filters",
-    description,
-
-    // limits
-    priceMin = 0,
-    priceMax = 100000,
-    priceStep = 1000,
+    priceMin = 0, priceMax = 100000, priceStep = 1000,
   } = props;
 
+  return (
+    <div className="space-y-5">
+      {/* Search */}
+      {showQuery && (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Search</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Name, service, tag…"
+              value={query}
+              onChange={(e) => onChangeQuery?.(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* City */}
+      {showCity && (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">City</Label>
+          <Select value={city || "__any__"} onValueChange={(v) => onChangeCity?.(v === "__any__" ? undefined : v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Any city" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__any__">Any city</SelectItem>
+              {KZ_CITIES.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Category */}
+      {showCategory && (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Category</Label>
+          <CategoryFilter value={categoryFilter ?? {}} onChange={(v) => onChangeCategoryFilter?.(v)} />
+        </div>
+      )}
+
+      {/* Price Range */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Price Range</Label>
+          <span className="text-xs font-medium">{priceRange[0].toLocaleString("ru-RU")} — {priceRange[1].toLocaleString("ru-RU")} ₸</span>
+        </div>
+        <div className="px-1 pt-1">
+          <Slider min={priceMin} max={priceMax} step={priceStep} value={priceRange} onValueChange={(v) => onChangePriceRange([v[0] as number, v[1] as number])} />
+          <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+            <span>{priceMin.toLocaleString("ru-RU")} ₸</span>
+            <span>{priceMax.toLocaleString("ru-RU")} ₸</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Rating */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Min. Rating</Label>
+          <span className="text-xs font-medium">{minRating > 0 ? `${minRating.toFixed(1)} ★` : "Any"}</span>
+        </div>
+        <div className="px-1 pt-1">
+          <Slider min={0} max={5} step={0.5} value={[minRating]} onValueChange={(v) => onChangeMinRating(v[0] as number)} />
+          <div className="flex justify-between mt-1 text-xs text-muted-foreground"><span>Any</span><span>5.0 ★</span></div>
+        </div>
+      </div>
+
+      {/* Sort */}
+      {showSort && (
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sort By</Label>
+          <Select value={sortBy} onValueChange={(v) => onChangeSort?.(v as SortOption)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="relevance">Relevance</SelectItem>
+              <SelectItem value="rating">Highest rated</SelectItem>
+              <SelectItem value="price">Price: low to high</SelectItem>
+              <SelectItem value="price-desc">Price: high to low</SelectItem>
+              <SelectItem value="requests">Most popular</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Has photos */}
+      <div className="flex items-center gap-2.5">
+        <Checkbox
+          id="has-photos"
+          checked={hasPhotos}
+          onCheckedChange={(v) => onChangeHasPhotos?.(!!v)}
+        />
+        <label htmlFor="has-photos" className="text-sm flex items-center gap-1.5 cursor-pointer select-none">
+          <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" /> With photos only
+        </label>
+      </div>
+
+      {onReset && (
+        <Button variant="outline" onClick={onReset} className="w-full gap-2">
+          <X className="h-4 w-4" /> Reset all filters
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export function FilterBar(props: FilterBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const Content = (
-    <CardContent className="space-y-6">
-      {showCategory && (
-        <div>
-          <Label>Service Category</Label>
-          <div className="mt-1">
-            <CategoryFilter
-              value={categoryFilter ?? {}}
-              onChange={(v) => onChangeCategoryFilter && onChangeCategoryFilter(v)}
-            />
-          </div>
-        </div>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {showQuery && (
-          <div className="md:col-span-2">
-            <Label htmlFor="search">Search</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="search"
-                placeholder="Name, service, tag…"
-                value={query}
-                onChange={(e) => onChangeQuery && onChangeQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </div>
-        )}
-        {showCity && (
-          <div>
-            <Label>City</Label>
-            <Select value={city || "__any__"} onValueChange={(v) => onChangeCity && onChangeCity(v === "__any__" ? undefined : v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Any" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__any__">Any</SelectItem>
-                {KZ_CITIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-        {showService && (
-          <div>
-            <Label>Service</Label>
-            <Select value={service || "__any__"} onValueChange={(v) => onChangeService && onChangeService(v === "__any__" ? undefined : v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Any" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__any__">Any</SelectItem>
-                {serviceOptions.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-        <div className="md:col-span-2">
-          <Label>Price Range (₸)</Label>
-          <div className="px-1 py-2">
-            <Slider
-              min={priceMin}
-              max={priceMax}
-              step={priceStep}
-              value={priceRange}
-              onValueChange={(v) => onChangePriceRange([v[0] as number, v[1] as number])}
-            />
-          </div>
-          <div className="text-sm text-muted-foreground">
-            from {priceRange[0].toLocaleString("ru-RU")} ₸ to {priceRange[1].toLocaleString("ru-RU")} ₸
-          </div>
-        </div>
-        <div>
-          <Label>Min. Rating</Label>
-          <div className="px-1 py-2">
-            <Slider
-              min={0}
-              max={5}
-              step={0.5}
-              value={[minRating]}
-              onValueChange={(v) => onChangeMinRating(v[0] as number)}
-            />
-          </div>
-          <div className="text-sm text-muted-foreground">{minRating.toFixed(1)}+</div>
-        </div>
-        <div className="flex gap-4">
-          {showLicensed && (
-            <div className="flex items-center space-x-2">
-              <Checkbox id="licensed" checked={licensedOnly} onCheckedChange={(v) => onChangeLicensed && onChangeLicensed(Boolean(v))} />
-              <Label htmlFor="licensed" className="cursor-pointer">
-                Licensed only
-              </Label>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {(showAvailability || showSort) && (
-        <div className="flex flex-wrap items-center gap-3 justify-between">
-          <div className="flex items-center gap-4">
-            {showAvailability && (
-              <div className="flex items-center space-x-2">
-                <Checkbox id="start7" checked={canStartWithin7} onCheckedChange={(v) => onChangeAvailability && onChangeAvailability(Boolean(v))} />
-                <Label htmlFor="start7" className="cursor-pointer flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  Starts within 7 days
-                </Label>
-              </div>
-            )}
-            {showAvailability && <Separator orientation="vertical" className="h-6" />}
-            {showSort && (
-              <div className="w-48">
-                <Label>Sort by</Label>
-                <Select value={sortBy} onValueChange={(v) => onChangeSort && onChangeSort(v as SortOption)}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                    <SelectItem value="rating">Rating</SelectItem>
-                    <SelectItem value="price">Price: low to high</SelectItem>
-                    <SelectItem value="requests">Popularity</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-          <div className="flex gap-2">
-            {onReset && (
-              <Button variant="ghost" onClick={onReset} className="gap-1">
-                <X className="h-4 w-4" />
-                Reset
-              </Button>
-            )}
-            {onApply && (
-              <Button className="gap-1" onClick={onApply}>
-                Apply
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-    </CardContent>
-  );
-
   return (
-    <div>
+    <>
       {/* Desktop */}
       <Card className="hidden md:block shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            {title}
-          </CardTitle>
-          {props.description && <CardDescription>{description}</CardDescription>}
-        </CardHeader>
-        {Content}
+        <CardContent className="pt-5 pb-5">
+          <div className="flex items-center gap-2 mb-5 pb-4 border-b">
+            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+            <span className="font-semibold text-sm">{props.title ?? "Filters"}</span>
+          </div>
+          <FilterContent {...props} />
+        </CardContent>
       </Card>
 
       {/* Mobile */}
       <div className="md:hidden">
         <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
-          <div className="flex items-center justify-between mb-3">
-            <Button size="sm" variant="secondary" className="gap-2" asChild>
-              <DialogTrigger>
-                <>
-                  <Filter className="h-4 w-4" /> Filters
-                </>
-              </DialogTrigger>
-            </Button>
+          <div className="flex items-center justify-between mb-4">
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" /> Filters
+              </Button>
+            </DialogTrigger>
           </div>
-          <DialogContent className="max-w-[640px]">
+          <DialogContent className="max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Filters</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" /> Filters
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              {/* Reuse same content inside dialog */}
-              <Card className="border-0 shadow-none">
-                {Content}
-              </Card>
-              <div className="flex justify-end gap-2">
-                {onReset && (
-                  <Button variant="ghost" onClick={onReset} className="gap-1">
-                    <X className="h-4 w-4" />
-                    Reset
-                  </Button>
-                )}
-                <Button
-                  onClick={() => {
-                    onApply && onApply();
-                    setMobileOpen(false);
-                  }}
-                >
-                  Apply
-                </Button>
-              </div>
-            </div>
+            <FilterContent
+              {...props}
+              onApply={() => { props.onApply?.(); setMobileOpen(false); }}
+            />
+            <Button className="w-full mt-2" onClick={() => setMobileOpen(false)}>
+              Apply
+            </Button>
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </>
   );
 }
-
-

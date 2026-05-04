@@ -1,368 +1,266 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import {
-  PrismaClient,
-  ServiceCategory,
-  UserRole,
-} from "@prisma/client";
+import { PrismaClient, ServiceCategory, UserRole, RequestStatus } from "@prisma/client";
 import { Pool } from "pg";
 import { hashPassword } from "../lib/auth";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
-const prisma = new PrismaClient({
-  adapter: new PrismaPg(pool),
-});
+const COMPANY_EMAILS = [
+  "stroymast@remont.kz",
+  "autocity@remont.kz",
+  "electroserv@remont.kz",
+  "plumbing@remont.kz",
+  "cleanpro@remont.kz",
+];
+const CLIENT_EMAILS = [
+  "asel@remont.kz",
+  "dmitry@remont.kz",
+  "zarina@remont.kz",
+  "arman@remont.kz",
+];
 
 async function main() {
-  console.log("Starting seed...");
+  console.log("🌱 Seeding database…");
 
-  const seedEmails = [
-    "stroymast@remont.kz",
-    "autocity@remont.kz",
-    "cleanpro@remont.kz",
-    "electroserv@remont.kz",
-    "plumbing@remont.kz",
-  ];
+  /* ── Clean slate ── */
+  await prisma.message.deleteMany({});
+  await prisma.requestOffer.deleteMany({});
+  await prisma.request.deleteMany({});
+  await prisma.favorite.deleteMany({});
+  await prisma.serviceImage.deleteMany({});
+  await prisma.service.deleteMany({});
+  await prisma.user.deleteMany({ where: { email: { in: [...COMPANY_EMAILS, ...CLIENT_EMAILS] } } });
 
-  await prisma.message.deleteMany({
-    where: {
-      OR: [
-        { sender: { email: { in: seedEmails } } },
-        { receiver: { email: { in: seedEmails } } },
-      ],
-    },
-  });
+  const pw = await hashPassword("password123");
 
-  await prisma.request.deleteMany({
-    where: {
-      OR: [
-        { client: { email: { in: seedEmails } } },
-        { company: { email: { in: seedEmails } } },
-      ],
-    },
-  });
+  /* ── Companies ── */
+  const companies = await Promise.all([
+    prisma.user.create({ data: { email: "stroymast@remont.kz", password: pw, role: UserRole.COMPANY, name: "StroiMaster", phone: "+7 701 100 1001", address: "Almaty, Abay 10", emailVerified: true } }),
+    prisma.user.create({ data: { email: "autocity@remont.kz",  password: pw, role: UserRole.COMPANY, name: "AutoCity KZ",  phone: "+7 701 100 1002", address: "Astana, Saryarka 5",  emailVerified: true } }),
+    prisma.user.create({ data: { email: "electroserv@remont.kz", password: pw, role: UserRole.COMPANY, name: "ElectroServ", phone: "+7 701 100 1003", address: "Almaty, Dostyk 22",  emailVerified: true } }),
+    prisma.user.create({ data: { email: "plumbing@remont.kz",  password: pw, role: UserRole.COMPANY, name: "PlumbingKZ",  phone: "+7 701 100 1004", address: "Astana, Kerey 8",    emailVerified: true } }),
+    prisma.user.create({ data: { email: "cleanpro@remont.kz",  password: pw, role: UserRole.COMPANY, name: "CleanPro",    phone: "+7 701 100 1005", address: "Almaty, Tole bi 30", emailVerified: true } }),
+  ]);
 
-  await prisma.serviceImage.deleteMany({
-    where: {
-      service: { company: { email: { in: seedEmails } } },
-    },
-  });
+  /* ── Clients ── */
+  const clients = await Promise.all([
+    prisma.user.create({ data: { email: "asel@remont.kz",   password: pw, role: UserRole.CLIENT, name: "Asel M.",   phone: "+7 705 200 0001", emailVerified: true } }),
+    prisma.user.create({ data: { email: "dmitry@remont.kz", password: pw, role: UserRole.CLIENT, name: "Dmitry K.", phone: "+7 705 200 0002", emailVerified: true } }),
+    prisma.user.create({ data: { email: "zarina@remont.kz", password: pw, role: UserRole.CLIENT, name: "Zarina T.", phone: "+7 705 200 0003", emailVerified: true } }),
+    prisma.user.create({ data: { email: "arman@remont.kz",  password: pw, role: UserRole.CLIENT, name: "Arman S.",  phone: "+7 705 200 0004", emailVerified: true } }),
+  ]);
 
-  await prisma.service.deleteMany({
-    where: {
-      company: { email: { in: seedEmails } },
-    },
-  });
+  const [stroymast, autocity, electroserv, plumbing, cleanpro] = companies;
+  const [asel, dmitry, zarina, arman] = clients;
 
-  const password = await hashPassword("Company123!");
-
-  const stroymast = await prisma.user.upsert({
-    where: { email: "stroymast@remont.kz" },
-    update: {},
-    create: {
-      email: "stroymast@remont.kz",
-      password,
-      role: UserRole.COMPANY,
-      name: "СтройМастер KZ",
-      phone: "+7 727 210 55 44",
-    },
-  });
-
-  const autocity = await prisma.user.upsert({
-    where: { email: "autocity@remont.kz" },
-    update: {},
-    create: {
-      email: "autocity@remont.kz",
-      password,
-      role: UserRole.COMPANY,
-      name: "AutoCity",
-      phone: "+7 717 330 77 11",
-    },
-  });
-
-  const cleanpro = await prisma.user.upsert({
-    where: { email: "cleanpro@remont.kz" },
-    update: {},
-    create: {
-      email: "cleanpro@remont.kz",
-      password,
-      role: UserRole.COMPANY,
-      name: "CleanPro",
-      phone: "+7 725 440 88 22",
-    },
-  });
-
-  const electroserv = await prisma.user.upsert({
-    where: { email: "electroserv@remont.kz" },
-    update: {},
-    create: {
-      email: "electroserv@remont.kz",
-      password,
-      role: UserRole.COMPANY,
-      name: "ЭлектроСервис",
-      phone: "+7 721 550 99 33",
-    },
-  });
-
-  const plumbing = await prisma.user.upsert({
-    where: { email: "plumbing@remont.kz" },
-    update: {},
-    create: {
-      email: "plumbing@remont.kz",
-      password,
-      role: UserRole.COMPANY,
-      name: "АкваМастер",
-      phone: "+7 727 660 11 44",
-    },
-  });
-
-  console.log("Companies ready");
-
-  const servicesData = [
-    // СтройМастер KZ
-    {
-      companyId: stroymast.id,
-      name: "Apartment renovation turnkey",
-      category: ServiceCategory.REAL_ESTATE,
-      description:
-        "Full apartment renovation: demolition, levelling, electrical, plumbing, finishing, and furnishing. Fixed-price contract with warranty.",
-      priceFrom: 250000,
-      priceTo: 800000,
-      city: "Almaty",
-      rating: 4.9,
-      licensed: true,
-      availabilityDays: 14,
-      urgency: "medium",
-      tags: ["warranty", "contract", "turnkey", "finishing"],
-      customAttributes: { warranty: "24 months", payment: "30% prepayment" },
-      images: [
-        "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d",
-        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136",
-        "https://images.unsplash.com/photo-1560185007-cde436f6a4d0",
-      ],
-    },
-    {
-      companyId: stroymast.id,
-      name: "Tile and flooring installation",
-      category: ServiceCategory.REAL_ESTATE,
-      description:
-        "Professional tile laying for bathroom, kitchen, and hallway. Large format tiles, heated floor systems, grouting.",
-      priceFrom: 80000,
-      priceTo: 200000,
-      city: "Almaty",
-      rating: 4.7,
-      licensed: true,
-      availabilityDays: 5,
-      urgency: "medium",
-      tags: ["tile", "flooring", "bathroom", "warranty"],
-      customAttributes: { grout: "Mapei", levelling: "Self-levelling compound" },
-      images: [
-        "https://images.unsplash.com/photo-1615529162924-f8605388461d",
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a",
-      ],
-    },
-    // AutoCity
-    {
-      companyId: autocity.id,
-      name: "Car diagnostics and service",
-      category: ServiceCategory.AUTOMOBILES,
-      description:
-        "Full computer diagnostics, oil change, filters, spark plugs, and suspension check. All car makes and models.",
-      priceFrom: 15000,
-      priceTo: 50000,
-      city: "Astana",
-      rating: 4.8,
-      licensed: true,
-      availabilityDays: 2,
-      urgency: "high",
-      tags: ["diagnostics", "oil change", "warranty", "OEM parts"],
-      customAttributes: { parts: "OEM / original", warranty: "6 months" },
-      images: [
-        "https://images.unsplash.com/photo-1625047509168-a7026f36de04",
-        "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3",
-      ],
-    },
-    {
-      companyId: autocity.id,
-      name: "Body repair and painting",
-      category: ServiceCategory.AUTOMOBILES,
-      description:
-        "Dent removal, panel replacement, and full or partial repainting. Computer colour matching, guaranteed colour uniformity.",
-      priceFrom: 60000,
-      priceTo: 300000,
-      city: "Astana",
-      rating: 4.6,
-      licensed: true,
-      availabilityDays: 7,
-      urgency: "medium",
-      tags: ["body repair", "painting", "dent removal", "warranty"],
-      customAttributes: { colour: "Computer matching", warranty: "12 months" },
-      images: [
-        "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64",
-      ],
-    },
-    // CleanPro
-    {
-      companyId: cleanpro.id,
-      name: "Deep apartment cleaning",
-      category: ServiceCategory.OTHER,
-      description:
-        "General cleaning: washing windows, cleaning appliances inside and out, sanitising bathroom, mopping, and removing stubborn stains.",
-      priceFrom: 20000,
-      priceTo: 60000,
-      city: "Shymkent",
-      rating: 4.7,
-      licensed: false,
-      availabilityDays: 1,
-      urgency: "high",
-      tags: ["deep cleaning", "eco products", "fast arrival"],
-      customAttributes: { crew: "2–3 people", products: "Eco-friendly" },
-      images: [
-        "https://images.unsplash.com/photo-1581578731548-c64695cc6952",
-        "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac",
-      ],
-    },
-    {
-      companyId: cleanpro.id,
-      name: "Dry cleaning of furniture and carpets",
-      category: ServiceCategory.OTHER,
-      description:
-        "Professional dry cleaning of sofas, armchairs, mattresses, and carpets. Removes stains and odours, quick drying.",
-      priceFrom: 15000,
-      priceTo: 45000,
-      city: "Shymkent",
-      rating: 4.5,
-      licensed: false,
-      availabilityDays: 2,
-      urgency: "medium",
-      tags: ["dry cleaning", "upholstery", "carpet", "odour removal"],
-      customAttributes: { drying: "2–4 hours", stain: "Any stains" },
-      images: [
-        "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13",
-        "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c",
-      ],
-    },
-    // ЭлектроСервис
-    {
-      companyId: electroserv.id,
-      name: "Electrical wiring in apartment",
-      category: ServiceCategory.REAL_ESTATE,
-      description:
-        "Complete replacement or partial upgrade of electrical wiring, installation of sockets, breakers, and distribution boards. Licensed specialists.",
-      priceFrom: 50000,
-      priceTo: 180000,
-      city: "Karaganda",
-      rating: 4.8,
-      licensed: true,
-      availabilityDays: 5,
-      urgency: "medium",
-      tags: ["electrical", "wiring", "licensed", "warranty"],
-      customAttributes: { licence: "State licensed", warranty: "18 months" },
-      images: [
-        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64",
-      ],
-    },
-    {
-      companyId: electroserv.id,
-      name: "Smart home installation",
-      category: ServiceCategory.OTHER,
-      description:
-        "Turnkey smart home: lighting control, smart sockets, security cameras, alarm, and app integration.",
-      priceFrom: 100000,
-      priceTo: 400000,
-      city: "Karaganda",
-      rating: 4.6,
-      licensed: true,
-      availabilityDays: 10,
-      urgency: "low",
-      tags: ["smart home", "automation", "security", "warranty"],
-      customAttributes: { system: "Tuya / Google Home / Yandex", warranty: "12 months" },
-      images: [
-        "https://images.unsplash.com/photo-1558002038-1055907df827",
-        "https://images.unsplash.com/photo-1585771724684-38269d6639fd",
-      ],
-    },
-    // АкваМастер
-    {
-      companyId: plumbing.id,
-      name: "Pipe and plumbing replacement",
-      category: ServiceCategory.REAL_ESTATE,
-      description:
-        "Replacing old pipes with modern polypropylene or copper, installing toilets, sinks, showers, and bathtubs. All work comes with warranty.",
-      priceFrom: 30000,
-      priceTo: 150000,
-      city: "Almaty",
-      rating: 4.7,
-      licensed: true,
-      availabilityDays: 3,
-      urgency: "high",
-      tags: ["plumbing", "pipes", "bathroom", "warranty"],
-      customAttributes: { material: "PPR / copper", warranty: "12 months" },
-      images: [
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64",
-        "https://images.unsplash.com/photo-1504307651254-35680f356dfd",
-      ],
-    },
-    {
-      companyId: plumbing.id,
-      name: "Water heater installation",
-      category: ServiceCategory.OTHER,
-      description:
-        "Installation and connection of storage or flow-through water heaters. Any brands, fast installation on the same day.",
-      priceFrom: 20000,
-      priceTo: 60000,
-      city: "Almaty",
-      rating: 4.5,
-      licensed: false,
-      availabilityDays: 1,
-      urgency: "high",
-      tags: ["water heater", "fast arrival", "any brand"],
-      customAttributes: { type: "Storage / flow-through", visit: "Same day" },
-      images: [
-        "https://images.unsplash.com/photo-1585771724684-38269d6639fd",
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a",
-      ],
-    },
-  ];
-
-  for (const item of servicesData) {
-    await prisma.service.create({
+  /* ── Services ── */
+  const services = await Promise.all([
+    // StroiMaster — Real Estate
+    prisma.service.create({
       data: {
-        name: item.name,
-        category: item.category,
-        description: item.description,
-        priceFrom: item.priceFrom,
-        priceTo: item.priceTo,
-        city: item.city,
-        rating: item.rating,
-        licensed: item.licensed,
-        availabilityDays: item.availabilityDays,
-        urgency: item.urgency,
-        tags: item.tags,
-        customAttributes: item.customAttributes,
-        companyId: item.companyId,
-        images: {
-          create: item.images.map((url, order) => ({ url, order })),
-        },
+        name: "Apartment renovation (turnkey)",
+        category: ServiceCategory.REAL_ESTATE,
+        description: "Full apartment renovation: design, demolition, rough and finish work, plumbing, electrical, flooring, painting. We work with all types of apartments in Almaty. Free estimate on-site.",
+        priceFrom: 150000, priceTo: 800000, city: "Almaty", address: "Almaty, Abay 10",
+        rating: 4.8, active: true, companyId: stroymast.id,
+        tags: ["renovation", "turnkey", "design", "plumbing"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80", order: 0 },
+          { url: "https://images.unsplash.com/photo-1503174971373-b1f69850bded?w=800&q=80", order: 1 },
+        ]},
       },
-    });
-  }
+    }),
+    prisma.service.create({
+      data: {
+        name: "Bathroom renovation",
+        category: ServiceCategory.REAL_ESTATE,
+        description: "Complete bathroom renovation: tile work, plumbing fixtures replacement, waterproofing, ventilation. Work in Almaty and surrounding areas. 1-year warranty on all work.",
+        priceFrom: 80000, priceTo: 300000, city: "Almaty", address: "Almaty, Abay 10",
+        rating: 4.9, active: true, companyId: stroymast.id,
+        tags: ["bathroom", "tiles", "plumbing", "waterproofing"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80", order: 0 },
+        ]},
+      },
+    }),
+    // AutoCity — Automobiles
+    prisma.service.create({
+      data: {
+        name: "Auto body repair & painting",
+        category: ServiceCategory.AUTOMOBILES,
+        description: "Professional body repair of any complexity: dents, scratches, corrosion removal, full or partial painting. Color matching guarantee. Working with all car makes.",
+        priceFrom: 30000, priceTo: 500000, city: "Astana", address: "Astana, Saryarka 5",
+        rating: 4.7, active: true, companyId: autocity.id,
+        tags: ["body repair", "painting", "dents", "scratches"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800&q=80", order: 0 },
+          { url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80", order: 1 },
+        ]},
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Engine diagnostics & repair",
+        category: ServiceCategory.AUTOMOBILES,
+        description: "Computer diagnostics of any car brand. Engine repair, transmission service, suspension check. Experienced mechanics, original and quality parts. Quick turnaround.",
+        priceFrom: 15000, priceTo: 200000, city: "Astana", address: "Astana, Saryarka 5",
+        rating: 4.6, active: true, companyId: autocity.id,
+        tags: ["diagnostics", "engine", "transmission", "suspension"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", order: 0 },
+        ]},
+      },
+    }),
+    // ElectroServ — Other
+    prisma.service.create({
+      data: {
+        name: "Electrical wiring installation",
+        category: ServiceCategory.OTHER,
+        description: "Installation and replacement of electrical wiring in apartments, houses and offices. Switchboard installation, socket and light fitting, grounding. All work done to code with documentation.",
+        priceFrom: 50000, priceTo: 400000, city: "Almaty", address: "Almaty, Dostyk 22",
+        rating: 4.9, active: true, companyId: electroserv.id,
+        tags: ["electrical", "wiring", "switchboard", "sockets"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&q=80", order: 0 },
+        ]},
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Appliance repair (washing machines, refrigerators)",
+        category: ServiceCategory.OTHER,
+        description: "On-site repair of washing machines, refrigerators, dishwashers, microwaves. Diagnostics within the day. Genuine parts. 6-month warranty on repairs.",
+        priceFrom: 8000, priceTo: 60000, city: "Almaty",
+        rating: 4.5, active: true, companyId: electroserv.id,
+        tags: ["appliances", "washing machine", "refrigerator", "on-site repair"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80", order: 0 },
+        ]},
+      },
+    }),
+    // PlumbingKZ
+    prisma.service.create({
+      data: {
+        name: "Plumbing repair & installation",
+        category: ServiceCategory.REAL_ESTATE,
+        description: "Emergency and planned plumbing: pipe replacement, faucet repair, toilet installation, water heater connection. Available 24/7 for emergencies. Serving all districts of Astana.",
+        priceFrom: 10000, priceTo: 150000, city: "Astana", address: "Astana, Kerey 8",
+        rating: 4.7, active: true, companyId: plumbing.id,
+        tags: ["plumbing", "pipes", "toilet", "water heater", "emergency"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&q=80", order: 0 },
+        ]},
+      },
+    }),
+    // CleanPro
+    prisma.service.create({
+      data: {
+        name: "Post-construction cleaning",
+        category: ServiceCategory.OTHER,
+        description: "Professional cleaning after renovation: removal of dust, construction debris, cement residue from windows and floors. Work with industrial equipment. Eco-friendly products. Result guaranteed.",
+        priceFrom: 20000, priceTo: 120000, city: "Almaty", address: "Almaty, Tole bi 30",
+        rating: 4.8, active: true, companyId: cleanpro.id,
+        tags: ["cleaning", "post-renovation", "deep clean"],
+        images: { create: [
+          { url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80", order: 0 },
+        ]},
+      },
+    }),
+  ]);
 
-  console.log("Services seeded (10 total)");
-  console.log("Seed completed");
+  const [svcRenovation, svcBathroom, svcBody, svcEngine, svcElectric, svcAppliance, svcPlumbing, svcCleaning] = services;
+
+  /* ── Requests (completed with reviews) ── */
+  const req1 = await prisma.request.create({
+    data: {
+      clientId: asel.id, serviceId: svcRenovation.id, companyId: stroymast.id,
+      description: "Need full renovation of 2-bedroom apartment, ~60 sqm. Demolition + rough work + finish. Budget is flexible for quality work.",
+      category: ServiceCategory.REAL_ESTATE, city: "Almaty", status: RequestStatus.COMPLETED,
+      budgetFrom: 400000, budgetTo: 700000,
+      rating: 5, review: "Excellent work! StroiMaster team did a fantastic job on our apartment. Clean, on time, and the quality exceeded expectations. Highly recommend!",
+      companyReply: "Thank you so much, Asel! It was a pleasure working on your apartment. We wish you many happy years in your new home!",
+    },
+  });
+
+  const req2 = await prisma.request.create({
+    data: {
+      clientId: dmitry.id, serviceId: svcBody.id, companyId: autocity.id,
+      description: "My Toyota Camry has a large dent on the front bumper and scratches on the driver door. Need body repair and spot painting.",
+      category: ServiceCategory.AUTOMOBILES, city: "Astana", status: RequestStatus.COMPLETED,
+      budgetFrom: 50000, budgetTo: 150000,
+      rating: 5, review: "AutoCity did an amazing job. The car looks brand new, you can't even tell where the dent was. Fair price and quick turnaround — 3 days instead of the quoted 5.",
+    },
+  });
+
+  const req3 = await prisma.request.create({
+    data: {
+      clientId: zarina.id, serviceId: svcElectric.id, companyId: electroserv.id,
+      description: "Complete rewiring of a 3-room apartment. Old wiring needs full replacement, new switchboard, install 15 outlets and 8 light points.",
+      category: ServiceCategory.OTHER, city: "Almaty", status: RequestStatus.COMPLETED,
+      budgetFrom: 150000, budgetTo: 300000,
+      rating: 4, review: "Good work, everything done neatly. Took slightly longer than planned but the quality is excellent. All certificates provided.",
+    },
+  });
+
+  const req4 = await prisma.request.create({
+    data: {
+      clientId: arman.id, serviceId: svcPlumbing.id, companyId: plumbing.id,
+      description: "Emergency call — burst pipe in bathroom. Need immediate repair.",
+      category: ServiceCategory.REAL_ESTATE, city: "Astana", status: RequestStatus.COMPLETED,
+      rating: 5, review: "They arrived within 40 minutes at midnight! Fixed everything quickly and cleanly. Real professionals. Will only call PlumbingKZ going forward.",
+      companyReply: "Thank you Arman! Emergency calls are our specialty. We're glad we could help quickly!",
+    },
+  });
+
+  /* ── Active requests (in progress / new) ── */
+  const req5 = await prisma.request.create({
+    data: {
+      clientId: asel.id, serviceId: svcBathroom.id, companyId: stroymast.id,
+      description: "Bathroom renovation: replace all tiles, new shower, toilet and sink. Approximately 5 sqm.",
+      category: ServiceCategory.REAL_ESTATE, city: "Almaty",
+      status: RequestStatus.IN_PROGRESS, budgetFrom: 120000, budgetTo: 250000,
+    },
+  });
+
+  const req6 = await prisma.request.create({
+    data: {
+      clientId: dmitry.id,
+      description: "Need appliance repair — washing machine Bosch Serie 4 doesn't spin, error E18.",
+      category: ServiceCategory.OTHER, city: "Almaty",
+      status: RequestStatus.NEW, budgetFrom: 15000, budgetTo: 40000,
+      expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  /* ── Update service ratings based on reviews ── */
+  await prisma.service.update({ where: { id: svcRenovation.id }, data: { rating: 4.8 } });
+  await prisma.service.update({ where: { id: svcBody.id }, data: { rating: 4.9 } });
+  await prisma.service.update({ where: { id: svcElectric.id }, data: { rating: 4.7 } });
+  await prisma.service.update({ where: { id: svcPlumbing.id }, data: { rating: 4.9 } });
+
+  /* ── Chat messages for active request ── */
+  await prisma.message.createMany({
+    data: [
+      { requestId: req5.id, senderId: stroymast.id, receiverId: asel.id, content: "Hello Asel! We've started work on your bathroom. Tiles have been removed, starting waterproofing tomorrow." },
+      { requestId: req5.id, senderId: asel.id, receiverId: stroymast.id, content: "Great, thank you! Can we choose the new tiles this week?" },
+      { requestId: req5.id, senderId: stroymast.id, receiverId: asel.id, content: "Of course! We can visit the showroom on Thursday at 11:00. Does that work?" },
+    ],
+  });
+
+  console.log("✅ Seed complete!");
+  console.log(`   Companies: ${companies.length}`);
+  console.log(`   Clients:   ${clients.length}`);
+  console.log(`   Services:  ${services.length}`);
+  console.log(`   Requests:  6 (4 completed, 1 in-progress, 1 new)`);
+  console.log("\nDemo accounts (password: password123):");
+  console.log("  Company: stroymast@remont.kz");
+  console.log("  Company: autocity@remont.kz");
+  console.log("  Client:  asel@remont.kz");
+  console.log("  Client:  dmitry@remont.kz");
 }
 
 main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-    await pool.end();
-  });
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); await pool.end(); });

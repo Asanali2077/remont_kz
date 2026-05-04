@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireCompany } from "@/lib/middleware";
+import { requireCompany, assertEmailVerified } from "@/lib/middleware";
 import { RequestStatus } from "@prisma/client";
+import { sendNewOfferEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 
 const offerSchema = z.object({
   price: z.number().int().positive("Price must be a positive integer"),
@@ -15,9 +17,14 @@ export async function POST(
 ) {
   try {
     const authResult = await requireCompany()(request);
-    if ("error" in authResult) {
-      return authResult.error;
-    }
+    if ("error" in authResult) return authResult.error;
+
+    try { await assertEmailVerified(authResult.user.userId); }
+    catch { return NextResponse.json({ error: "Please verify your email before submitting offers." }, { status: 403 }); }
+
+    // 20 offers per hour per company
+    const rl = rateLimit(`offer:${authResult.user.userId}`, 20, 60 * 60_000);
+    if (!rl.allowed) return NextResponse.json({ error: "Too many offers. Try again later." }, { status: 429 });
 
     const { id } = await params;
     const body = await request.json();
@@ -25,10 +32,15 @@ export async function POST(
 
     const existingRequest = await prisma.request.findUnique({
       where: { id },
+      include: { service: { select: { companyId: true } } },
     });
 
     if (!existingRequest) {
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    }
+
+    if (existingRequest.service?.companyId === authResult.user.userId) {
+      return NextResponse.json({ error: "Cannot offer on your own service's request." }, { status: 403 });
     }
 
     if (existingRequest.companyId !== null) {
@@ -70,6 +82,21 @@ export async function POST(
         company: { select: { id: true, name: true, email: true, phone: true } },
       },
     });
+
+    // Notify client about new offer (non-blocking)
+    const reqWithClient = await prisma.request.findUnique({
+      where: { id },
+      select: { client: { select: { email: true, name: true } } },
+    });
+    if (reqWithClient?.client?.email) {
+      void sendNewOfferEmail(
+        reqWithClient.client.email,
+        reqWithClient.client.name ?? "",
+        offer.company?.name ?? "Company",
+        price,
+        "/my-requests"
+      ).catch(() => null);
+    }
 
     return NextResponse.json(offer, { status: 201 });
   } catch (error) {

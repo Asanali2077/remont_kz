@@ -1,4 +1,5 @@
-"use client";
+﻿"use client";
+import { fmtNum } from "@/lib/utils";
 
 import { useEffect, useMemo, useState } from "react";
 import { ClipboardList } from "lucide-react";
@@ -140,7 +141,7 @@ function RequestCard({
           {myOffer ? (
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
-                Offer sent: {myOffer.price.toLocaleString()} ₸
+                Offer sent: {fmtNum(myOffer.price)} ₸
               </span>
               <Button
                 size="sm"
@@ -325,3 +326,5 @@ export default function CompanyCatalogPage() {
     </ProtectedRoute>
   );
 }
+
+

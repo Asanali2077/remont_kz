@@ -3,14 +3,24 @@ import { Prisma, ServiceCategory } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCompany } from "@/lib/middleware";
+import { geocodeAddress } from "@/lib/geocode";
 
-const serviceCategories = ["automobiles", "real-estate", "other"] as const;
-const urgencyLevels = ["low", "medium", "high"] as const;
+const serviceCategories = [
+  "automobiles", "real-estate", "plumbing", "electrical",
+  "painting", "cleaning", "renovation", "welding", "roofing", "other",
+] as const;
 
 const categoryMap: Record<(typeof serviceCategories)[number], ServiceCategory> = {
-  automobiles: ServiceCategory.AUTOMOBILES,
-  "real-estate": ServiceCategory.REAL_ESTATE,
-  other: ServiceCategory.OTHER,
+  automobiles:  ServiceCategory.AUTOMOBILES,
+  "real-estate":ServiceCategory.REAL_ESTATE,
+  plumbing:     ServiceCategory.PLUMBING,
+  electrical:   ServiceCategory.ELECTRICAL,
+  painting:     ServiceCategory.PAINTING,
+  cleaning:     ServiceCategory.CLEANING,
+  renovation:   ServiceCategory.RENOVATION,
+  welding:      ServiceCategory.WELDING,
+  roofing:      ServiceCategory.ROOFING,
+  other:        ServiceCategory.OTHER,
 };
 
 const updateServiceSchema = z.object({
@@ -22,11 +32,13 @@ const updateServiceSchema = z.object({
   city: z.string().optional(),
   rating: z.number().min(0).max(5).optional(),
   licensed: z.boolean().optional(),
-  availabilityDays: z.number().int().positive().optional(),
-  urgency: z.enum(urgencyLevels).optional(),
   tags: z.array(z.string()).optional(),
   customAttributes: z.record(z.string(), z.string()).optional(),
   active: z.boolean().optional(),
+  address: z.string().optional(),
+  imageUrls: z.array(z.string()).max(10).optional(),
+  startDate: z.string().datetime({ offset: true }).optional().nullable(),
+  endDate: z.string().datetime({ offset: true }).optional().nullable(),
   imageUrl: z.union([z.string().min(1), z.literal(""), z.null()]).optional(),
 });
 
@@ -118,27 +130,29 @@ export async function PUT(
     if (validatedData.city !== undefined) updateData.city = validatedData.city;
     if (validatedData.rating !== undefined) updateData.rating = validatedData.rating;
     if (validatedData.licensed !== undefined) updateData.licensed = validatedData.licensed;
-    if (validatedData.availabilityDays !== undefined) {
-      updateData.availabilityDays = validatedData.availabilityDays;
-    }
-    if (validatedData.urgency !== undefined) updateData.urgency = validatedData.urgency;
     if (validatedData.tags !== undefined) updateData.tags = validatedData.tags;
     if (validatedData.customAttributes !== undefined) {
       updateData.customAttributes = validatedData.customAttributes as Prisma.InputJsonValue;
     }
     if (validatedData.active !== undefined) updateData.active = validatedData.active;
-    if (validatedData.imageUrl !== undefined) {
+    if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate ? new Date(validatedData.startDate) : null;
+    if (validatedData.endDate !== undefined) updateData.endDate = validatedData.endDate ? new Date(validatedData.endDate) : null;
+    if (validatedData.address !== undefined) {
+      updateData.address = validatedData.address || null;
+      if (validatedData.address) {
+        const geocoded = await geocodeAddress(validatedData.address);
+        updateData.lat = geocoded?.lat ?? null;
+        updateData.lng = geocoded?.lng ?? null;
+      } else {
+        updateData.lat = null;
+        updateData.lng = null;
+      }
+    }
+    if (validatedData.imageUrls !== undefined) {
       updateData.images = {
         deleteMany: {},
-        ...(validatedData.imageUrl
-          ? {
-              create: [
-                {
-                  url: validatedData.imageUrl,
-                  order: 0,
-                },
-              ],
-            }
+        ...(validatedData.imageUrls.length
+          ? { create: validatedData.imageUrls.map((url, order) => ({ url, order })) }
           : {}),
       };
     }

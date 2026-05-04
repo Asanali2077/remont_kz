@@ -6,7 +6,10 @@ import { requireAuth, requireClient } from "@/lib/middleware";
 
 const requestStatuses = ["new", "accepted", "in_progress", "completed"] as const;
 const requestScopes = ["assigned", "unassigned", "all"] as const;
-const serviceCategories = ["automobiles", "real-estate", "other"] as const;
+const serviceCategories = [
+  "automobiles", "real-estate", "plumbing", "electrical",
+  "painting", "cleaning", "renovation", "welding", "roofing", "other",
+] as const;
 
 const requestStatusMap: Record<(typeof requestStatuses)[number], RequestStatus> = {
   new: RequestStatus.NEW,
@@ -16,9 +19,16 @@ const requestStatusMap: Record<(typeof requestStatuses)[number], RequestStatus> 
 };
 
 const categoryMap: Record<(typeof serviceCategories)[number], ServiceCategory> = {
-  automobiles: ServiceCategory.AUTOMOBILES,
-  "real-estate": ServiceCategory.REAL_ESTATE,
-  other: ServiceCategory.OTHER,
+  automobiles:  ServiceCategory.AUTOMOBILES,
+  "real-estate":ServiceCategory.REAL_ESTATE,
+  plumbing:     ServiceCategory.PLUMBING,
+  electrical:   ServiceCategory.ELECTRICAL,
+  painting:     ServiceCategory.PAINTING,
+  cleaning:     ServiceCategory.CLEANING,
+  renovation:   ServiceCategory.RENOVATION,
+  welding:      ServiceCategory.WELDING,
+  roofing:      ServiceCategory.ROOFING,
+  other:        ServiceCategory.OTHER,
 };
 
 const createRequestSchema = z

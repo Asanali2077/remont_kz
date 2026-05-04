@@ -5,6 +5,7 @@ import { requireClient } from "@/lib/middleware";
 
 const rateSchema = z.object({
   rating: z.number().int().min(1).max(5),
+  review: z.string().max(1000).optional(),
 });
 
 export async function POST(
@@ -19,7 +20,7 @@ export async function POST(
 
     const { id } = await params;
     const body = await request.json();
-    const { rating } = rateSchema.parse(body);
+    const { rating, review } = rateSchema.parse(body);
 
     const existingRequest = await prisma.request.findUnique({
       where: { id },
@@ -49,7 +50,7 @@ export async function POST(
 
     const updated = await prisma.request.update({
       where: { id },
-      data: { rating },
+      data: { rating, ...(review ? { review } : {}) },
       include: {
         client: { select: { id: true, name: true, email: true, phone: true } },
         service: { select: { id: true, name: true, category: true, city: true } },

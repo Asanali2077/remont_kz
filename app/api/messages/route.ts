@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/middleware";
 import { MessageType, Prisma } from "@prisma/client";
+import { rateLimit } from "@/lib/rate-limit";
 
 const createMessageSchema = z.object({
   requestId: z.string().uuid().optional(),
@@ -124,9 +125,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const authResult = await requireAuth()(request);
-    if ("error" in authResult) {
-      return authResult.error;
-    }
+    if ("error" in authResult) return authResult.error;
+
+    // 60 messages per minute per user
+    const rl = rateLimit(`msg:${authResult.user.userId}`, 60, 60_000);
+    if (!rl.allowed) return NextResponse.json({ error: "Too many messages. Please slow down." }, { status: 429 });
 
     const { user } = authResult;
     const body = await request.json();

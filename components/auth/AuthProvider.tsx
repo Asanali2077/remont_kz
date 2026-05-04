@@ -3,8 +3,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import type { UserRole } from "@/lib/types";
 
-export type UserRole = "client" | "company";
+export type { UserRole };
 
 export type User = {
   id: string;
@@ -17,10 +18,11 @@ export type User = {
 
 type AuthContextValue = {
   user: User;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
-  register: (email: string, password: string, role: UserRole, name?: string, phone?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, role: UserRole, name?: string, phone?: string) => Promise<{ verifyUrl?: string }>;
   logout: () => void;
   loading: boolean;
+  updateUser: (data: { name?: string | null; phone?: string | null }) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -39,10 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Verify token by fetching user data
           api.getMe()
             .then((userData) => {
+              const role = userData.role.toLowerCase();
+              // Map any legacy admin role to client
+              const mappedRole: UserRole = role === "company" ? "company" : "client";
               setUser({
                 id: userData.id,
                 email: userData.email,
-                role: userData.role.toLowerCase() as UserRole,
+                role: mappedRole,
                 name: userData.name,
                 phone: userData.phone,
                 token: JSON.parse(raw).token,
@@ -77,21 +82,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  const login = async (email: string, password: string, role: UserRole) => {
+  const login = async (email: string, password: string) => {
     try {
       const response = await api.login(email, password);
-      if (response.user.role.toLowerCase() !== role) {
-        throw new Error("Role mismatch");
-      }
+      const role = response.user.role.toLowerCase();
+      const mappedRole: UserRole = role === "company" ? "company" : "client";
       setUser({
         id: response.user.id,
         email: response.user.email,
-        role: response.user.role.toLowerCase() as UserRole,
+        role: mappedRole,
         name: response.user.name,
         phone: response.user.phone,
         token: response.token,
       });
-      toast.success("Signed in");
+      if (response.emailVerified === false) {
+        toast.warning("Please verify your email to access all features.", { duration: 6000 });
+      } else {
+        toast.success("Signed in");
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Sign in failed";
       toast.error(message);
@@ -105,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: UserRole,
     name?: string,
     phone?: string
-  ) => {
+  ): Promise<{ verifyUrl?: string }> => {
     try {
       const response = await api.register({ email, password, role, name, phone });
       setUser({
@@ -116,11 +124,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         phone: response.user.phone,
         token: response.token,
       });
-      toast.success("Registration successful");
+      // Toast is shown by AuthModal after getting verifyUrl
+      return { verifyUrl: response.verifyUrl };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Registration failed";
       toast.error(message);
       throw error;
+      return {};
     }
   };
 
@@ -129,8 +139,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     toast.success("Signed out");
   };
 
+  const updateUser = (data: { name?: string | null; phone?: string | null }) => {
+    setUser((prev) => prev ? { ...prev, ...data } : prev);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

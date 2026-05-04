@@ -1,0 +1,20 @@
+{
+  "name": "Remont.kz",
+  "short_name": "Remont",
+  "description": "Find repair and renovation contractors in Kazakhstan",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "categories": ["business", "utilities"],
+  "lang": "en",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Browse Services", "url": "/repair", "description": "Find a service" },
+    { "name": "My Requests",    "url": "/my-requests", "description": "Track my requests" }
+  ]
+}

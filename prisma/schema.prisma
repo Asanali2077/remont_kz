@@ -13,12 +13,26 @@ datasource db {
 enum UserRole {
   CLIENT
   COMPANY
+  ADMIN
 }
 
 enum ServiceCategory {
   AUTOMOBILES
   REAL_ESTATE
+  PLUMBING
+  ELECTRICAL
+  PAINTING
+  CLEANING
+  RENOVATION
+  WELDING
+  ROOFING
   OTHER
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 enum RequestStatus {
@@ -35,14 +49,21 @@ enum MessageType {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  password      String
-  role          UserRole
-  name          String?
-  phone         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  password            String
+  role                UserRole
+  name                String?
+  phone               String?
+  avatarUrl           String?
+  address             String?
+  lastActiveAt        DateTime?
+  emailVerified       Boolean   @default(false)
+  emailVerifyToken    String?   @unique
+  resetToken          String?   @unique
+  resetTokenExpiresAt DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   // Relations
   services           Service[]
@@ -51,6 +72,7 @@ model User {
   sentMessages       Message[]       @relation("SentMessages")
   receivedMessages   Message[]       @relation("ReceivedMessages")
   sentOffers         RequestOffer[]  @relation("CompanyOffers")
+  favorites          Favorite[]
 
   @@index([email])
   @@index([role])
@@ -66,11 +88,16 @@ model Service {
   active            Boolean         @default(true)
   city              String?
   rating            Float?
-  licensed          Boolean          @default(false)
-  availabilityDays  Int?
-  urgency           String?         // "low" | "medium" | "high"
-  tags              String[]         @default([])
-  customAttributes  Json?           // Record<string, string>
+  licensed          Boolean         @default(false)
+  startDate         DateTime?
+  endDate           DateTime?
+  tags              String[]        @default([])
+  customAttributes  Json?
+  address           String?
+  lat               Float?
+  lng               Float?
+  aiSummary         String?         @db.Text
+  aiSummaryAt       DateTime?
   companyId         String
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
@@ -79,6 +106,7 @@ model Service {
   company           User            @relation(fields: [companyId], references: [id], onDelete: Cascade)
   images            ServiceImage[]
   requests          Request[]
+  favorites         Favorite[]
 
   @@index([companyId])
   @@index([category])
@@ -108,8 +136,10 @@ model Request {
   city        String?
   imageUrl    String?
   status      RequestStatus @default(NEW)
-  rating      Int?
-  budgetFrom  Float?
+  rating        Int?
+  review        String?     @db.Text
+  companyReply  String?     @db.Text
+  budgetFrom    Float?
   budgetTo    Float?
   expiresAt   DateTime?
   createdAt   DateTime      @default(now())
@@ -129,15 +159,17 @@ model Request {
   @@index([category])
   @@index([city])
   @@index([expiresAt])
+  @@index([category, city, status])
 }
 
 model RequestOffer {
-  id        String   @id @default(uuid())
+  id        String      @id @default(uuid())
   requestId String
   companyId String
   price     Int
   message   String?
-  createdAt DateTime @default(now())
+  status    OfferStatus @default(PENDING)
+  createdAt DateTime    @default(now())
 
   request   Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
   company   User     @relation("CompanyOffers", fields: [companyId], references: [id])
@@ -169,3 +201,18 @@ model Message {
   @@index([receiverId])
   @@index([createdAt])
 }
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  serviceId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serviceId])
+  @@index([userId])
+  @@index([serviceId])
+}
+

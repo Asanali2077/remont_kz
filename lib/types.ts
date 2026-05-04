@@ -1,6 +1,18 @@
 export type UserRole = "client" | "company";
 
-export type ServiceCategory = "automobiles" | "real-estate" | "other";
+export type ServiceCategory =
+  | "automobiles"
+  | "real-estate"
+  | "plumbing"
+  | "electrical"
+  | "painting"
+  | "cleaning"
+  | "renovation"
+  | "welding"
+  | "roofing"
+  | "other";
+
+export type OfferStatus = "pending" | "accepted" | "rejected";
 
 export type RequestStatus = "new" | "accepted" | "in_progress" | "completed";
 
@@ -9,12 +21,26 @@ export type MessageType = "text" | "image" | "audio";
 export const SERVICE_CATEGORY_OPTIONS: ServiceCategory[] = [
   "automobiles",
   "real-estate",
+  "plumbing",
+  "electrical",
+  "painting",
+  "cleaning",
+  "renovation",
+  "welding",
+  "roofing",
   "other",
 ];
 
 export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
   automobiles: "Automobiles",
   "real-estate": "Real Estate",
+  plumbing: "Plumbing",
+  electrical: "Electrical",
+  painting: "Painting",
+  cleaning: "Cleaning",
+  renovation: "Renovation",
+  welding: "Welding",
+  roofing: "Roofing",
   other: "Other",
 };
 
@@ -31,6 +57,7 @@ export interface UserSummary {
   role: string;
   name?: string | null;
   phone?: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface ServiceImageRecord {
@@ -50,10 +77,15 @@ export interface ServiceRecord {
   city?: string | null;
   rating?: number | null;
   licensed?: boolean;
-  availabilityDays?: number | null;
-  urgency?: "low" | "medium" | "high" | null;
   tags: string[];
   customAttributes?: Record<string, string> | null;
+  address?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  aiSummary?: string | null;
+  aiSummaryAt?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
   companyId: string;
   company: UserSummary;
   images: ServiceImageRecord[];
@@ -70,9 +102,11 @@ export interface ServiceFormValues {
   priceFrom: number;
   priceTo: number;
   city?: string;
-  imageUrl?: string;
-  availabilityDays?: number;
-  urgency?: "low" | "medium" | "high";
+  address?: string;
+  imageUrls?: string[];
+  tags?: string[];
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface RequestServiceSummary {
@@ -88,6 +122,7 @@ export interface RequestOfferRecord {
   companyId: string;
   price: number;
   message?: string | null;
+  status: OfferStatus;
   createdAt: string;
   company?: UserSummary;
 }
@@ -103,6 +138,8 @@ export interface RequestRecord {
   imageUrl?: string | null;
   status: RequestStatus;
   rating?: number | null;
+  review?: string | null;
+  companyReply?: string | null;
   budgetFrom?: number | null;
   budgetTo?: number | null;
   expiresAt?: string | null;
@@ -112,6 +149,26 @@ export interface RequestRecord {
   service?: RequestServiceSummary | null;
   company?: UserSummary | null;
   offers?: RequestOfferRecord[];
+}
+
+export interface ProfileRecord {
+  id: string;
+  email: string;
+  name: string | null;
+  phone: string | null;
+  avatarUrl: string | null;
+  address: string | null;
+  role: string;
+  createdAt: string;
+}
+
+export interface ReviewRecord {
+  id: string;
+  rating: number;
+  review?: string | null;
+  companyReply?: string | null;
+  createdAt: string;
+  client?: { name?: string | null; email: string } | null;
 }
 
 export interface MessageRecord {
