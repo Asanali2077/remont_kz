@@ -1,4 +1,4 @@
-export type UserRole = "client" | "company";
+export type UserRole = "client" | "company" | "admin";
 
 export type ServiceCategory =
   | "automobiles"

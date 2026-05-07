@@ -19,7 +19,7 @@ export type User = {
 type AuthContextValue = {
   user: User;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, role: UserRole, name?: string, phone?: string) => Promise<{ verifyUrl?: string }>;
+  register: (email: string, password: string, role: "client" | "company", name?: string, phone?: string) => Promise<{ verifyUrl?: string }>;
   logout: () => void;
   loading: boolean;
   updateUser: (data: { name?: string | null; phone?: string | null }) => void;
@@ -41,13 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Verify token by fetching user data
           api.getMe()
             .then((userData) => {
-              const role = userData.role.toLowerCase();
-              // Map any legacy admin role to client
-              const mappedRole: UserRole = role === "company" ? "company" : "client";
+              const role = userData.role.toLowerCase() as UserRole;
               setUser({
                 id: userData.id,
                 email: userData.email,
-                role: mappedRole,
+                role,
                 name: userData.name,
                 phone: userData.phone,
                 token: JSON.parse(raw).token,
@@ -85,12 +83,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await api.login(email, password);
-      const role = response.user.role.toLowerCase();
-      const mappedRole: UserRole = role === "company" ? "company" : "client";
+      const role = response.user.role.toLowerCase() as UserRole;
       setUser({
         id: response.user.id,
         email: response.user.email,
-        role: mappedRole,
+        role,
         name: response.user.name,
         phone: response.user.phone,
         token: response.token,
@@ -110,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (
     email: string,
     password: string,
-    role: UserRole,
+    role: "client" | "company",
     name?: string,
     phone?: string
   ): Promise<{ verifyUrl?: string }> => {

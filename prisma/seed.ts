@@ -249,6 +249,19 @@ async function main() {
     ],
   });
 
+  /* ── Admin account ── */
+  await prisma.user.upsert({
+    where: { email: "admin@remont.kz" },
+    update: {},
+    create: {
+      email: "admin@remont.kz",
+      password: await hashPassword("Admin123!"),
+      role: "ADMIN",
+      name: "Admin",
+      emailVerified: true,
+    },
+  });
+
   console.log("✅ Seed complete!");
   console.log(`   Companies: ${companies.length}`);
   console.log(`   Clients:   ${clients.length}`);
@@ -259,6 +272,7 @@ async function main() {
   console.log("  Company: autocity@remont.kz");
   console.log("  Client:  asel@remont.kz");
   console.log("  Client:  dmitry@remont.kz");
+  console.log("  Admin:   admin@remont.kz  (password: Admin123!)");
 }
 
 main()

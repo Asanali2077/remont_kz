@@ -223,7 +223,7 @@ export async function PUT(
         updatedRequest.client.name ?? "",
         updatedRequest.company?.name ?? "Company",
         `/chat/${updatedRequest.id}`
-      ).catch(() => null);
+      ).catch((err) => console.error("sendRequestAcceptedEmail failed", { requestId: updatedRequest.id, err }));
     }
     if (nextStatus === RequestStatus.COMPLETED && updatedRequest.client?.email) {
       void sendJobCompletedEmail(
@@ -231,7 +231,7 @@ export async function PUT(
         updatedRequest.client.name ?? "",
         updatedRequest.company?.name ?? "Company",
         "/my-requests"
-      ).catch(() => null);
+      ).catch((err) => console.error("sendJobCompletedEmail failed", { requestId: updatedRequest.id, err }));
     }
 
     return NextResponse.json(updatedRequest);

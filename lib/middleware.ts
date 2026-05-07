@@ -18,13 +18,27 @@ export async function authenticateRequest(
 
   try {
     const user = verifyToken(token);
+    const { prisma } = await import("./db");
+
+    // Check isBlocked — must be synchronous to prevent blocked users from acting
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { isBlocked: true, lastActiveAt: true },
+    });
+
+    if (!dbUser) {
+      return { error: NextResponse.json({ error: "User not found" }, { status: 401 }) };
+    }
+    if (dbUser.isBlocked) {
+      return { error: NextResponse.json({ error: "Your account has been suspended. Please contact support." }, { status: 403 }) };
+    }
+
     // Update lastActiveAt async — non-blocking, best-effort
-    void import("./db").then(({ prisma }) =>
-      prisma.user.update({
-        where: { id: user.userId },
-        data: { lastActiveAt: new Date() },
-      }).catch(() => null)
-    );
+    void prisma.user.update({
+      where: { id: user.userId },
+      data: { lastActiveAt: new Date() },
+    }).catch(() => null);
+
     return { user };
   } catch {
     return { error: NextResponse.json({ error: "Invalid or expired token" }, { status: 401 }) };
@@ -52,6 +66,10 @@ export function requireClient() {
 
 export function requireAuth() {
   return requireRole([UserRole.CLIENT, UserRole.COMPANY, UserRole.ADMIN]);
+}
+
+export function requireAdmin() {
+  return requireRole([UserRole.ADMIN]);
 }
 
 export async function assertEmailVerified(userId: string): Promise<void> {

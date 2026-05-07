@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth, UserRole } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Eye, EyeOff, Loader2, Wrench, CheckCircle2, Mail } from "lucide-react";
 
 export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactNode; defaultMode?: "login" | "register" }) {
@@ -19,7 +19,7 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
   const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<UserRole>("client");
+  const [role, setRole] = useState<"client" | "company">("client");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -131,7 +131,7 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
             <>
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Account type</Label>
-                <Select value={role} onValueChange={(v: UserRole) => setRole(v)}>
+                <Select value={role} onValueChange={(v: "client" | "company") => setRole(v)}>
                   <SelectTrigger className="rounded-xl h-10">
                     <SelectValue />
                   </SelectTrigger>

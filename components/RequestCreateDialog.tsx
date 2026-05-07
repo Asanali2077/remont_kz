@@ -150,11 +150,11 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
               {service ? (
                 <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/30 p-3">
                   <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-lg font-bold text-primary">{(service.company.name ?? service.company.email)[0]}</span>
+                    <span className="text-lg font-bold text-primary">{(service.company?.name ?? service.company?.email ?? "?")[0]}</span>
                   </div>
                   <div className="min-w-0">
                     <p className="font-semibold text-sm truncate">{service.name}</p>
-                    <p className="text-xs text-muted-foreground">{service.company.name} {service.city ? `· ${service.city}` : ""}</p>
+                    <p className="text-xs text-muted-foreground">{service.company?.name} {service.city ? `· ${service.city}` : ""}</p>
                   </div>
                 </div>
               ) : (

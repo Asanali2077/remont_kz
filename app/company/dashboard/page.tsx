@@ -12,12 +12,13 @@ import { api } from "@/lib/api";
 import type { RequestRecord } from "@/lib/types";
 import {
   LayoutDashboard, Briefcase, ClipboardList, BarChart3,
-  Menu, X, ArrowRight, User, MessageSquare,
+  Menu, X, ArrowRight, User, MessageSquare, GalleryHorizontal,
 } from "lucide-react";
+import { PortfolioManager } from "@/components/company/PortfolioManager";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-type Tab = "overview" | "services" | "requests" | "statistics" | "profile";
+type Tab = "overview" | "services" | "requests" | "statistics" | "portfolio" | "profile";
 
 export default function CompanyDashboardPage() {
   const { user } = useAuth();
@@ -46,6 +47,7 @@ export default function CompanyDashboardPage() {
     { id: "requests",    label: "Requests",    icon: ClipboardList,   badge: totalBadge > 0 ? totalBadge : undefined },
     { id: "services",    label: "Services",    icon: Briefcase },
     { id: "statistics",  label: "Statistics",  icon: BarChart3 },
+    { id: "portfolio",   label: "Portfolio",   icon: GalleryHorizontal },
     { id: "profile",     label: "Profile",     icon: User },
   ];
 
@@ -160,6 +162,13 @@ export default function CompanyDashboardPage() {
               {activeTab === "services"   && <ServicesManagement />}
               {activeTab === "requests"   && <RequestsManagement />}
               {activeTab === "statistics" && <CompanyStatistics />}
+              {activeTab === "portfolio"  && user && (
+                <div>
+                  <h2 className="text-xl font-bold mb-1">Portfolio</h2>
+                  <p className="text-muted-foreground text-sm mb-6">Showcase your completed work — up to 20 photos.</p>
+                  <PortfolioManager companyId={user.id} />
+                </div>
+              )}
               {activeTab === "profile"    && (
                 <div className="max-w-md">
                   <h2 className="text-xl font-bold mb-1">Company Profile</h2>

@@ -91,17 +91,11 @@ export async function GET(request: NextRequest) {
       prisma.message.count({ where }),
     ]);
 
-    // Mark messages as read
-    await prisma.message.updateMany({
-      where: {
-        ...where,
-        receiverId: user.userId,
-        read: false,
-      },
-      data: {
-        read: true,
-      },
-    });
+    // Mark messages as read — isolated so failure doesn't destroy the fetch response
+    prisma.message.updateMany({
+      where: { ...where, receiverId: user.userId, read: false },
+      data: { read: true },
+    }).catch((err) => console.error("mark-read failed", err));
 
     return NextResponse.json({
       messages,

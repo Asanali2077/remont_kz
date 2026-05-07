@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
-         AlertCircle, Sparkles, Building2, X } from "lucide-react";
+         AlertCircle, Sparkles, Building2, X, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -368,11 +368,11 @@ export default function MyRequestsPage() {
                               <div className="flex items-center gap-2">
                                 <AlertCircle className="h-4 w-4 text-amber-500" />
                                 <p className="text-sm font-semibold">
-                                  {req.offers!.length} offer{req.offers!.length !== 1 ? "s" : ""} received — choose one
+                                  {req.offers?.length ?? 0} offer{(req.offers?.length ?? 0) !== 1 ? "s" : ""} received — choose one
                                 </p>
                               </div>
                               <div className="space-y-2">
-                                {req.offers!.map((offer) => (
+                                {(req.offers ?? []).map((offer) => (
                                   <OfferCard
                                     key={offer.id}
                                     offer={offer}
@@ -403,6 +403,13 @@ export default function MyRequestsPage() {
                                   onClick={() => setCancelId(req.id)}>
                                   Cancel request
                                 </Button>
+                              )}
+                              {req.status === "completed" && (
+                                <Link href={`/payment/${req.id}`}>
+                                  <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1.5 border-green-300 text-green-700 dark:border-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/30">
+                                    <CreditCard className="h-3.5 w-3.5" /> Pay
+                                  </Button>
+                                </Link>
                               )}
                             </div>
                             {req.status === "completed" && req.rating === null && (

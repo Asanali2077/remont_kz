@@ -20,7 +20,14 @@ export async function POST(
     if ("error" in authResult) return authResult.error;
 
     try { await assertEmailVerified(authResult.user.userId); }
-    catch { return NextResponse.json({ error: "Please verify your email before submitting offers." }, { status: 403 }); }
+    catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (message === "Email not verified") {
+        return NextResponse.json({ error: "Please verify your email before submitting offers." }, { status: 403 });
+      }
+      console.error("assertEmailVerified DB error", err);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
 
     // 20 offers per hour per company
     const rl = rateLimit(`offer:${authResult.user.userId}`, 20, 60 * 60_000);
@@ -95,7 +102,7 @@ export async function POST(
         offer.company?.name ?? "Company",
         price,
         "/my-requests"
-      ).catch(() => null);
+      ).catch((err) => console.error("sendNewOfferEmail failed", { requestId: id, err }));
     }
 
     return NextResponse.json(offer, { status: 201 });

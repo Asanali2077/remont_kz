@@ -28,6 +28,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
+    if (user.isBlocked) {
+      return NextResponse.json(
+        { error: "Your account has been suspended. Please contact support." },
+        { status: 403 }
+      );
+    }
+
     const isValidPassword = await verifyPassword(validatedData.password, user.password);
     if (!isValidPassword) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });

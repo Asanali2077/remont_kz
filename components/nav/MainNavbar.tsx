@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import {
   LogOut, Menu, X, Moon, Sun, ChevronDown, ClipboardList,
   Bell, BookOpen, User, Settings, CreditCard, LayoutDashboard,
-  Heart, MessageSquare, Search,
+  Heart, MessageSquare, Search, ShieldCheck,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -224,6 +224,17 @@ export function MainNavbar() {
                         <Icon className="h-4 w-4 text-muted-foreground" /> {label}
                       </Link>
                     ))}
+
+                    {/* Admin Panel link */}
+                    {user.role === "admin" && (
+                      <Link
+                        href="/admin/dashboard"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-red-600 dark:text-red-400 font-medium"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <ShieldCheck className="h-4 w-4" /> Admin Panel
+                      </Link>
+                    )}
 
                     {/* Dashboard link for company */}
                     {user.role === "company" && (

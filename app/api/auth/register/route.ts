@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     });
 
     const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/auth/verify-email?token=${verifyToken}`;
-    void sendVerificationEmail(user.email, verifyUrl).catch(() => null);
-    void sendWelcomeEmail(user.email, user.name ?? "").catch(() => null);
+    void sendVerificationEmail(user.email, verifyUrl).catch((err) => console.error("sendVerificationEmail failed", { to: user.email, err }));
+    void sendWelcomeEmail(user.email, user.name ?? "").catch((err) => console.error("sendWelcomeEmail failed", { to: user.email, err }));
 
     return NextResponse.json({
       user,

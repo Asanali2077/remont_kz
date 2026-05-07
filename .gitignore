@@ -41,4 +41,10 @@ next-env.d.ts
 # git worktrees
 .worktrees/
 
+# Claude Code
+.claude/
+
+# docs/plans
+docs/
+
 /generated/prisma

@@ -86,10 +86,10 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
         )}
 
         {/* Photo count pill */}
-        {service.images.length > 1 && (
+        {(service.images?.length ?? 0) > 1 && (
           <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2 py-0.5 text-white text-[11px] font-medium">
             <Camera className="h-2.5 w-2.5" />
-            {service.images.length}
+            {service.images?.length}
           </div>
         )}
 
@@ -150,7 +150,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
 
         {/* Row 3: Company */}
         <p className="text-xs text-muted-foreground mb-2 truncate">
-          {service.company.name}
+          {service.company?.name}
         </p>
 
         {/* Row 4: Description */}

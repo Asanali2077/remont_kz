@@ -58,24 +58,23 @@ export async function POST(
       },
     });
 
-    // Recalculate company-wide rating and apply to all company services
+    // Recalculate company-wide rating — isolated so failure doesn't affect the response
     if (existingRequest.companyId) {
-      const ratedRequests = await prisma.request.findMany({
-        where: {
-          companyId: existingRequest.companyId,
-          rating: { not: null },
-        },
-        select: { rating: true },
-      });
-
-      const avg =
-        ratedRequests.reduce((sum, r) => sum + (r.rating ?? 0), 0) /
-        ratedRequests.length;
-
-      await prisma.service.updateMany({
-        where: { companyId: existingRequest.companyId },
-        data: { rating: avg },
-      });
+      try {
+        const ratedRequests = await prisma.request.findMany({
+          where: { companyId: existingRequest.companyId, rating: { not: null } },
+          select: { rating: true },
+        });
+        const avg =
+          ratedRequests.reduce((sum, r) => sum + (r.rating ?? 0), 0) /
+          ratedRequests.length;
+        await prisma.service.updateMany({
+          where: { companyId: existingRequest.companyId },
+          data: { rating: avg },
+        });
+      } catch (recalcError) {
+        console.error("Rating recalculation failed (rating was saved)", recalcError);
+      }
     }
 
     return NextResponse.json(updated);

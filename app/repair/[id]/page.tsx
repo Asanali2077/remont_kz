@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft, MapPin, Star, CheckCircle2, Loader2,
-  Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera,
+  Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, ImageIcon,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -126,6 +126,8 @@ export default function ServiceDetailPage() {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [reviews, setReviews] = useState<ReviewRecord[]>([]);
   const [similar, setSimilar] = useState<ServiceRecord[]>([]);
+  const [portfolio, setPortfolio] = useState<{ id: string; url: string; caption: string | null }[]>([]);
+  const [portfolioLightbox, setPortfolioLightbox] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -139,6 +141,11 @@ export default function ServiceDetailPage() {
         setService(svc);
         setReviews(revs);
         setSimilar(sim);
+        // Load portfolio after service is loaded
+        fetch(`/api/portfolio?companyId=${svc.companyId}`)
+          .then((r) => r.json())
+          .then(setPortfolio)
+          .catch(() => null);
       } catch {
         toast.error("Service not found");
         router.push("/repair");
@@ -176,7 +183,7 @@ export default function ServiceDetailPage() {
   );
   if (!service) return null;
 
-  const images = service.images.length > 0
+  const images = (service.images?.length ?? 0) > 0
     ? service.images
     : [{ url: "https://placehold.co/800x600/e2e8f0/94a3b8?text=No+photo", id: "ph", serviceId: service.id, order: 0, createdAt: "" }];
 
@@ -411,6 +418,43 @@ export default function ServiceDetailPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* ══ PORTFOLIO ══ */}
+        {portfolio.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-950/40">
+                <ImageIcon className="h-4 w-4 text-purple-600" />
+              </div>
+              <h2 className="font-bold text-lg">Portfolio</h2>
+              <span className="text-sm text-muted-foreground">({portfolio.length} photos)</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {portfolio.map((photo, i) => (
+                <button
+                  key={photo.id}
+                  onClick={() => setPortfolioLightbox(i)}
+                  className="group relative aspect-square rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.url} alt={photo.caption ?? "Portfolio"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {photo.caption && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-xs text-white truncate">{photo.caption}</p>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {portfolioLightbox !== null && (
+          <Lightbox
+            images={portfolio}
+            startIndex={portfolioLightbox}
+            onClose={() => setPortfolioLightbox(null)}
+          />
         )}
       </div>
 
