@@ -3,7 +3,8 @@
 
 import { useState } from "react";
 import { MapPin, Heart, GitCompare, Star, CheckCircle2, ArrowRight, Camera } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
@@ -21,6 +22,8 @@ interface OrgCardProps {
 }
 
 export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardProps) {
+  const t = useTranslations("service");
+  const tc = useTranslations("common");
   const { user } = useAuth();
   const { toggle, isSelected } = useCompare();
   const [imgError, setImgError] = useState(false);
@@ -104,7 +107,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
                   ? "bg-rose-500 text-white shadow-sm"
                   : "bg-black/30 text-white hover:bg-black/50"
               }`}
-              title={isFav ? "Remove from saved" : "Save"}
+              title={isFav ? t("removeFavorite") : t("addFavorite")}
             >
               <Heart className={`h-3.5 w-3.5 ${isFav ? "fill-white" : ""}`} />
             </button>
@@ -176,11 +179,11 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
                 ))}
                 <span className="ml-0.5 text-xs font-semibold text-foreground">{ratingNum.toFixed(1)}</span>
                 {requestCount > 0 && (
-                  <span className="text-xs text-muted-foreground">({requestCount})</span>
+                  <span className="text-xs text-muted-foreground">({tc("reviews", { count: requestCount })})</span>
                 )}
               </div>
             ) : (
-              <span className="text-[11px] text-muted-foreground">No ratings yet</span>
+              <span className="text-[11px] text-muted-foreground">{t("noReviews")}</span>
             )}
             <p className="text-base font-bold text-foreground leading-tight">
               {fmtNum(service.priceFrom)}
@@ -196,7 +199,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
             {/* Compare */}
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(service); }}
-              title={inCompare ? "Remove from compare" : "Compare"}
+              title={inCompare ? t("compare") : t("compare")}
               className={`h-8 w-8 flex items-center justify-center rounded-xl border transition-all duration-150 ${
                 inCompare
                   ? "border-primary bg-primary/10 text-primary"
@@ -217,7 +220,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
             {!user ? (
               <AuthModal trigger={
                 <Button size="sm" className="h-8 gap-1.5 text-xs font-medium">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Request
+                  <CheckCircle2 className="h-3.5 w-3.5" /> {t("createRequest")}
                 </Button>
               } />
             ) : isClient ? (

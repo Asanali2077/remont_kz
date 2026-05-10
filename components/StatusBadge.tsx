@@ -1,5 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { RequestStatus } from "@/lib/types";
-import { REQUEST_STATUS_LABELS } from "@/lib/types";
 
 type StatusValue = RequestStatus | "expired";
 
@@ -11,15 +13,11 @@ const CONFIG: Record<StatusValue, string> = {
   expired:     "bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border-red-200 dark:border-red-800",
 };
 
-const LABEL: Record<StatusValue, string> = {
-  ...REQUEST_STATUS_LABELS,
-  expired: "Expired",
-};
-
 export function StatusBadge({ status }: { status: StatusValue }) {
+  const t = useTranslations("requests");
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${CONFIG[status]}`}>
-      {LABEL[status]}
+      {t(`status.${status}`)}
     </span>
   );
 }
