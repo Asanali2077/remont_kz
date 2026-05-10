@@ -185,7 +185,7 @@ function ActiveChips(props: ActiveChipsProps) {
 }
 
 /* ─── Quick filter tabs (labels set in component) ─── */
-const QUICK_FILTER_DEFS = [
+const QUICK_FILTER_DEFS: { labelKey: string; icon: React.ElementType | null; value: string | null; type: string }[] = [
   { labelKey: "all",         icon: null,   value: null,            type: "category" },
   { labelKey: "AUTOMOBILES", icon: Car,    value: "AUTOMOBILES",   type: "category" },
   { labelKey: "REAL_ESTATE", icon: Home,   value: "REAL_ESTATE",   type: "category" },
