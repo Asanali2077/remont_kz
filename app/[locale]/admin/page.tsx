@@ -1,5 +1,5 @@
 import { redirect } from "@/i18n/routing";
 
 export default function AdminPage() {
-  redirect("/admin/dashboard");
+  redirect({ href: "/admin/dashboard", locale: "ru" });
 }
