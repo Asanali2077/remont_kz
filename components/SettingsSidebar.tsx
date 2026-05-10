@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { User, Lock, CreditCard } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 

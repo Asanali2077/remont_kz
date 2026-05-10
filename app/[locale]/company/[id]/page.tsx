@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
 import {
   Star, MapPin, Phone, Mail, Building2, ArrowLeft,
   CheckCircle2, Calendar, Loader2,
