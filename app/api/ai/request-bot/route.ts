@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClient } from "@/lib/middleware";
 
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+const MODEL = process.env.OPENROUTER_BOT_MODEL ?? "meta-llama/llama-3.3-70b-instruct:free";
 
 const SYSTEM_PROMPT = `You are a friendly assistant on Remont.kz, a repair services marketplace in Kazakhstan.
 Your goal is to help the client create a service request by collecting the following information through natural conversation:
@@ -18,8 +18,8 @@ Rules:
 {"done":true,"data":{"description":"...","category":"automobiles|real-estate|plumbing|electrical|painting|cleaning|renovation|welding|roofing|other","city":"...","budgetFrom":0,"budgetTo":0}}`;
 
 export async function POST(req: NextRequest) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
+  if (!process.env.OPENROUTER_API_KEY) {
+    return NextResponse.json({ error: "OPENROUTER_API_KEY not configured" }, { status: 500 });
   }
   try {
     const authResult = await requireClient()(req);
@@ -27,40 +27,34 @@ export async function POST(req: NextRequest) {
 
     const { messages, collectedData } = await req.json();
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const systemWithData = `${SYSTEM_PROMPT}\n\nCurrently collected: ${JSON.stringify(collectedData)}`;
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "anthropic-beta": "prompt-caching-2024-07-31",
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+        "X-Title": "Remont.kz",
       },
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 600,
-        system: [
-          {
-            type: "text",
-            text: SYSTEM_PROMPT,
-            cache_control: { type: "ephemeral" },
-          },
-          {
-            type: "text",
-            text: `Currently collected: ${JSON.stringify(collectedData)}`,
-          },
+        messages: [
+          { role: "system", content: systemWithData },
+          ...messages,
         ],
-        messages,
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Anthropic API error:", err);
+      console.error("OpenRouter API error:", err);
       return NextResponse.json({ error: "AI service unavailable" }, { status: 502 });
     }
 
     const aiData = await response.json();
-    const text: string = aiData.content?.[0]?.text?.trim() ?? "";
+    const text: string = aiData.choices?.[0]?.message?.content?.trim() ?? "";
 
     const jsonMatch =
       text.match(/```json\s*([\s\S]+?)\s*```/) ??
@@ -86,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: text, done: false });
   } catch (err) {
-    console.error(err);
+    console.error("Request bot error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

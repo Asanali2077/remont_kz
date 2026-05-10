@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/middleware";
 
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+const MODEL = process.env.OPENROUTER_SUMMARY_MODEL ?? "google/gemma-4-31b-it:free";
+
+const SYSTEM_PROMPT = `Ты — помощник маркетплейса ремонтных услуг Remont.kz.
+Составь краткое (2-3 предложения) профессиональное резюме о компании на основе данных, которые тебе предоставят.
+Пиши от третьего лица, нейтральный деловой тон, на русском языке.`;
 
 export async function POST(req: NextRequest) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 500 });
+  if (!process.env.OPENROUTER_API_KEY) {
+    return NextResponse.json({ error: "OPENROUTER_API_KEY not configured" }, { status: 500 });
   }
   try {
     const authResult = await requireAuth()(req);
@@ -34,29 +38,19 @@ export async function POST(req: NextRequest) {
       .slice(0, 5)
       .join("; ") || "нет отзывов";
 
-    const systemText = `Ты — помощник маркетплейса ремонтных услуг Remont.kz.
-Составь краткое (2-3 предложения) профессиональное резюме о компании на основе данных, которые тебе предоставят.
-Пиши от третьего лица, нейтральный деловой тон, на русском языке.`;
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "anthropic-beta": "prompt-caching-2024-07-31",
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+        "X-Title": "Remont.kz",
       },
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 300,
-        system: [
-          {
-            type: "text",
-            text: systemText,
-            cache_control: { type: "ephemeral" },
-          },
-        ],
         messages: [
+          { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
             content: `Название услуги: ${service.name}
@@ -72,8 +66,14 @@ export async function POST(req: NextRequest) {
       }),
     });
 
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("OpenRouter summary error:", err);
+      return NextResponse.json({ error: "AI service unavailable" }, { status: 502 });
+    }
+
     const data = await response.json();
-    const aiSummary = data.content?.[0]?.text?.trim() ?? "";
+    const aiSummary = data.choices?.[0]?.message?.content?.trim() ?? "";
 
     await prisma.service.update({
       where: { id: serviceId },
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ aiSummary });
   } catch (err) {
-    console.error(err);
+    console.error("AI summary error:", err);
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }
