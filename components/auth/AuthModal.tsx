@@ -1,7 +1,8 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Eye, EyeOff, Loader2, Wrench, CheckCircle2, Mail } from "lucide-react";
 
 export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactNode; defaultMode?: "login" | "register" }) {
+  const t = useTranslations("auth");
   const { login, register } = useAuth();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "register">(defaultMode);
@@ -74,13 +76,13 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
               <CheckCircle2 className="h-7 w-7 text-green-600" />
             </div>
             <div>
-              <p className="font-bold text-lg">Account created!</p>
+              <p className="font-bold text-lg">{t("accountCreated")}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                We sent a verification link to
+                {t("verificationSent")}
               </p>
               <p className="font-semibold text-sm mt-0.5">{registeredEmail}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Click the link in the email to activate your account.
+                {t("checkEmail")}
               </p>
             </div>
 
@@ -90,7 +92,7 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <Mail className="h-3.5 w-3.5 text-amber-600" />
                   <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
-                    Dev — click to verify now:
+                    {t("devVerifyLink")}
                   </span>
                 </div>
                 <Link href={devVerifyUrl} onClick={() => handleOpenChange(false)}
@@ -101,7 +103,7 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
             )}
 
             <Button className="w-full rounded-xl" onClick={() => handleOpenChange(false)}>
-              Continue to site
+              {t("closeWindow")}
             </Button>
           </div>
         )}
@@ -116,11 +118,11 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
             <span className="font-bold text-base">Remont.kz</span>
           </div>
           <h2 className="text-xl font-bold mt-3">
-            {mode === "login" ? "Welcome back" : "Create an account"}
+            {mode === "login" ? t("welcomeBack") : t("createAccount")}
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
             {mode === "login"
-              ? "Sign in to your account"
+              ? t("signIn")
               : "Join thousands of users on Remont.kz"}
           </p>
         </div>
@@ -130,20 +132,20 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
           {mode === "register" && (
             <>
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Account type</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("accountType")}</Label>
                 <Select value={role} onValueChange={(v: "client" | "company") => setRole(v)}>
                   <SelectTrigger className="rounded-xl h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="client">Client — I need services</SelectItem>
-                    <SelectItem value="company">Company — I provide services</SelectItem>
+                    <SelectItem value="client">{t("clientRole")}</SelectItem>
+                    <SelectItem value="company">{t("companyRole")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  {role === "company" ? "Company name" : "Your name"}
+                  {t("name")}
                 </Label>
                 <Input
                   value={name} onChange={(e) => setName(e.target.value)}
@@ -155,7 +157,7 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
           )}
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</Label>
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("email")}</Label>
             <Input
               type="email" value={email} onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com" className="rounded-xl h-10"
@@ -165,11 +167,11 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Password</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("password")}</Label>
               {mode === "login" && (
                 <Link href="/forgot-password" onClick={() => setOpen(false)}
                   className="text-xs text-primary hover:underline underline-offset-2">
-                  Forgot password?
+                  {t("forgotPassword")}
                 </Link>
               )}
             </div>
@@ -192,18 +194,18 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
           {mode === "register" && (
             <>
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Confirm password</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("confirmPassword")}</Label>
                 <Input
                   type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
                   placeholder="Repeat password" className="rounded-xl h-10"
                 />
                 {confirm && password !== confirm && (
-                  <p className="text-xs text-destructive">Passwords do not match</p>
+                  <p className="text-xs text-destructive">{t("passwordMismatch")}</p>
                 )}
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Phone <span className="font-normal text-muted-foreground/60">(optional)</span>
+                  {t("phone")}
                 </Label>
                 <Input
                   value={phone} onChange={(e) => setPhone(e.target.value)}
@@ -221,17 +223,17 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
 
           <Button onClick={() => void submit()} disabled={!isValid || loading} className="w-full h-10 rounded-xl font-semibold mt-1">
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            {mode === "login" ? "Sign in" : "Create account"}
+            {mode === "login" ? t("loginButton") : t("registerButton")}
           </Button>
         </div>
 
         {/* Footer */}
         <div className="px-7 pb-6 text-center">
           <p className="text-sm text-muted-foreground">
-            {mode === "login" ? "Don't have an account? " : "Already have an account? "}
+            {mode === "login" ? t("noAccount") + " " : t("hasAccount") + " "}
             <button onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
               className="font-semibold text-primary hover:underline underline-offset-2">
-              {mode === "login" ? "Sign up" : "Sign in"}
+              {mode === "login" ? t("signUp") : t("loginButton")}
             </button>
           </p>
         </div>

@@ -1,32 +1,33 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/routing";
 import { Home, Search, ClipboardList, MessageSquare, User } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
 
-const CLIENT_ITEMS = [
-  { href: "/",            icon: Home,           label: "Home" },
-  { href: "/repair",      icon: Search,         label: "Search" },
-  { href: "/my-requests", icon: ClipboardList,  label: "Requests" },
-  { href: "/chat",        icon: MessageSquare,  label: "Chat" },
-  { href: "/profile",     icon: User,           label: "Profile" },
-];
-
-const COMPANY_ITEMS = [
-  { href: "/",                    icon: Home,          label: "Home" },
-  { href: "/repair",              icon: Search,        label: "Catalog" },
-  { href: "/company/dashboard",   icon: ClipboardList, label: "Dashboard" },
-  { href: "/chat",                icon: MessageSquare, label: "Chat" },
-  { href: "/profile",             icon: User,          label: "Profile" },
-];
-
 export function MobileNav() {
   const { user } = useAuth();
   const pathname = usePathname();
+  const t = useTranslations("nav");
 
   if (!user) return null;
+
+  const CLIENT_ITEMS = [
+    { href: "/",            icon: Home,           label: t("catalog") },
+    { href: "/repair",      icon: Search,         label: t("catalog") },
+    { href: "/my-requests", icon: ClipboardList,  label: t("myRequests") },
+    { href: "/chat",        icon: MessageSquare,  label: t("chat") },
+    { href: "/profile",     icon: User,           label: t("profile") },
+  ];
+
+  const COMPANY_ITEMS = [
+    { href: "/",                    icon: Home,          label: t("catalog") },
+    { href: "/repair",              icon: Search,        label: t("catalog") },
+    { href: "/company/dashboard",   icon: ClipboardList, label: t("dashboard") },
+    { href: "/chat",                icon: MessageSquare, label: t("chat") },
+    { href: "/profile",             icon: User,          label: t("profile") },
+  ];
 
   const items = user.role === "company" ? COMPANY_ITEMS : CLIENT_ITEMS;
 
@@ -42,7 +43,7 @@ export function MobileNav() {
                   <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 -mt-4">
                     <span className="text-white text-2xl font-black leading-none">+</span>
                   </div>
-                  <span className="text-[10px] font-semibold text-primary">New</span>
+                  <span className="text-[10px] font-semibold text-primary">{label}</span>
                 </button>
               } />
             );

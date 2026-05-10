@@ -1,6 +1,9 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 export function Footer() {
+  const t = useTranslations("footer");
+
   return (
     <footer className="border-t bg-background">
       <div className="mx-auto max-w-6xl px-4 py-12">
@@ -37,7 +40,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Platform */}
           <div>
             <h4 className="text-sm font-semibold mb-4">Platform</h4>
             <ul className="space-y-2.5 text-sm text-muted-foreground">
@@ -48,12 +51,12 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/#about" className="hover:text-foreground transition-colors">
-                  About
+                  {t("about")}
                 </Link>
               </li>
               <li>
                 <Link href="/repair" className="hover:text-foreground transition-colors">
-                  Browse Catalog
+                  {t("catalog")}
                 </Link>
               </li>
             </ul>
@@ -61,7 +64,7 @@ export function Footer() {
         </div>
 
         <div className="border-t pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">© 2024 Remont.kz. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2024 Remont.kz. {t("rights")}.</p>
           <p className="text-xs text-muted-foreground">Demo version for development and testing</p>
         </div>
       </div>
