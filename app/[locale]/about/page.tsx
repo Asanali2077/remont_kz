@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import { Code2, Database, Zap, Globe, CheckCircle2 } from "lucide-react";
@@ -23,7 +24,8 @@ const STATS = [
   { label: "Email types",   value: "6" },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const t = await getTranslations("about");
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="mx-auto max-w-4xl px-4 py-12">
@@ -33,7 +35,7 @@ export default function AboutPage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-semibold text-primary mb-5">
             Diploma Project · 2026
           </div>
-          <h1 className="text-4xl font-black tracking-tight mb-3">About Remont.kz</h1>
+          <h1 className="text-4xl font-black tracking-tight mb-3">{t("title")}</h1>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg leading-relaxed">
             A full-stack marketplace connecting clients with verified repair and renovation contractors across Kazakhstan.
           </p>

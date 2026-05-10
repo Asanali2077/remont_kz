@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { useTranslations } from "next-intl";
 import { CATEGORY_COLORS, fmtNum } from "@/lib/utils";
 
 import { useCompare } from "@/components/CompareContext";
 import { SERVICE_CATEGORY_LABELS } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { MapPin, Star, Clock, CheckCircle2, X, ArrowLeft, GitCompare } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 import { useEffect } from "react";
 import { Footer } from "@/components/Footer";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
@@ -15,6 +15,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
 
 export default function ComparePage() {
+  const t = useTranslations("compare");
+  const tCommon = useTranslations("common");
   const { selected, remove, clear } = useCompare();
   const router = useRouter();
   const { user } = useAuth();
@@ -36,17 +38,17 @@ export default function ComparePage() {
               <GitCompare className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Compare Services</h1>
+              <h1 className="text-xl font-bold">{t("title")}</h1>
               <p className="text-xs text-muted-foreground">{selected.length} selected</p>
             </div>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={clear}>
-              <X className="h-3.5 w-3.5" /> Clear all
+              <X className="h-3.5 w-3.5" /> {t("clear")}
             </Button>
             <Link href="/repair">
               <Button variant="ghost" size="sm" className="rounded-xl gap-1.5">
-                <ArrowLeft className="h-3.5 w-3.5" /> Back
+                <ArrowLeft className="h-3.5 w-3.5" /> {tCommon("back")}
               </Button>
             </Link>
           </div>
@@ -60,7 +62,7 @@ export default function ComparePage() {
             {selected.map((s) => (
               <div key={s.id} className="px-4 py-4 border-r border-border/40 last:border-0">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <Link href={`/repair/${s.id}`} className="font-semibold text-sm leading-snug hover:text-primary transition-colors line-clamp-2">
+                  <Link href={`/repair/${s.id}` as `/repair/${string}`} className="font-semibold text-sm leading-snug hover:text-primary transition-colors line-clamp-2">
                     {s.name}
                   </Link>
                   <button onClick={() => remove(s.id)} className="shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors">
@@ -89,7 +91,7 @@ export default function ComparePage() {
           {/* Data rows */}
           {[
             {
-              label: "Category",
+              label: t("category"),
               render: (s: typeof selected[0]) => (
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${CATEGORY_COLORS[s.category] ?? CATEGORY_COLORS.other}`}>
                   {SERVICE_CATEGORY_LABELS[s.category]}
@@ -97,13 +99,13 @@ export default function ComparePage() {
               ),
             },
             {
-              label: "City",
+              label: t("city"),
               render: (s: typeof selected[0]) => s.city ? (
                 <span className="flex items-center gap-1 text-sm"><MapPin className="h-3.5 w-3.5 text-muted-foreground" />{s.city}</span>
               ) : <span className="text-muted-foreground text-sm">—</span>,
             },
             {
-              label: "Price",
+              label: t("price"),
               render: (s: typeof selected[0]) => (
                 <span className="text-base font-bold">
                   {fmtNum(s.priceFrom)}
@@ -113,7 +115,7 @@ export default function ComparePage() {
               ),
             },
             {
-              label: "Rating",
+              label: t("rating"),
               render: (s: typeof selected[0]) => typeof s.rating === "number" ? (
                 <div className="flex items-center gap-1">
                   {[1,2,3,4,5].map((n) => (
@@ -124,7 +126,7 @@ export default function ComparePage() {
               ) : <span className="text-xs text-muted-foreground">No ratings</span>,
             },
             {
-              label: "Availability",
+              label: t("licensed"),
               render: (s: typeof selected[0]) => (s.startDate || s.endDate) ? (
                 <span className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Clock className="h-3.5 w-3.5" />
@@ -135,7 +137,7 @@ export default function ComparePage() {
               ) : <span className="text-sm text-emerald-600 font-medium">Available now</span>,
             },
             {
-              label: "Action",
+              label: t("createRequest"),
               render: (s: typeof selected[0]) => {
                 if (!user) return <AuthModal trigger={<Button size="sm" className="w-full rounded-xl">Log in</Button>} />;
                 if (user.role !== "client") return null;

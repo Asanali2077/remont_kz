@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, Suspense } from "react";
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Lock, Eye, EyeOff, CheckCircle2, ArrowLeft, Wrench } from "lucide-react";
 
 function ResetContent() {
+  const t = useTranslations("resetPassword");
+  const tCommon = useTranslations("common");
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token") ?? "";
@@ -42,11 +45,11 @@ function ResetContent() {
           <Lock className="h-6 w-6 text-destructive" />
         </div>
         <div>
-          <p className="font-semibold">Invalid reset link</p>
-          <p className="text-sm text-muted-foreground mt-1">This link is invalid or has expired.</p>
+          <p className="font-semibold">{t("invalidToken")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("invalidToken")}</p>
         </div>
         <Link href="/forgot-password">
-          <Button variant="outline" className="rounded-xl">Request new link</Button>
+          <Button variant="outline" className="rounded-xl">{tCommon("tryAgain")}</Button>
         </Link>
       </div>
     );
@@ -59,11 +62,11 @@ function ResetContent() {
           <CheckCircle2 className="h-7 w-7 text-green-600" />
         </div>
         <div>
-          <p className="font-semibold">Password updated!</p>
-          <p className="text-sm text-muted-foreground mt-1">You can now log in with your new password.</p>
+          <p className="font-semibold">{t("success")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("successDesc")}</p>
         </div>
         <Button className="w-full rounded-xl" onClick={() => router.push("/")}>
-          Go to login
+          {tCommon("yes")}
         </Button>
       </div>
     );
@@ -72,7 +75,7 @@ function ResetContent() {
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
       <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">New password</label>
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("newPassword")}</label>
         <div className="relative">
           <Input type={showPw ? "text" : "password"} value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters"
@@ -85,7 +88,7 @@ function ResetContent() {
         </div>
       </div>
       <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Confirm password</label>
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("confirmPassword")}</label>
         <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Repeat password" required className="rounded-xl h-10" />
         {confirmPassword && newPassword !== confirmPassword && (
@@ -94,13 +97,15 @@ function ResetContent() {
       </div>
       <Button type="submit" className="w-full rounded-xl h-10 font-semibold" disabled={loading || !newPassword || !confirmPassword}>
         {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-        Set new password
+        {t("reset")}
       </Button>
     </form>
   );
 }
 
 export default function ResetPasswordPage() {
+  const t = useTranslations("resetPassword");
+  const tCommon = useTranslations("common");
   return (
     <div className="min-h-screen bg-muted/30 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -116,7 +121,7 @@ export default function ResetPasswordPage() {
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 mb-4">
               <Lock className="h-5 w-5 text-primary" />
             </div>
-            <h1 className="text-xl font-bold">Set new password</h1>
+            <h1 className="text-xl font-bold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground mt-1">Choose a strong password for your account</p>
           </div>
 
@@ -128,7 +133,7 @@ export default function ResetPasswordPage() {
 
           <div className="px-7 pb-6 text-center">
             <Link href="/forgot-password" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-3.5 w-3.5" /> Back
+              <ArrowLeft className="h-3.5 w-3.5" /> {tCommon("back")}
             </Link>
           </div>
         </div>

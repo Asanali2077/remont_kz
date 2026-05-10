@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import { Footer } from "@/components/Footer";
 import { SettingsSidebar } from "@/components/SettingsSidebar";
 
 export default function SettingsPage() {
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState("");
@@ -50,10 +53,10 @@ export default function SettingsPage() {
           <div className="flex-1 min-w-0 space-y-4">
             {/* Password card */}
             <div className="bg-card border border-border/50 rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-5">Change password</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-5">{t("changePassword")}</h2>
               <div className="space-y-4 max-w-md">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Current password</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("security")}</label>
                   <div className="relative">
                     <Input type={showCurrent ? "text" : "password"} value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" className="rounded-xl h-10 pr-10" />
@@ -65,7 +68,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">New password</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("changePassword")}</label>
                   <div className="relative">
                     <Input type={showNew ? "text" : "password"} value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" className="rounded-xl h-10 pr-10" />
@@ -77,7 +80,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Confirm new password</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("changePassword")}</label>
                   <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repeat password" className="rounded-xl h-10" />
                   {confirmPassword && newPassword !== confirmPassword && (
@@ -86,14 +89,14 @@ export default function SettingsPage() {
                 </div>
                 <Button onClick={() => void handleChangePassword()} disabled={!isValid || saving} className="rounded-xl">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Update password
+                  {tCommon("save")}
                 </Button>
               </div>
             </div>
 
             {/* Security tips */}
             <div className="bg-card border border-border/50 rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">Security tips</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">{t("security")}</h2>
               <ul className="space-y-2.5">
                 {[
                   "Use at least 8 characters",

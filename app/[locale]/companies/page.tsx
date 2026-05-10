@@ -1,7 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Building2, Search, MapPin, CheckCircle2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Footer } from "@/components/Footer";
@@ -17,6 +18,7 @@ interface CompanyItem {
 }
 
 export default function CompaniesPage() {
+  const t = useTranslations("companies");
   const [companies, setCompanies] = useState<CompanyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -35,8 +37,8 @@ export default function CompaniesPage() {
       <div className="mx-auto max-w-5xl px-4 py-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight">Companies</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">All registered service providers on Remont.kz</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("subtitle")}</p>
         </div>
 
         {/* Search */}
@@ -53,14 +55,14 @@ export default function CompaniesPage() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 bg-card border border-border/50 rounded-2xl">
             <Building2 className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="font-medium">No companies found</p>
+            <p className="font-medium">{t("noCompanies")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map(c => {
               const name = c.name ?? c.email;
               return (
-                <Link key={c.id} href={`/company/${c.id}`}>
+                <Link key={c.id} href={`/company/${c.id}` as `/company/${string}`}>
                   <div className="bg-card border border-border/50 rounded-2xl p-5 hover:shadow-md hover:border-border hover:-translate-y-0.5 transition-all duration-200 cursor-pointer h-full flex flex-col gap-3">
                     {/* Avatar + name */}
                     <div className="flex items-center gap-3">
@@ -86,7 +88,7 @@ export default function CompaniesPage() {
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-auto pt-2 border-t border-border/40">
                       <span className="flex items-center gap-1">
                         <Building2 className="h-3.5 w-3.5" />
-                        {c._count.services} services
+                        {c._count.services} {t("services")}
                       </span>
                       <span className="flex items-center gap-1">
                         <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown, BookOpen, Star, Briefcase, Shield, User,
@@ -214,6 +215,7 @@ function ArticleItem({ article, sectionId, query }: { article: Article; sectionI
    MAIN PAGE
 ═══════════════════════════════ */
 export default function GuidePage() {
+  const t = useTranslations("guide");
   const [query, setQuery] = useState("");
   const [activeSection, setActiveSection] = useState("start");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -266,7 +268,7 @@ export default function GuidePage() {
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 mb-5">
             <BookOpen className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3">Help Center</h1>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3">{t("title")}</h1>
           <p className="text-muted-foreground mb-8 text-lg max-w-md mx-auto">
             Quick answers to everything about Remont.kz
           </p>

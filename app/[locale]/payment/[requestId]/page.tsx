@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -9,16 +11,18 @@ import { CreditCard, Smartphone, ArrowLeftRight, CheckCircle2, Loader2 } from "l
 
 type Method = "card" | "kaspi" | "transfer";
 
-const METHODS: { id: Method; label: string; icon: React.ReactNode }[] = [
-  { id: "card", label: "Bank card", icon: <CreditCard className="h-5 w-5" /> },
-  { id: "kaspi", label: "Kaspi Pay", icon: <Smartphone className="h-5 w-5" /> },
-  { id: "transfer", label: "Bank transfer", icon: <ArrowLeftRight className="h-5 w-5" /> },
-];
-
 export default function PaymentPage() {
+  const t = useTranslations("payment");
+  const tCommon = useTranslations("common");
   const { requestId } = useParams<{ requestId: string }>();
   const { user } = useAuth();
   const router = useRouter();
+
+  const METHODS: { id: Method; label: string; icon: React.ReactNode }[] = [
+    { id: "card", label: t("card"), icon: <CreditCard className="h-5 w-5" /> },
+    { id: "kaspi", label: "Kaspi Pay", icon: <Smartphone className="h-5 w-5" /> },
+    { id: "transfer", label: t("method"), icon: <ArrowLeftRight className="h-5 w-5" /> },
+  ];
 
   const [payment, setPayment] = useState<{ id: string; amount: number; status: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,8 +94,8 @@ export default function PaymentPage() {
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/40 mx-auto">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
-          <p className="font-bold text-xl">Payment confirmed!</p>
-          <p className="text-sm text-muted-foreground">Redirecting to your requests…</p>
+          <p className="font-bold text-xl">{t("success")}</p>
+          <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
         </div>
       </div>
     );
@@ -101,13 +105,13 @@ export default function PaymentPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Pay for service</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">Mock payment — no real money charged</p>
         </div>
 
         {payment && (
           <div className="rounded-xl border bg-muted/40 px-5 py-4">
-            <p className="text-sm text-muted-foreground">Amount</p>
+            <p className="text-sm text-muted-foreground">{t("amount")}</p>
             <p className="text-3xl font-bold mt-0.5">
               {payment.amount.toLocaleString("ru-KZ")} ₸
             </p>
@@ -115,7 +119,7 @@ export default function PaymentPage() {
         )}
 
         <div className="space-y-2">
-          <p className="text-sm font-semibold">Payment method</p>
+          <p className="text-sm font-semibold">{t("method")}</p>
           {METHODS.map((m) => (
             <button
               key={m.id}
@@ -134,11 +138,11 @@ export default function PaymentPage() {
 
         <Button onClick={initAndPay} disabled={paying} className="w-full h-11 rounded-xl font-semibold">
           {paying ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          {paying ? "Processing…" : "Pay now"}
+          {paying ? t("processing") : t("pay")}
         </Button>
 
         <Button variant="ghost" className="w-full" onClick={() => router.back()}>
-          Cancel
+          {tCommon("cancel")}
         </Button>
       </div>
     </div>

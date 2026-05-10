@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { CheckCircle2, XCircle, Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function Content() {
+  const t = useTranslations("verifyEmail");
   const params = useSearchParams();
   const success = params.get("success") === "1";
   const error = params.get("error");
@@ -17,10 +19,10 @@ function Content() {
         <CheckCircle2 className="h-8 w-8 text-green-600" />
       </div>
       <div>
-        <h2 className="text-xl font-bold">Email verified!</h2>
-        <p className="text-sm text-muted-foreground mt-1">Your account is now fully activated.</p>
+        <h2 className="text-xl font-bold">{t("success")}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t("successDesc")}</p>
       </div>
-      <Link href="/"><Button className="rounded-xl">Go to Home</Button></Link>
+      <Link href="/"><Button className="rounded-xl">{t("goHome")}</Button></Link>
     </div>
   );
 
@@ -30,10 +32,10 @@ function Content() {
         <XCircle className="h-8 w-8 text-destructive" />
       </div>
       <div>
-        <h2 className="text-xl font-bold">Invalid link</h2>
-        <p className="text-sm text-muted-foreground mt-1">This verification link is invalid or has expired.</p>
+        <h2 className="text-xl font-bold">{t("error")}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t("errorDesc")}</p>
       </div>
-      <Link href="/"><Button variant="outline" className="rounded-xl">Back to Home</Button></Link>
+      <Link href="/"><Button variant="outline" className="rounded-xl">{t("goHome")}</Button></Link>
     </div>
   );
 
@@ -43,9 +45,9 @@ function Content() {
         <Mail className="h-8 w-8 text-primary" />
       </div>
       <div>
-        <h2 className="text-xl font-bold">Check your email</h2>
+        <h2 className="text-xl font-bold">{t("verifying")}</h2>
         <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-          We sent a verification link to your email address. Click it to activate your account.
+          {t("successDesc")}
         </p>
       </div>
       <p className="text-xs text-muted-foreground">Link expires in 24 hours</p>

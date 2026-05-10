@@ -1,11 +1,10 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { fmtNum } from "@/lib/utils";
-
-
 
 import { useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { CheckCircle2, Loader2, Smartphone, CreditCard, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
@@ -42,6 +41,7 @@ const PLANS = [
 ];
 
 export default function BillingPage() {
+  const t = useTranslations("billing");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   useEffect(() => { if (!authLoading && !user) router.push("/"); }, [user, authLoading, router]);
@@ -57,7 +57,7 @@ export default function BillingPage() {
 
           <div className="flex-1 min-w-0 space-y-4">
             <div className="bg-card border border-border/50 rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">Subscription plans</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-1">{t("title")}</h2>
               <p className="text-xs text-muted-foreground mb-6">Choose the plan that fits your needs</p>
 
               <div className="grid grid-cols-1 gap-3">

@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ import { Footer } from "@/components/Footer";
 import { SettingsSidebar } from "@/components/SettingsSidebar";
 
 export default function ProfilePage() {
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
   const { user, loading: authLoading, updateUser } = useAuth();
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -79,7 +82,7 @@ export default function ProfilePage() {
           <div className="flex-1 min-w-0 space-y-4">
             {/* Avatar card */}
             <div className="bg-card border border-border/50 rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-5">Profile photo</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-5">{t("avatar")}</h2>
               <div className="flex items-center gap-5">
                 <div className="relative shrink-0">
                   {displayAvatar ? (
@@ -97,7 +100,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <Button variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                    <Camera className="h-3.5 w-3.5" /> Change photo
+                    <Camera className="h-3.5 w-3.5" /> {t("avatar")}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-1.5">JPG, PNG, WEBP · max 5 MB</p>
                 </div>
@@ -107,32 +110,32 @@ export default function ProfilePage() {
 
             {/* Info card */}
             <div className="bg-card border border-border/50 rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-5">Personal information</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-5">{t("title")}</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("email")}</label>
                     <Input value={user.email} disabled className="bg-muted/50 rounded-xl h-10" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Account type</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("title")}</label>
                     <Input value={user.role === "company" ? "Company" : "Client"} disabled className="bg-muted/50 rounded-xl h-10 capitalize" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Display name</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("name")}</label>
                     <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="rounded-xl h-10" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Phone</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("phone")}</label>
                     <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+7 (777) 000-00-00" className="rounded-xl h-10" />
                   </div>
                 </div>
                 {user.role === "company" && (
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> Company address
+                      <MapPin className="h-3 w-3" /> {t("address")}
                     </label>
                     <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="City, street, building" className="rounded-xl h-10" />
                   </div>
@@ -148,7 +151,7 @@ export default function ProfilePage() {
                 </p>
               )}
               <Button onClick={() => void handleSave()} disabled={saving || uploading} className="rounded-xl px-6">
-                {saving ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving...</> : "Save changes"}
+                {saving ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{tCommon("loading")}</> : t("saveChanges")}
               </Button>
             </div>
           </div>

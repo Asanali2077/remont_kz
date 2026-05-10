@@ -1,18 +1,19 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
 import { api } from "@/lib/api";
 import { ServiceRecord } from "@/lib/types";
 import { OrgCard } from "@/components/OrgCard";
 import { toast } from "sonner";
 import { Heart, Loader2, Search } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 
 export default function FavoritesPage() {
+  const t = useTranslations("favorites");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [services, setServices] = useState<ServiceRecord[]>([]);
@@ -51,13 +52,13 @@ export default function FavoritesPage() {
               <Heart className="h-5 w-5 fill-rose-500 text-rose-500" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Saved Services</h1>
+              <h1 className="text-xl font-bold">{t("title")}</h1>
               {services.length > 0 && <p className="text-xs text-muted-foreground">{services.length} saved</p>}
             </div>
           </div>
           <Link href="/repair">
             <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
-              <Search className="h-3.5 w-3.5" /> Browse catalog
+              <Search className="h-3.5 w-3.5" /> {t("browseCatalog")}
             </Button>
           </Link>
         </div>
@@ -67,11 +68,11 @@ export default function FavoritesPage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950/30 mx-auto mb-4">
               <Heart className="h-7 w-7 text-rose-400" />
             </div>
-            <p className="font-semibold text-lg mb-1">Nothing saved yet</p>
+            <p className="font-semibold text-lg mb-1">{t("noFavorites")}</p>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
-              Tap the heart icon on any service to save it here for quick access
+              {t("noFavoritesDesc")}
             </p>
-            <Link href="/repair"><Button className="rounded-xl">Browse services</Button></Link>
+            <Link href="/repair"><Button className="rounded-xl">{t("browseCatalog")}</Button></Link>
           </div>
         ) : (
           <div className="flex flex-col gap-3">

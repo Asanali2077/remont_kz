@@ -1,7 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Mail, ArrowLeft, CheckCircle2, Wrench } from "lucide-react";
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations("forgotPassword");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -46,9 +48,9 @@ export default function ForgotPasswordPage() {
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 mb-4">
               <Mail className="h-5 w-5 text-primary" />
             </div>
-            <h1 className="text-xl font-bold">Reset your password</h1>
+            <h1 className="text-xl font-bold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Enter your email and we&apos;ll send you a reset link
+              {t("description")}
             </p>
           </div>
 
@@ -59,9 +61,9 @@ export default function ForgotPasswordPage() {
                   <CheckCircle2 className="h-7 w-7 text-green-600" />
                 </div>
                 <div>
-                  <p className="font-semibold">Check your inbox</p>
+                  <p className="font-semibold">{t("sent")}</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    If an account with <strong>{email}</strong> exists, we sent a reset link.
+                    {t("sentDesc")} <strong>{email}</strong>
                   </p>
                 </div>
                 {devLink && (
@@ -73,13 +75,13 @@ export default function ForgotPasswordPage() {
                   </div>
                 )}
                 <Button variant="outline" className="w-full rounded-xl" onClick={() => { setSent(false); setDevLink(null); }}>
-                  Send again
+                  {t("send")}
                 </Button>
               </div>
             ) : (
               <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email address</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("email")}</label>
                   <Input
                     type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com" required className="rounded-xl h-10"
@@ -87,7 +89,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 <Button type="submit" className="w-full rounded-xl h-10 font-semibold" disabled={loading || !email.trim()}>
                   {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Send reset link
+                  {t("send")}
                 </Button>
               </form>
             )}
@@ -95,7 +97,7 @@ export default function ForgotPasswordPage() {
 
           <div className="px-7 pb-6 text-center">
             <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to login
+              <ArrowLeft className="h-3.5 w-3.5" /> {t("backToLogin")}
             </Link>
           </div>
         </div>
