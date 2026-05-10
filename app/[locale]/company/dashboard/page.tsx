@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
 import { RequestsManagement } from "@/components/company/RequestsManagement";
 import { ServicesManagement } from "@/components/company/ServicesManagement";
@@ -21,6 +22,8 @@ import { Card, CardContent } from "@/components/ui/card";
 type Tab = "overview" | "services" | "requests" | "statistics" | "portfolio" | "profile";
 
 export default function CompanyDashboardPage() {
+  const t = useTranslations("company");
+  const tCommon = useTranslations("common");
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,12 +46,12 @@ export default function CompanyDashboardPage() {
   const unreadMessages = requests.filter(r => r.companyId && (r.status === "accepted" || r.status === "in_progress")).length;
 
   const NAV: { id: Tab; label: string; icon: React.ElementType; badge?: number }[] = [
-    { id: "overview",    label: "Overview",    icon: LayoutDashboard, badge: totalBadge > 0 ? totalBadge : undefined },
-    { id: "requests",    label: "Requests",    icon: ClipboardList,   badge: totalBadge > 0 ? totalBadge : undefined },
-    { id: "services",    label: "Services",    icon: Briefcase },
-    { id: "statistics",  label: "Statistics",  icon: BarChart3 },
-    { id: "portfolio",   label: "Portfolio",   icon: GalleryHorizontal },
-    { id: "profile",     label: "Profile",     icon: User },
+    { id: "overview",    label: t("overview"),    icon: LayoutDashboard, badge: totalBadge > 0 ? totalBadge : undefined },
+    { id: "requests",    label: t("requests"),    icon: ClipboardList,   badge: totalBadge > 0 ? totalBadge : undefined },
+    { id: "services",    label: t("services"),    icon: Briefcase },
+    { id: "statistics",  label: t("statistics"),  icon: BarChart3 },
+    { id: "portfolio",   label: t("portfolio"),   icon: GalleryHorizontal },
+    { id: "profile",     label: tCommon("edit"),  icon: User },
   ];
 
   const activeLabel = NAV.find(n => n.id === activeTab)?.label ?? "";
@@ -78,7 +81,7 @@ export default function CompanyDashboardPage() {
           `}>
             {/* Mobile close */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 md:hidden">
-              <span className="font-semibold text-sm">Dashboard</span>
+              <span className="font-semibold text-sm">{t("dashboard")}</span>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSidebarOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>
@@ -122,7 +125,7 @@ export default function CompanyDashboardPage() {
                 <Link href="/chat">
                   <button className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 text-muted-foreground hover:bg-muted hover:text-foreground`}>
                     <MessageSquare className="h-4 w-4 shrink-0" />
-                    <span className="flex-1 text-left">Messages</span>
+                    <span className="flex-1 text-left">{tCommon("send")}</span>
                     {unreadMessages > 0 && (
                       <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-500 text-white px-1 text-[10px] font-black">
                         {unreadMessages > 9 ? "9+" : unreadMessages}
@@ -136,7 +139,7 @@ export default function CompanyDashboardPage() {
             {/* Footer */}
             <div className="p-4 border-t border-border/50">
               <a href="/" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                ← Back to site
+                ← {tCommon("back")}
               </a>
             </div>
           </aside>
@@ -164,20 +167,20 @@ export default function CompanyDashboardPage() {
               {activeTab === "statistics" && <CompanyStatistics />}
               {activeTab === "portfolio"  && user && (
                 <div>
-                  <h2 className="text-xl font-bold mb-1">Portfolio</h2>
+                  <h2 className="text-xl font-bold mb-1">{t("portfolio")}</h2>
                   <p className="text-muted-foreground text-sm mb-6">Showcase your completed work — up to 20 photos.</p>
                   <PortfolioManager companyId={user.id} />
                 </div>
               )}
               {activeTab === "profile"    && (
                 <div className="max-w-md">
-                  <h2 className="text-xl font-bold mb-1">Company Profile</h2>
+                  <h2 className="text-xl font-bold mb-1">{t("dashboard")}</h2>
                   <p className="text-muted-foreground text-sm mb-6">Manage your avatar, name, phone, and address.</p>
                   <Card>
                     <CardContent className="p-5">
                       <Link href="/profile">
                         <Button className="w-full gap-2 rounded-xl">
-                          <User className="h-4 w-4" /> Open Profile Settings <ArrowRight className="h-4 w-4" />
+                          <User className="h-4 w-4" /> {tCommon("open")} <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
                     </CardContent>

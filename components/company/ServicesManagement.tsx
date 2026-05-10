@@ -1,6 +1,7 @@
 ﻿/* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   CheckCircle2, Edit, Plus, Trash2, XCircle, Loader2,
@@ -17,6 +18,8 @@ import { OnboardingChecklist } from "./OnboardingChecklist";
 import { Button } from "@/components/ui/button";
 
 export function ServicesManagement() {
+  const t = useTranslations("company");
+  const tCommon = useTranslations("common");
   const { user } = useAuth();
   const [services, setServices] = useState<ServiceRecord[]>([]);
   const [editingService, setEditingService] = useState<ServiceRecord | null>(null);
@@ -101,7 +104,7 @@ export function ServicesManagement() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-xl font-bold">Services</h2>
+          <h2 className="text-xl font-bold">{t("services")}</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{services.length} total · {services.filter(s => s.active).length} active</p>
         </div>
         <div className="flex items-center gap-2">
@@ -120,7 +123,7 @@ export function ServicesManagement() {
             </div>
           )}
           <Button onClick={() => { setEditingService(null); setIsModalOpen(true); }} className="rounded-xl gap-2">
-            <Plus className="h-4 w-4" /> Add service
+            <Plus className="h-4 w-4" /> {t("addService")}
           </Button>
         </div>
       </div>
@@ -131,10 +134,10 @@ export function ServicesManagement() {
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted mx-auto mb-4">
             <Plus className="h-6 w-6 text-muted-foreground" />
           </div>
-          <p className="font-semibold mb-1">No services yet</p>
+          <p className="font-semibold mb-1">{t("noServices")}</p>
           <p className="text-sm text-muted-foreground mb-5">Add your first service so clients can find you</p>
           <Button className="rounded-xl gap-2" onClick={() => { setEditingService(null); setIsModalOpen(true); }}>
-            <Plus className="h-4 w-4" /> Add first service
+            <Plus className="h-4 w-4" /> {t("addService")}
           </Button>
         </div>
       )}
@@ -202,7 +205,7 @@ export function ServicesManagement() {
                         }`}
                       >
                         {service.active ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                        {service.active ? "Active" : "Inactive"}
+                        {service.active ? tCommon("yes") : tCommon("no")}
                       </button>
                     </div>
 
@@ -228,7 +231,7 @@ export function ServicesManagement() {
                     {/* Actions */}
                     <div className="flex gap-2 pt-1 border-t border-border/40 mt-1">
                       <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs gap-1.5" onClick={() => { setEditingService(service); setIsModalOpen(true); }}>
-                        <Edit className="h-3.5 w-3.5" /> Edit
+                        <Edit className="h-3.5 w-3.5" /> {tCommon("edit")}
                       </Button>
                       <Button variant="ghost" size="sm" className="h-8 rounded-xl text-xs text-destructive hover:bg-destructive/10" onClick={() => void handleDelete(service.id)}>
                         <Trash2 className="h-3.5 w-3.5" />

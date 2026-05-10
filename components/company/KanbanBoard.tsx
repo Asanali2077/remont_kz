@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { RequestRecord, RequestStatus } from "@/lib/types";
@@ -14,12 +15,12 @@ import { Button } from "@/components/ui/button";
 import { timeAgo, formatBudget, fmtNum } from "@/lib/utils";
 import { OfferDialog } from "@/components/OfferDialog";
 
-const COLUMNS: { id: RequestStatus | "unassigned"; label: string; icon: React.ElementType; color: string; headerColor: string }[] = [
-  { id: "unassigned",  label: "Available",   icon: Star,         color: "bg-amber-50 dark:bg-amber-950/20",    headerColor: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300" },
-  { id: "new",         label: "New",         icon: Clock,        color: "bg-slate-50 dark:bg-slate-900/30",    headerColor: "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300" },
-  { id: "accepted",    label: "Accepted",    icon: CheckCircle2, color: "bg-blue-50 dark:bg-blue-950/20",     headerColor: "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300" },
-  { id: "in_progress", label: "In Progress", icon: PlayCircle,   color: "bg-violet-50 dark:bg-violet-950/20", headerColor: "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" },
-  { id: "completed",   label: "Done",        icon: Zap,          color: "bg-green-50 dark:bg-green-950/20",   headerColor: "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300" },
+const COLUMN_DEFS: { id: RequestStatus | "unassigned"; labelKey: string; icon: React.ElementType; color: string; headerColor: string }[] = [
+  { id: "unassigned",  labelKey: "unassigned",  icon: Star,         color: "bg-amber-50 dark:bg-amber-950/20",    headerColor: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300" },
+  { id: "new",         labelKey: "kanban.new",  icon: Clock,        color: "bg-slate-50 dark:bg-slate-900/30",    headerColor: "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300" },
+  { id: "accepted",    labelKey: "kanban.accepted", icon: CheckCircle2, color: "bg-blue-50 dark:bg-blue-950/20",  headerColor: "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300" },
+  { id: "in_progress", labelKey: "kanban.inProgress", icon: PlayCircle, color: "bg-violet-50 dark:bg-violet-950/20", headerColor: "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300" },
+  { id: "completed",   labelKey: "kanban.completed", icon: Zap,      color: "bg-green-50 dark:bg-green-950/20",   headerColor: "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300" },
 ];
 
 
@@ -29,6 +30,7 @@ function KanbanCard({ request, onMove, onOffer, myId }: {
   onOffer: (r: RequestRecord) => void;
   myId: string;
 }) {
+  const t = useTranslations("requests");
   const isAssigned = !!request.companyId && request.companyId === myId;
   const isUnassigned = !request.companyId;
   const myOffer = request.offers?.find(o => o.companyId === myId);
@@ -81,31 +83,31 @@ function KanbanCard({ request, onMove, onOffer, myId }: {
       <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border/40">
         {isUnassigned && !myOffer && (
           <Button size="sm" className="h-7 text-[11px] rounded-lg gap-1 flex-1" onClick={() => onOffer(request)}>
-            <CheckCircle2 className="h-3 w-3" /> Make offer
+            <CheckCircle2 className="h-3 w-3" /> {t("makeOffer")}
           </Button>
         )}
         {isUnassigned && myOffer && (
           <span className="text-[11px] text-muted-foreground px-2 py-1">
-            Offer sent: {fmtNum(myOffer.price)} ₸
+            {t("makeOffer")}: {fmtNum(myOffer.price)} ₸
           </span>
         )}
         {isAssigned && request.status === "new" && (
           <Button size="sm" className="h-7 text-[11px] rounded-lg flex-1" onClick={() => onMove(request.id, "accepted")}>
-            Accept
+            {t("acceptOffer")}
           </Button>
         )}
         {isAssigned && request.status === "accepted" && (
           <Button size="sm" variant="outline" className="h-7 text-[11px] rounded-lg flex-1" onClick={() => onMove(request.id, "in_progress")}>
-            Start work
+            {t("workStarted")}
           </Button>
         )}
         {isAssigned && request.status === "in_progress" && (
           <Button size="sm" variant="outline" className="h-7 text-[11px] rounded-lg flex-1 border-green-300 dark:border-green-700 text-green-700 dark:text-green-400" onClick={() => onMove(request.id, "completed")}>
-            Complete
+            {t("workCompleted")}
           </Button>
         )}
         {isAssigned && (request.status === "accepted" || request.status === "in_progress") && (
-          <Link href={`/chat/${request.id}`}>
+          <Link href={`/chat/${request.id}` as `/chat/${string}`}>
             <Button size="sm" variant="ghost" className="h-7 text-[11px] rounded-lg px-2">
               <MessageSquare className="h-3 w-3" />
             </Button>
@@ -117,9 +119,17 @@ function KanbanCard({ request, onMove, onOffer, myId }: {
 }
 
 export function KanbanBoard({ userId }: { userId: string }) {
+  const t = useTranslations("company");
+  const tCommon = useTranslations("common");
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [offerTarget, setOfferTarget] = useState<RequestRecord | null>(null);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const COLUMNS = COLUMN_DEFS.map(col => ({
+    ...col,
+    label: col.labelKey === "unassigned" ? tCommon("all") : t(col.labelKey as any),
+  }));
 
   const load = useCallback(async () => {
     setLoading(true);

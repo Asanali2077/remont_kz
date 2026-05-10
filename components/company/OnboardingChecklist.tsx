@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CheckCircle2, Circle, ChevronRight } from "lucide-react";
 import type { ServiceRecord } from "@/lib/types";
@@ -12,14 +13,15 @@ interface Props {
 }
 
 export function OnboardingChecklist({ services, hasCompletedRequest, hasAvatar, onNavigate }: Props) {
+  const t = useTranslations("company");
   const { user } = useAuth();
 
   const steps = [
-    { label: "Fill in company name and phone",  done: !!(user?.name && user?.phone),   tab: "profile" },
-    { label: "Add profile photo",               done: hasAvatar,                       tab: "profile" },
-    { label: "Create your first service",       done: services.length > 0,            tab: "services" },
-    { label: "Add photos to a service",         done: services.some(s => s.images.length > 0), tab: "services" },
-    { label: "Complete your first request",     done: hasCompletedRequest,             tab: "requests" },
+    { label: t("onboarding.completeProfile"),  done: !!(user?.name && user?.phone),   tab: "profile" },
+    { label: t("onboarding.completeProfile"),  done: hasAvatar,                       tab: "profile" },
+    { label: t("onboarding.addService"),       done: services.length > 0,            tab: "services" },
+    { label: t("onboarding.addService"),       done: services.some(s => s.images.length > 0), tab: "services" },
+    { label: t("stats.completedRequests"),     done: hasCompletedRequest,             tab: "requests" },
   ];
 
   const completed = steps.filter(s => s.done).length;
@@ -32,7 +34,7 @@ export function OnboardingChecklist({ services, hasCompletedRequest, hasAvatar, 
       {/* Header */}
       <div className="px-5 py-4 border-b border-border/40">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-bold text-sm">🚀 Getting started</h3>
+          <h3 className="font-bold text-sm">{t("onboarding.title")}</h3>
           <span className="text-xs font-semibold text-muted-foreground">{completed}/{steps.length} done</span>
         </div>
         {/* Progress bar */}

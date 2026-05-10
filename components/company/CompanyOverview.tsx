@@ -1,7 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { api } from "@/lib/api";
 import { useAuth } from "@/components/auth/AuthProvider";
 import {
@@ -12,6 +13,8 @@ import type { RequestRecord } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 
 export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => void }) {
+  const t = useTranslations("company");
+  const tReq = useTranslations("requests");
   const { user } = useAuth();
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [stats, setStats] = useState<{
@@ -41,10 +44,10 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
   }
 
   const STAT_CARDS = [
-    { label: "New Requests",  value: stats?.byStatus.new ?? 0,        icon: AlertCircle,    color: "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800", iconCls: "text-amber-600", tab: "requests" },
-    { label: "In Progress",   value: stats?.byStatus.in_progress ?? 0, icon: Zap,           color: "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800",   iconCls: "text-blue-600",  tab: "requests" },
-    { label: "Completed",     value: stats?.byStatus.completed ?? 0,   icon: CheckCircle2,  color: "bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800",iconCls: "text-green-600", tab: "requests" },
-    { label: "My Services",   value: stats?.totalServices ?? 0,        icon: Briefcase,     color: "bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800", iconCls: "text-violet-600", tab: "services" },
+    { label: tReq("status.new"),        value: stats?.byStatus.new ?? 0,        icon: AlertCircle,    color: "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800", iconCls: "text-amber-600", tab: "requests" },
+    { label: tReq("status.in_progress"), value: stats?.byStatus.in_progress ?? 0, icon: Zap,          color: "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800",   iconCls: "text-blue-600",  tab: "requests" },
+    { label: tReq("status.completed"),  value: stats?.byStatus.completed ?? 0,   icon: CheckCircle2,  color: "bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800",iconCls: "text-green-600", tab: "requests" },
+    { label: t("services"),             value: stats?.totalServices ?? 0,        icon: Briefcase,     color: "bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800", iconCls: "text-violet-600", tab: "services" },
   ];
 
   return (
@@ -79,7 +82,7 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
             </div>
             <div>
               <p className="text-2xl font-black">{stats.avgRating?.toFixed(1) ?? "—"}</p>
-              <p className="text-xs text-muted-foreground">Avg. rating</p>
+              <p className="text-xs text-muted-foreground">{t("stats.rating")}</p>
             </div>
           </div>
           <div className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3">
@@ -88,7 +91,7 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
             </div>
             <div>
               <p className="text-2xl font-black">{stats.revenue > 0 ? `${(stats.revenue / 1000).toFixed(0)}K ₸` : "—"}</p>
-              <p className="text-xs text-muted-foreground">Total revenue</p>
+              <p className="text-xs text-muted-foreground">{t("stats.revenue")}</p>
             </div>
           </div>
         </div>
@@ -101,7 +104,7 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/40">
               <AlertCircle className="h-4 w-4 text-amber-600" />
             </div>
-            <h3 className="font-bold text-sm">Action needed</h3>
+            <h3 className="font-bold text-sm">{tReq("offers")}</h3>
             <span className="ml-auto text-xs font-bold bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
               {actionNeeded.length + newRequests.length}
             </span>
@@ -113,7 +116,7 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
                   <ClipboardList className="h-4 w-4 text-amber-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">New request available</p>
+                  <p className="text-sm font-semibold">{tReq("createRequest")}</p>
                   <p className="text-xs text-muted-foreground line-clamp-1">{r.description}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -159,7 +162,7 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/40">
               <Zap className="h-4 w-4 text-blue-600" />
             </div>
-            <h3 className="font-bold text-sm">Currently in progress</h3>
+            <h3 className="font-bold text-sm">{tReq("status.in_progress")}</h3>
             <span className="ml-auto text-xs text-muted-foreground">{inProgress.length} active</span>
           </div>
           <div className="divide-y divide-border/40">
@@ -182,9 +185,9 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label: "Add new service",    icon: Briefcase,     tab: "services",    color: "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800" },
-          { label: "View all requests",  icon: ClipboardList, tab: "requests",    color: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" },
-          { label: "See statistics",     icon: TrendingUp,    tab: "statistics",  color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" },
+          { label: t("addService"),   icon: Briefcase,     tab: "services",    color: "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800" },
+          { label: t("requests"),     icon: ClipboardList, tab: "requests",    color: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" },
+          { label: t("statistics"),   icon: TrendingUp,    tab: "statistics",  color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" },
         ].map(({ label, icon: Icon, tab, color }) => (
           <button key={tab} onClick={() => onNavigate(tab)}
             className={`flex items-center gap-3 rounded-xl border p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 text-left ${color}`}>

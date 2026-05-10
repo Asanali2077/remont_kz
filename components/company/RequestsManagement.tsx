@@ -1,7 +1,8 @@
 ﻿"use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { LayoutGrid, LayoutList, CheckCircle2, PlayCircle, Star, ClipboardList, Download } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -22,18 +23,22 @@ async function fetchRequests(statusFilter: RequestFilter) {
   return api.getRequests({ scope: "all", status: statusFilter === "all" ? undefined : statusFilter });
 }
 
-const TAB_OPTIONS: { value: RequestFilter; label: string }[] = [
-  { value: "all",         label: "All" },
-  { value: "new",         label: "New" },
-  { value: "accepted",    label: "Accepted" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "completed",   label: "Completed" },
-];
 
 const PAGE_SIZE = 6;
 
 export function RequestsManagement() {
+  const t = useTranslations("company");
+  const tReq = useTranslations("requests");
+  const tCommon = useTranslations("common");
   const { user } = useAuth();
+
+  const TAB_OPTIONS: { value: RequestFilter; label: string }[] = [
+    { value: "all",         label: tCommon("all") },
+    { value: "new",         label: tReq("status.new") },
+    { value: "accepted",    label: tReq("status.accepted") },
+    { value: "in_progress", label: tReq("status.in_progress") },
+    { value: "completed",   label: tReq("status.completed") },
+  ];
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<RequestFilter>("all");
   const [loading, setLoading] = useState(true);
@@ -112,7 +117,7 @@ export function RequestsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold">Requests</h2>
+          <h2 className="text-xl font-bold">{t("requests")}</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{requests.length} total · {unassigned.length} available</p>
         </div>
         <div className="flex items-center gap-2">
@@ -160,7 +165,7 @@ export function RequestsManagement() {
           {/* Assigned requests */}
           {assigned.length > 0 && (
             <section>
-              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Assigned to you</h3>
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">{tReq("offers")}</h3>
               <div className="space-y-3">
                 {assignedPage.map(req => (
                   <RequestCard key={req.id} req={req}
@@ -181,7 +186,7 @@ export function RequestsManagement() {
           {/* Unassigned */}
           {unassigned.length > 0 && (
             <section>
-              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Available requests</h3>
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">{tReq("noOffers")}</h3>
               <div className="space-y-3">
                 {unassigned.slice(0, 10).map(req => (
                   <UnassignedCard key={req.id} req={req} myId={myId} onOffer={setOfferDialogRequestId} />
@@ -210,14 +215,14 @@ export function RequestsManagement() {
       {/* Reply dialog */}
       <Dialog open={replyRequestId !== null} onOpenChange={v => { if (!v) setReplyRequestId(null); }}>
         <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader><DialogTitle>Reply to review</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{tReq("review")}</DialogTitle></DialogHeader>
           <div className="space-y-3 py-2">
             <Textarea rows={4} placeholder="Write a professional response to the client's review…"
               value={replyText} onChange={e => setReplyText(e.target.value)} maxLength={1000} className="rounded-xl" />
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setReplyRequestId(null)} className="rounded-xl">Cancel</Button>
+              <Button variant="outline" onClick={() => setReplyRequestId(null)} className="rounded-xl">{tCommon("cancel")}</Button>
               <Button onClick={() => void handleReply()} disabled={!replyText.trim() || replySubmitting} className="rounded-xl">
-                {replySubmitting ? "Sending…" : "Send reply"}
+                {replySubmitting ? tCommon("loading") : tCommon("send")}
               </Button>
             </div>
           </div>
@@ -233,6 +238,7 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
   onUpdateStatus: (id: string, s: RequestStatus) => void;
   onReply?: (id: string) => void;
 }) {
+  const tReq = useTranslations("requests");
   const borderColor = {
     new: "border-l-slate-300 dark:border-l-slate-600",
     accepted: "border-l-blue-400",
@@ -266,15 +272,15 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
         <div className="flex flex-wrap gap-2 items-center">
           {req.status === "new" && (
             <Button size="sm" className="h-8 rounded-xl text-xs gap-1" onClick={() => onUpdateStatus(req.id, "accepted")}>
-              <CheckCircle2 className="h-3.5 w-3.5" /> Accept
+              <CheckCircle2 className="h-3.5 w-3.5" /> {tReq("acceptOffer")}
             </Button>
           )}
           {req.status === "accepted" && (
             <>
               <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs" onClick={() => onUpdateStatus(req.id, "in_progress")}>
-                <PlayCircle className="h-3.5 w-3.5 mr-1" /> Start work
+                <PlayCircle className="h-3.5 w-3.5 mr-1" /> {tReq("workStarted")}
               </Button>
-              <Link href={`/chat/${req.id}`}>
+              <Link href={`/chat/${req.id}` as `/chat/${string}`}>
                 <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5">💬 Chat</Button>
               </Link>
             </>
@@ -282,9 +288,9 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
           {req.status === "in_progress" && (
             <>
               <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs border-green-300 dark:border-green-700 text-green-700 dark:text-green-400" onClick={() => onUpdateStatus(req.id, "completed")}>
-                ✓ Complete
+                ✓ {tReq("workCompleted")}
               </Button>
-              <Link href={`/chat/${req.id}`}>
+              <Link href={`/chat/${req.id}` as `/chat/${string}`}>
                 <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs">💬 Chat</Button>
               </Link>
             </>
@@ -292,7 +298,7 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
           {req.status === "completed" && req.rating !== null && !req.companyReply && onReply && (
             <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1">
               <Star className="h-3.5 w-3.5" />
-              <span onClick={() => onReply(req.id)}>Reply to review</span>
+              <span onClick={() => onReply(req.id)}>{tReq("review")}</span>
             </Button>
           )}
           {req.companyReply && (
@@ -308,6 +314,7 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
 function UnassignedCard({ req, myId, onOffer }: {
   req: RequestRecord; myId: string; onOffer: (id: string) => void;
 }) {
+  const tReq = useTranslations("requests");
   const myOffer = req.offers?.find(o => o.companyId === myId);
   return (
     <div className="bg-card border border-border/50 rounded-2xl px-5 py-4 hover:border-primary/30 hover:shadow-sm transition-all">
@@ -330,7 +337,7 @@ function UnassignedCard({ req, myId, onOffer }: {
         </p>
       ) : (
         <Button size="sm" className="h-8 rounded-xl text-xs gap-1.5 shadow-sm shadow-primary/20" onClick={() => onOffer(req.id)}>
-          <CheckCircle2 className="h-3.5 w-3.5" /> Make offer
+          <CheckCircle2 className="h-3.5 w-3.5" /> {tReq("makeOffer")}
         </Button>
       )}
     </div>

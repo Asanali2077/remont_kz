@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,9 @@ interface CompanyStats {
 }
 
 export function CompanyStatistics() {
+  const t = useTranslations("company");
+  const tCommon = useTranslations("common");
+  const tReq = useTranslations("requests");
   const [stats, setStats] = useState<CompanyStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,29 +43,29 @@ export function CompanyStatistics() {
   if (loading) {
     return (
       <div className="py-16 text-center text-muted-foreground animate-pulse">
-        Loading statistics...
+        {tCommon("loading")}
       </div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="py-16 text-center text-muted-foreground">No statistics available.</div>
+      <div className="py-16 text-center text-muted-foreground">{tCommon("noData")}</div>
     );
   }
 
   const topCards = [
-    { label: "Total Services", value: stats.totalServices, icon: Briefcase, color: "text-blue-600 dark:text-blue-400" },
-    { label: "Total Requests", value: stats.totalRequests, icon: ClipboardList, color: "text-violet-600 dark:text-violet-400" },
-    { label: "Avg Rating", value: stats.avgRating !== null ? `${stats.avgRating.toFixed(1)} ★` : "—", icon: Star, color: "text-yellow-500" },
-    { label: "Revenue (₸)", value: stats.revenue > 0 ? stats.revenue.toLocaleString("ru-RU") : "—", icon: TrendingUp, color: "text-green-600 dark:text-green-400" },
+    { label: t("stats.services"), value: stats.totalServices, icon: Briefcase, color: "text-blue-600 dark:text-blue-400" },
+    { label: t("stats.totalRequests"), value: stats.totalRequests, icon: ClipboardList, color: "text-violet-600 dark:text-violet-400" },
+    { label: t("stats.rating"), value: stats.avgRating !== null ? `${stats.avgRating.toFixed(1)} ★` : "—", icon: Star, color: "text-yellow-500" },
+    { label: t("stats.revenue"), value: stats.revenue > 0 ? stats.revenue.toLocaleString("ru-RU") : "—", icon: TrendingUp, color: "text-green-600 dark:text-green-400" },
   ];
 
   const statusRows = [
-    { label: "New", value: stats.byStatus.new, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" },
-    { label: "Accepted", value: stats.byStatus.accepted, color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300" },
-    { label: "In Progress", value: stats.byStatus.in_progress, color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300" },
-    { label: "Completed", value: stats.byStatus.completed, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" },
+    { label: tReq("status.new"), value: stats.byStatus.new, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" },
+    { label: tReq("status.accepted"), value: stats.byStatus.accepted, color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300" },
+    { label: tReq("status.in_progress"), value: stats.byStatus.in_progress, color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300" },
+    { label: tReq("status.completed"), value: stats.byStatus.completed, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" },
   ];
 
   /* Format dates for chart */
@@ -73,8 +77,8 @@ export function CompanyStatistics() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-1">Statistics</h2>
-        <p className="text-muted-foreground text-sm">Overview of your company performance</p>
+        <h2 className="text-2xl font-bold mb-1">{t("statistics")}</h2>
+        <p className="text-muted-foreground text-sm">{t("stats.totalRequests")}</p>
       </div>
 
       {/* Top metric cards */}
@@ -95,7 +99,7 @@ export function CompanyStatistics() {
       {/* Status breakdown */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Requests by Status</CardTitle>
+          <CardTitle className="text-base">{t("requests")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
