@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,6 +28,8 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 export default function AdminAuditPage() {
+  const t = useTranslations("admin");
+  const tCommon = useTranslations("common");
   const { user } = useAuth();
   const [logs, setLogs] = useState<AuditEntry[]>([]);
   const [total, setTotal] = useState(0);
@@ -59,8 +62,8 @@ export default function AdminAuditPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold">Audit Log</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Admin actions history — {total} total entries</p>
+        <h1 className="text-2xl font-bold">{t("auditLog")}</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{t("audit")} — {total}</p>
       </div>
 
       <div className="flex gap-3">
@@ -69,9 +72,9 @@ export default function AdminAuditPage() {
             <SelectValue placeholder="Entity" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All entities</SelectItem>
-            <SelectItem value="user">Users</SelectItem>
-            <SelectItem value="service">Services</SelectItem>
+            <SelectItem value="all">{tCommon("all")}</SelectItem>
+            <SelectItem value="user">{t("users")}</SelectItem>
+            <SelectItem value="service">{t("services")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -93,12 +96,12 @@ export default function AdminAuditPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 border-b">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Time</th>
-                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Admin</th>
-                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Action</th>
-                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Entity</th>
-                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Target ID</th>
-                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Details</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">{t("timestamp")}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">{t("actor")}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">{t("action")}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">{t("entity")}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">ID</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">{tCommon("more")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -137,8 +140,8 @@ export default function AdminAuditPage() {
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Page {page} of {pages}</p>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => void load(page - 1)}>Previous</Button>
-                <Button size="sm" variant="outline" disabled={page >= pages} onClick={() => void load(page + 1)}>Next</Button>
+                <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => void load(page - 1)}>{tCommon("back")}</Button>
+                <Button size="sm" variant="outline" disabled={page >= pages} onClick={() => void load(page + 1)}>{tCommon("more")}</Button>
               </div>
             </div>
           )}

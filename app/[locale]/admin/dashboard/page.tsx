@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Users, Briefcase, ClipboardList, CheckCircle, UserX, Activity } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -13,6 +14,7 @@ interface Stats {
 }
 
 export default function AdminDashboardPage() {
+  const t = useTranslations("admin");
   const { user } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,18 +41,18 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground text-sm mt-1">Обзор платформы remont.kz</p>
+        <h1 className="text-2xl font-bold">{t("dashboard")}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t("title")}</p>
       </div>
 
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatsCard label="Всего пользователей" value={stats.users.total} icon={Users} color="blue" sub={`Клиентов: ${stats.users.clients} · Компаний: ${stats.users.companies}`} />
-          <StatsCard label="Заблокировано" value={stats.users.blocked} icon={UserX} color="red" />
-          <StatsCard label="Услуг на платформе" value={stats.services.total} icon={Briefcase} color="default" sub={`Активных: ${stats.services.active}`} />
-          <StatsCard label="Всего заявок" value={stats.requests.total} icon={ClipboardList} color="amber" />
-          <StatsCard label="Завершённых заявок" value={stats.requests.completed} icon={CheckCircle} color="green" />
-          <StatsCard label="Новых заявок" value={stats.requests.new} icon={Activity} color="blue" />
+          <StatsCard label={t("stats.totalUsers")} value={stats.users.total} icon={Users} color="blue" sub={`${t("stats.totalClients")}: ${stats.users.clients} · ${t("stats.totalCompanies")}: ${stats.users.companies}`} />
+          <StatsCard label={t("blocked")} value={stats.users.blocked} icon={UserX} color="red" />
+          <StatsCard label={t("stats.totalServices")} value={stats.services.total} icon={Briefcase} color="default" sub={`${t("active")}: ${stats.services.active}`} />
+          <StatsCard label={t("stats.totalRequests")} value={stats.requests.total} icon={ClipboardList} color="amber" />
+          <StatsCard label={t("stats.completedRequests")} value={stats.requests.completed} icon={CheckCircle} color="green" />
+          <StatsCard label={t("stats.totalRequests")} value={stats.requests.new} icon={Activity} color="blue" />
         </div>
       )}
     </div>
