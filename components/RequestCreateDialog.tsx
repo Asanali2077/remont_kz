@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { ServiceRecord } from "@/lib/types";
@@ -25,9 +26,10 @@ interface Props {
   onCreated?: () => Promise<void> | void;
 }
 
-const STEPS = ["Task", "Details", "Confirm"];
-
 export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
+  const t = useTranslations("requestCreate");
+  const tCat = useTranslations("categories");
+  const STEPS = [t("step1"), t("step2"), t("step3")];
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
@@ -113,7 +115,7 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-border/50">
           <h2 className="text-lg font-bold mb-4">
-            {service ? `Request: ${service.name}` : "Post a request"}
+            {service ? `${t("title")}: ${service.name}` : t("title")}
           </h2>
 
           {/* Progress */}
@@ -160,7 +162,7 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
               ) : (
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Service type *
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> {t("category")} *
                   </label>
                   <CategoryFilter value={categoryFilter} onChange={setCategoryFilter} showAll={false} />
                 </div>
@@ -168,11 +170,11 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                  <MessageSquare className="h-3.5 w-3.5 text-primary" /> Describe your task *
+                  <MessageSquare className="h-3.5 w-3.5 text-primary" /> {t("description")} *
                 </label>
                 <Textarea
                   rows={5}
-                  placeholder="What exactly needs to be done? The more detail — the better offers you'll get. Example: Replace kitchen faucet, install new shower head, fix leaking pipe under sink."
+                  placeholder={t("descriptionPlaceholder")}
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   className="resize-none rounded-xl text-sm"
@@ -189,7 +191,7 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
               {isCustom && (
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-primary" /> City *
+                    <MapPin className="h-3.5 w-3.5 text-primary" /> {t("city")} *
                   </label>
                   <CitySelect value={city} onChange={setCity} />
                 </div>
@@ -197,12 +199,12 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                  <Wallet className="h-3.5 w-3.5 text-primary" /> Budget (optional)
+                  <Wallet className="h-3.5 w-3.5 text-primary" /> {t("budgetFrom")} / {t("budgetTo")}
                 </label>
                 <div className="flex items-center gap-2">
-                  <Input value={budgetFrom} onChange={e => setBudgetFrom(e.target.value)} type="number" placeholder="Min (₸)" className="rounded-xl h-10" />
+                  <Input value={budgetFrom} onChange={e => setBudgetFrom(e.target.value)} type="number" placeholder={t("budgetFrom")} className="rounded-xl h-10" />
                   <span className="text-muted-foreground text-sm shrink-0">—</span>
-                  <Input value={budgetTo} onChange={e => setBudgetTo(e.target.value)} type="number" placeholder="Max (₸)" className="rounded-xl h-10" />
+                  <Input value={budgetTo} onChange={e => setBudgetTo(e.target.value)} type="number" placeholder={t("budgetTo")} className="rounded-xl h-10" />
                 </div>
                 <p className="text-[11px] text-muted-foreground">Leave empty if not sure. Companies will suggest their price.</p>
               </div>
@@ -244,21 +246,19 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
                 )}
                 {categoryFilter.category && (
                   <div className="flex justify-between items-center px-4 py-3 text-sm">
-                    <span className="text-muted-foreground">Category</span>
-                    <span className="font-semibold">{
-                      { AUTOMOBILES: "🚗 Automobiles", REAL_ESTATE: "🏠 Real Estate", OTHER: "🔧 Other" }[categoryFilter.category]
-                    }</span>
+                    <span className="text-muted-foreground">{t("category")}</span>
+                    <span className="font-semibold">{tCat(categoryFilter.category as "AUTOMOBILES" | "REAL_ESTATE" | "OTHER")}</span>
                   </div>
                 )}
                 {city && (
                   <div className="flex justify-between items-center px-4 py-3 text-sm">
-                    <span className="text-muted-foreground">City</span>
+                    <span className="text-muted-foreground">{t("city")}</span>
                     <span className="font-semibold">📍 {city}</span>
                   </div>
                 )}
                 {(budgetFrom || budgetTo) && (
                   <div className="flex justify-between items-center px-4 py-3 text-sm">
-                    <span className="text-muted-foreground">Budget</span>
+                    <span className="text-muted-foreground">{t("budgetFrom")}</span>
                     <span className="font-semibold">{budgetFrom && `${Number(budgetFrom).toLocaleString()} ₸`}{budgetTo && ` – ${Number(budgetTo).toLocaleString()} ₸`}</span>
                   </div>
                 )}
@@ -269,7 +269,7 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
                   </div>
                 )}
                 <div className="px-4 py-3">
-                  <p className="text-xs text-muted-foreground mb-1">Description</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t("description")}</p>
                   <p className="text-sm">{description}</p>
                 </div>
               </div>
@@ -287,16 +287,16 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
         <div className="px-6 py-4 border-t border-border/50 flex items-center justify-between gap-3">
           <Button variant="ghost" size="sm" className="rounded-xl gap-1" onClick={() => step > 0 ? setStep(s => s - 1) : handleClose(false)}>
             <ChevronLeft className="h-4 w-4" />
-            {step === 0 ? "Cancel" : "Back"}
+            {step === 0 ? t("back") : t("back")}
           </Button>
 
           {step < 2 ? (
             <Button className="rounded-xl gap-2 px-6" disabled={!canProceed(step)} onClick={() => setStep(s => s + 1)}>
-              Continue <ChevronRight className="h-4 w-4" />
+              {t("next")} <ChevronRight className="h-4 w-4" />
             </Button>
           ) : (
             <Button className="rounded-xl gap-2 px-6 shadow-sm shadow-primary/20" disabled={submitting} onClick={() => void handleSubmit()}>
-              {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</> : <><CheckCircle2 className="h-4 w-4" /> Submit request</>}
+              {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("submitting")}</> : <><CheckCircle2 className="h-4 w-4" /> {t("submit")}</>}
             </Button>
           )}
         </div>

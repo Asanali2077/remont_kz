@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
          AlertCircle, Sparkles, Building2, X, CreditCard } from "lucide-react";
 import { toast } from "sonner";
@@ -118,6 +119,8 @@ function getExpiry(expiresAt: string | null | undefined): { label: string; expir
    MAIN PAGE
 ════════════════════════════════ */
 export default function MyRequestsPage() {
+  const t = useTranslations("requests");
+  const tCommon = useTranslations("common");
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -181,13 +184,13 @@ export default function MyRequestsPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">My Dashboard</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">Track your requests and manage everything in one place</p>
+              <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">{t("noRequestsDesc")}</p>
             </div>
             <RequestCreateDialog
               trigger={
                 <Button className="rounded-xl gap-2 shadow-sm shadow-primary/20">
-                  <Sparkles className="h-4 w-4" /> New Request
+                  <Sparkles className="h-4 w-4" /> {t("createRequest")}
                 </Button>
               }
               onCreated={load}
@@ -242,9 +245,9 @@ export default function MyRequestsPage() {
               {!loading && requests.length === 0 && (
                 <div className="bg-card border border-border/50 rounded-2xl p-10 text-center">
                   <div className="text-5xl mb-5">👋</div>
-                  <h2 className="text-xl font-bold mb-2">Welcome to Remont.kz!</h2>
+                  <h2 className="text-xl font-bold mb-2">{t("noRequests")}</h2>
                   <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                    You have no requests yet. Create your first one and let verified companies send you offers.
+                    {t("noRequestsDesc")}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left mb-8">
                     {[
@@ -264,10 +267,10 @@ export default function MyRequestsPage() {
                   </div>
                   <div className="flex gap-3 justify-center">
                     <RequestCreateDialog
-                      trigger={<Button className="rounded-xl gap-2"><Sparkles className="h-4 w-4" /> Post a request</Button>}
+                      trigger={<Button className="rounded-xl gap-2"><Sparkles className="h-4 w-4" /> {t("createRequest")}</Button>}
                       onCreated={load}
                     />
-                    <Link href="/repair"><Button variant="outline" className="rounded-xl">Browse services</Button></Link>
+                    <Link href="/repair"><Button variant="outline" className="rounded-xl">{tCommon("more")}</Button></Link>
                   </div>
                 </div>
               )}
@@ -401,13 +404,13 @@ export default function MyRequestsPage() {
                               {req.status === "new" && !isExpired && (
                                 <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs text-muted-foreground"
                                   onClick={() => setCancelId(req.id)}>
-                                  Cancel request
+                                  {t("deleteRequest")}
                                 </Button>
                               )}
                               {req.status === "completed" && (
                                 <Link href={`/payment/${req.id}`}>
                                   <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1.5 border-green-300 text-green-700 dark:border-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/30">
-                                    <CreditCard className="h-3.5 w-3.5" /> Pay
+                                    <CreditCard className="h-3.5 w-3.5" /> {tCommon("submit")}
                                   </Button>
                                 </Link>
                               )}
@@ -415,7 +418,7 @@ export default function MyRequestsPage() {
                             {req.status === "completed" && req.rating === null && (
                               <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1.5 border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
                                 onClick={() => { setReviewRequest(req); setReviewStars(0); setReviewText(""); }}>
-                                <Star className="h-3.5 w-3.5" /> Leave a review
+                                <Star className="h-3.5 w-3.5" /> {t("rateWork")}
                               </Button>
                             )}
                           </div>
@@ -453,13 +456,13 @@ export default function MyRequestsPage() {
       <Dialog open={cancelId !== null} onOpenChange={(v) => { if (!v) setCancelId(null); }}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Cancel request?</DialogTitle>
-            <DialogDescription>This action is permanent. The request will be deleted and all offers will be withdrawn.</DialogDescription>
+            <DialogTitle>{t("deleteRequest")}</DialogTitle>
+            <DialogDescription>{t("deleteConfirm")}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelId(null)} disabled={cancelling} className="rounded-xl">Keep</Button>
+            <Button variant="outline" onClick={() => setCancelId(null)} disabled={cancelling} className="rounded-xl">{tCommon("cancel")}</Button>
             <Button variant="destructive" onClick={() => void handleCancel()} disabled={cancelling} className="rounded-xl">
-              {cancelling ? "Cancelling…" : "Yes, cancel"}
+              {cancelling ? "..." : tCommon("confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -469,12 +472,12 @@ export default function MyRequestsPage() {
       <Dialog open={reviewRequest !== null} onOpenChange={(v) => { if (!v) setReviewRequest(null); }}>
         <DialogContent className="sm:max-w-[440px]">
           <DialogHeader>
-            <DialogTitle>Leave a Review</DialogTitle>
-            <DialogDescription>How was your experience with this company?</DialogDescription>
+            <DialogTitle>{t("rateWork")}</DialogTitle>
+            <DialogDescription>{t("review")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <p className="text-sm font-semibold mb-3">Your rating *</p>
+              <p className="text-sm font-semibold mb-3">{t("rating")} *</p>
               <div className="flex gap-2">
                 {[1,2,3,4,5].map(s => (
                   <button key={s} onMouseEnter={() => setReviewHover(s)} onMouseLeave={() => setReviewHover(0)}
@@ -488,16 +491,16 @@ export default function MyRequestsPage() {
               )}
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold">Review (optional)</label>
-              <Textarea rows={3} placeholder="Share your experience…" value={reviewText}
+              <label className="text-sm font-semibold">{t("review")}</label>
+              <Textarea rows={3} placeholder={t("review")} value={reviewText}
                 onChange={e => setReviewText(e.target.value)} maxLength={1000} className="rounded-xl" />
               <p className="text-xs text-muted-foreground text-right">{reviewText.length}/1000</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewRequest(null)} className="rounded-xl">Cancel</Button>
+            <Button variant="outline" onClick={() => setReviewRequest(null)} className="rounded-xl">{tCommon("cancel")}</Button>
             <Button onClick={() => void handleReview()} disabled={reviewStars === 0 || submittingReview} className="rounded-xl">
-              {submittingReview ? "Submitting…" : "Submit Review"}
+              {submittingReview ? "..." : t("submitRating")}
             </Button>
           </DialogFooter>
         </DialogContent>

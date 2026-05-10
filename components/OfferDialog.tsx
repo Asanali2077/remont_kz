@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,8 @@ interface OfferDialogProps {
 }
 
 export function OfferDialog({ request, open, onOpenChange, onSubmit, submitting }: OfferDialogProps) {
+  const t = useTranslations("requests");
+  const tCommon = useTranslations("common");
   const [price, setPrice] = useState("");
   const [message, setMessage] = useState("");
 
@@ -34,7 +37,7 @@ export function OfferDialog({ request, open, onOpenChange, onSubmit, submitting 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>Make an offer</DialogTitle>
+          <DialogTitle>{t("makeOffer")}</DialogTitle>
         </DialogHeader>
 
         {request && (
@@ -43,12 +46,12 @@ export function OfferDialog({ request, open, onOpenChange, onSubmit, submitting 
             <div className="rounded-xl bg-muted/40 border border-border/50 p-3 space-y-1">
               <p className="text-sm font-semibold line-clamp-2">{request.service?.name ?? request.description.slice(0, 80)}</p>
               {budget && (
-                <p className="text-xs text-muted-foreground">Client budget: <span className="font-semibold text-foreground">{budget}</span></p>
+                <p className="text-xs text-muted-foreground">{t("budget")}: <span className="font-semibold text-foreground">{budget}</span></p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your price (₸) *</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("offerPrice")} (₸) *</Label>
               <Input
                 type="number" min={1} placeholder="e.g. 50,000"
                 value={price} onChange={e => setPrice(e.target.value)}
@@ -58,7 +61,7 @@ export function OfferDialog({ request, open, onOpenChange, onSubmit, submitting 
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Message <span className="font-normal text-muted-foreground/60">(optional)</span>
+                {t("offerMessage")} <span className="font-normal text-muted-foreground/60">({tCommon("none")})</span>
               </Label>
               <Textarea
                 rows={3}
@@ -71,7 +74,7 @@ export function OfferDialog({ request, open, onOpenChange, onSubmit, submitting 
 
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">
-                Cancel
+                {tCommon("cancel")}
               </Button>
               <Button
                 onClick={() => void onSubmit(priceNum, message)}
@@ -79,7 +82,7 @@ export function OfferDialog({ request, open, onOpenChange, onSubmit, submitting 
                 className="rounded-xl gap-1.5"
               >
                 <CheckCircle2 className="h-4 w-4" />
-                {submitting ? "Sending…" : "Send offer"}
+                {submitting ? tCommon("loading") : t("makeOffer")}
               </Button>
             </div>
           </div>
