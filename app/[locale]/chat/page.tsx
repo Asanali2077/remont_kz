@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { MessageSquare, Loader2, ArrowRight, Circle } from "lucide-react";
@@ -21,6 +22,7 @@ interface ChatItem {
 
 
 export default function ChatInboxPage() {
+  const t = useTranslations("chat");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [chats, setChats] = useState<ChatItem[]>([]);
@@ -56,7 +58,7 @@ export default function ChatInboxPage() {
             <MessageSquare className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Messages</h1>
+            <h1 className="text-xl font-bold">{t("title")}</h1>
             {chats.length > 0 && <p className="text-xs text-muted-foreground">{chats.length} conversations</p>}
           </div>
         </div>
@@ -66,9 +68,9 @@ export default function ChatInboxPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted mx-auto mb-4">
               <MessageSquare className="h-6 w-6 text-muted-foreground" />
             </div>
-            <p className="font-medium">No conversations yet</p>
+            <p className="font-medium">{t("noChats")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Conversations appear once a company accepts your request
+              {t("noChatsDesc")}
             </p>
           </div>
         ) : (
@@ -84,7 +86,7 @@ export default function ChatInboxPage() {
               return (
                 <Link
                   key={chat.requestId}
-                  href={`/chat/${chat.requestId}`}
+                  href={`/chat/${chat.requestId}` as `/chat/${string}`}
                   className={`flex items-center gap-4 px-5 py-4 hover:bg-muted/50 transition-colors ${i !== chats.length - 1 ? "border-b border-border/40" : ""}`}
                 >
                   {/* Avatar */}

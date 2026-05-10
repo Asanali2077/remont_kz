@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { ArrowLeft, Send, Loader2, Phone, Mail, Paperclip } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
@@ -11,6 +13,7 @@ import type { MessageRecord, RequestRecord } from "@/lib/types";
 import { toast } from "sonner";
 
 export default function ChatPage() {
+  const t = useTranslations("chat");
   const { requestId } = useParams<{ requestId: string }>();
   const router = useRouter();
   const { user } = useAuth();
@@ -186,7 +189,7 @@ export default function ChatPage() {
                 <span className="text-2xl font-bold text-muted-foreground">{otherInitial}</span>
               </div>
               <p className="text-sm font-medium">{otherParty?.name ?? otherParty?.email}</p>
-              <p className="text-xs text-muted-foreground mt-1">Send the first message to start the conversation</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("noChatsDesc")}</p>
             </div>
           )}
 
@@ -257,7 +260,7 @@ export default function ChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(); } }}
-              placeholder="Write a message…"
+              placeholder={t("messagePlaceholder")}
               disabled={sending || uploadingFile}
               className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 px-0 text-sm"
             />
