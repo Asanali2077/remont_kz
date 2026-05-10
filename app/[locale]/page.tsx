@@ -16,8 +16,8 @@ import {
   Star, ArrowRight, Shield, Zap, Users, ChevronRight, Award,
   MapPin, Clock, TrendingUp,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/routing";
 
 /* ─── Animated counter ─── */
 function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -52,14 +52,12 @@ function FadeUp({ children, delay = 0, className = "" }: { children: React.React
 }
 
 /* ─── Typewriter rotating words ─── */
-const ROTATE_WORDS = ["car repair", "apartment renovation", "office fit-out", "equipment service", "plumbing work", "electrical work"];
-
-function TypewriterHero() {
+function TypewriterHero({ words }: { words: string[] }) {
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % ROTATE_WORDS.length), 2800);
+    const t = setInterval(() => setIdx((i) => (i + 1) % words.length), 2800);
     return () => clearInterval(t);
-  }, []);
+  }, [words.length]);
   return (
     <span className="relative inline-block">
       <AnimatePresence mode="wait">
@@ -70,7 +68,7 @@ function TypewriterHero() {
           exit={{ opacity: 0, y: -20, filter: "blur(8px)" }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
-          {ROTATE_WORDS[idx]}
+          {words[idx]}
         </motion.span>
       </AnimatePresence>
     </span>
@@ -196,6 +194,7 @@ function CompanyMarquee() {
 /* ─── Search bar ─── */
 function HeroSearch() {
   const router = useRouter();
+  const t = useTranslations("home");
   const [city, setCity] = useState("");
   const [category, setCategory] = useState("");
 
@@ -213,10 +212,10 @@ function HeroSearch() {
         <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
         <Select value={city} onValueChange={setCity}>
           <SelectTrigger className="border-0 shadow-none h-9 p-0 font-medium focus:ring-0 text-sm">
-            <SelectValue placeholder="Any city" />
+            <SelectValue placeholder={t("allCities")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="any">Any city</SelectItem>
+            <SelectItem value="any">{t("allCities")}</SelectItem>
             {KZ_CITIES.slice(0, 20).map((c) => (
               <SelectItem key={c} value={c}>{c}</SelectItem>
             ))}
@@ -242,7 +241,7 @@ function HeroSearch() {
 
       {/* Button */}
       <Button onClick={handleSearch} className="gap-2 rounded-xl h-11 px-5 font-semibold shrink-0">
-        <Search className="h-4 w-4" /> Find services
+        <Search className="h-4 w-4" /> {t("searchButton")}
       </Button>
     </div>
   );
@@ -273,31 +272,28 @@ const CATEGORIES = [
   },
 ];
 
-const STEPS = [
-  { n: "01", icon: Search,        title: "Describe your task",   desc: "Fill in a quick form — type of work, city, budget. Takes 2 minutes." },
-  { n: "02", icon: ClipboardList, title: "Get offers",            desc: "Verified companies respond with their prices within a few hours." },
-  { n: "03", icon: CheckCircle2,  title: "Choose & confirm",      desc: "Compare offers, read reviews, and confirm the best match." },
-];
-
-const FEATURES = [
-  { icon: Shield, title: "Verified companies",  desc: "Every contractor passes an identity check before listing.", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600" },
-  { icon: Star,   title: "Real reviews only",    desc: "Only clients who completed a job can leave a review.", color: "bg-amber-50 dark:bg-amber-950/40 text-amber-600" },
-  { icon: Zap,    title: "Fast responses",        desc: "Average response time from companies is under 2 hours.", color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600" },
-  { icon: Users,  title: "200+ companies",        desc: "Wide network covering all major cities in Kazakhstan.", color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600" },
-];
-
-const TESTIMONIALS = [
-  { name: "Asel M.", city: "Almaty", rating: 5, text: "Found a great auto repair shop in 20 minutes. Fair price, excellent quality. Will definitely use again!", role: "Client" },
-  { name: "Dmitry K.", city: "Astana", rating: 5, text: "Submitted a request for apartment renovation, got 4 offers the same day. Very happy with the result.", role: "Client" },
-  { name: "Zarina T.", city: "Shymkent", rating: 5, text: "No need to call around — companies contact you. Saved a huge amount of time. Love this platform.", role: "Client" },
-];
-
 /* ══════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════ */
 export default function HomePage() {
   const { user } = useAuth();
   const heroRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("home");
+
+  const ROTATE_WORDS = t.raw("rotateWords") as string[];
+
+  const STEPS = [
+    { n: "01", icon: Search,        title: t("step1Title"), desc: t("step1Desc") },
+    { n: "02", icon: ClipboardList, title: t("step2Title"), desc: t("step2Desc") },
+    { n: "03", icon: CheckCircle2,  title: t("step3Title"), desc: t("step3Desc") },
+  ];
+
+  const FEATURES = [
+    { icon: Shield, title: t("benefit1Title"), desc: t("benefit1Desc"), color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600" },
+    { icon: Star,   title: t("benefit2Title"), desc: t("benefit2Desc"), color: "bg-amber-50 dark:bg-amber-950/40 text-amber-600" },
+    { icon: Zap,    title: t("benefit3Title"), desc: t("benefit3Desc"), color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600" },
+    { icon: Users,  title: "200+ companies",   desc: "Wide network covering all major cities in Kazakhstan.", color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600" },
+  ];
 
   // Show toast if redirected from session expiry
   useEffect(() => {
@@ -358,16 +354,15 @@ export default function HomePage() {
               {/* Heading with typewriter */}
               <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
                 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-6">
-                Find experts for
+                {t("heroTitle")}
                 <br />
-                <TypewriterHero />
+                <TypewriterHero words={ROTATE_WORDS} />
               </motion.h1>
 
               {/* Subtitle */}
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
                 className="text-lg md:text-xl text-muted-foreground max-w-xl mb-8 leading-relaxed">
-                Describe your task — verified companies send offers within hours.
-                Compare prices, check reviews, confirm confidently.
+                {t("heroDescription")}
               </motion.p>
 
               {/* Search bar */}
@@ -404,10 +399,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { target: 200, suffix: "+", label: "Companies", icon: Users },
-              { target: 1500, suffix: "+", label: "Completed jobs", icon: CheckCircle2 },
-              { target: 14, suffix: "", label: "Cities covered", icon: MapPin },
-              { target: 98, suffix: "%", label: "Satisfaction rate", icon: TrendingUp },
+              { target: 200, suffix: "+", label: t("stats.companies"), icon: Users },
+              { target: 1500, suffix: "+", label: t("stats.requests"), icon: CheckCircle2 },
+              { target: 14, suffix: "", label: t("stats.services"), icon: MapPin },
+              { target: 98, suffix: "%", label: t("stats.rating"), icon: TrendingUp },
             ].map(({ target, suffix, label, icon: Icon }) => (
               <div key={label} className="text-center group">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 mb-3 group-hover:bg-primary/20 transition-colors">
@@ -471,10 +466,10 @@ export default function HomePage() {
               <div className="flex items-end justify-between mb-10">
                 <div>
                   <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Top rated</p>
-                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">Featured services</h2>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">{t("featuredServices")}</h2>
                 </div>
                 <Link href="/repair" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-3 transition-all duration-200">
-                  View all <ArrowRight className="h-4 w-4" />
+                  {t("viewAll")} <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </FadeUp>
@@ -490,7 +485,7 @@ export default function HomePage() {
             <div className="mt-6 text-center sm:hidden">
               <Link href="/repair">
                 <Button variant="outline" className="rounded-xl gap-2">
-                  View all services <ArrowRight className="h-4 w-4" />
+                  {t("viewAll")} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -504,7 +499,7 @@ export default function HomePage() {
           <FadeUp>
             <div className="text-center mb-14">
               <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Process</p>
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">How it works</h2>
+              <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">{t("howItWorks")}</h2>
               <p className="text-muted-foreground max-w-sm mx-auto">Get connected with verified contractors in 3 simple steps</p>
             </div>
           </FadeUp>
@@ -514,7 +509,7 @@ export default function HomePage() {
             <div className="hidden md:block absolute top-12 left-[calc(16.7%+40px)] right-[calc(16.7%+40px)] border-t-2 border-dashed border-border/60" />
 
             {STEPS.map(({ n, icon: Icon, title, desc }, i) => (
-              <FadeUp key={title} delay={i * 0.15}>
+              <FadeUp key={n} delay={i * 0.15}>
                 <div className="relative">
                   <div className="relative mx-auto mb-6 h-24 w-24 flex items-center justify-center">
                     {/* Outer ring */}
@@ -574,19 +569,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ════ FEATURES ════ */}
+      {/* ════ FEATURES / WHY US ════ */}
       <section className="py-20 px-4">
         <div className="mx-auto max-w-6xl">
           <FadeUp>
             <div className="text-center mb-12">
               <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Why choose us</p>
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight">Built for trust</h2>
+              <h2 className="text-3xl md:text-4xl font-black tracking-tight">{t("whyUs")}</h2>
             </div>
           </FadeUp>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {FEATURES.map(({ icon: Icon, title, desc, color }, i) => (
-              <FadeUp key={title} delay={i * 0.1}>
+              <FadeUp key={i} delay={i * 0.1}>
                 <div className="group rounded-2xl border border-border/50 bg-card p-6 hover:shadow-lg hover:border-border hover:-translate-y-1 transition-all duration-300">
                   <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl mb-4 transition-all duration-200 group-hover:scale-110 ${color}`}>
                     <Icon className="h-5 w-5" />
@@ -611,7 +606,11 @@ export default function HomePage() {
           </FadeUp>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {TESTIMONIALS.map(({ name, city, rating, text, role }, i) => (
+            {[
+              { name: "Asel M.", city: "Almaty", rating: 5, text: "Found a great auto repair shop in 20 minutes. Fair price, excellent quality. Will definitely use again!", role: "Client" },
+              { name: "Dmitry K.", city: "Astana", rating: 5, text: "Submitted a request for apartment renovation, got 4 offers the same day. Very happy with the result.", role: "Client" },
+              { name: "Zarina T.", city: "Shymkent", rating: 5, text: "No need to call around — companies contact you. Saved a huge amount of time. Love this platform.", role: "Client" },
+            ].map(({ name, city, rating, text, role }, i) => (
               <FadeUp key={name} delay={i * 0.1}>
                 <div className="group rounded-2xl border border-border/50 bg-card p-6 flex flex-col gap-4 hover:shadow-lg hover:border-border transition-all duration-300">
                   {/* Stars */}
@@ -673,28 +672,28 @@ export default function HomePage() {
                 </div>
 
                 <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">
-                  Ready to find your<br />perfect contractor?
+                  {t("ctaTitle")}
                 </h2>
                 <p className="text-white/75 mb-8 max-w-md mx-auto text-lg">
-                  Join thousands of clients who found trusted help on Remont.kz
+                  {t("ctaDesc")}
                 </p>
 
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Link href="/repair">
                     <Button size="lg" variant="secondary" className="h-12 px-7 font-bold rounded-xl text-base shadow-lg">
-                      Browse services
+                      {t("viewAll")}
                     </Button>
                   </Link>
                   {!user ? (
                     <AuthModal defaultMode="register" trigger={
                       <Button size="lg" className="h-12 px-7 font-bold rounded-xl text-base bg-white text-primary hover:bg-white/95 shadow-lg">
-                        Sign up free →
+                        {t("ctaButton")}
                       </Button>
                     } />
                   ) : (
                     <Link href="/repair">
                       <Button size="lg" className="h-12 px-7 font-bold rounded-xl text-base bg-white text-primary hover:bg-white/95 shadow-lg">
-                        Post a request →
+                        {t("ctaButton")}
                       </Button>
                     </Link>
                   )}
