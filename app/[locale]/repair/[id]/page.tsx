@@ -2,7 +2,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import {
   ArrowLeft, MapPin, Star, CheckCircle2, Loader2,
   Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, ImageIcon,
@@ -70,7 +72,7 @@ function Lightbox({ images, startIndex, onClose }: {
 }
 
 /* ── Location card: Google Maps iframe embed + 2GIS button ── */
-function LocationCard({ address, city }: { address?: string | null; city?: string | null }) {
+function LocationCard({ address, city, locationLabel, openInLabel }: { address?: string | null; city?: string | null; locationLabel: string; openInLabel: string }) {
   if (!address && !city) return null;
 
   const displayAddress = [address, city].filter(Boolean).join(", ");
@@ -80,7 +82,7 @@ function LocationCard({ address, city }: { address?: string | null; city?: strin
 
   return (
     <div className="space-y-3">
-      <h2 className="font-semibold text-lg">Location</h2>
+      <h2 className="font-semibold text-lg">{locationLabel}</h2>
 
       <p className="text-sm text-muted-foreground flex items-start gap-1.5">
         <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
@@ -110,7 +112,7 @@ function LocationCard({ address, city }: { address?: string | null; city?: strin
         <svg viewBox="0 0 24 24" className="h-5 w-5 fill-white" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
         </svg>
-        Open in 2GIS
+        {openInLabel}
       </a>
     </div>
   );
@@ -120,6 +122,8 @@ export default function ServiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations("service");
+  const tCommon = useTranslations("common");
 
   const [service, setService] = useState<ServiceRecord | null>(null);
   const [loading, setLoading] = useState(true);
@@ -160,17 +164,17 @@ export default function ServiceDetailPage() {
     if (!user) return (
       <AuthModal trigger={
         <Button size="lg" className="w-full gap-2">
-          <CheckCircle2 className="h-4 w-4" /> Log in to request
+          <CheckCircle2 className="h-4 w-4" /> {t("createRequest")}
         </Button>
       } />
     );
     if (user.role !== "client") return (
-      <Button size="lg" disabled className="w-full">Client account required</Button>
+      <Button size="lg" disabled className="w-full">{t("createRequest")}</Button>
     );
     return (
       <RequestCreateDialog service={service} trigger={
         <Button size="lg" className="w-full gap-2 shadow-lg shadow-primary/25">
-          <CheckCircle2 className="h-4 w-4" /> Request this service
+          <CheckCircle2 className="h-4 w-4" /> {t("createRequest")}
         </Button>
       } />
     );
@@ -201,7 +205,7 @@ export default function ServiceDetailPage() {
         {/* Breadcrumb */}
         <button onClick={() => router.back()}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5 group">
-          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> Back to catalog
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> {tCommon("back")}
         </button>
 
         {/* ══ TOP: gallery LEFT + action card RIGHT ══ */}
@@ -269,7 +273,7 @@ export default function ServiceDetailPage() {
 
               {/* Company block */}
               <div className="pt-1 space-y-3">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Company</p>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{t("company")}</p>
                 <div className="flex items-center gap-2.5">
                   <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
                     {(service.company.name ?? service.company.email)[0].toUpperCase()}
@@ -322,7 +326,7 @@ export default function ServiceDetailPage() {
 
             {/* Description */}
             <div className="bg-card border border-border/50 rounded-2xl p-5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Description</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">{t("description")}</p>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{service.description}</p>
             </div>
 
@@ -361,7 +365,7 @@ export default function ServiceDetailPage() {
 
           {/* Map — 2/5 */}
           <div className="lg:col-span-2">
-            <LocationCard address={service.address} city={service.city} />
+            <LocationCard address={service.address} city={service.city} locationLabel={t("location")} openInLabel="Open in 2GIS" />
           </div>
         </div>
 
@@ -372,7 +376,7 @@ export default function ServiceDetailPage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/40">
                 <MessageSquare className="h-4 w-4 text-amber-600" />
               </div>
-              <h2 className="font-bold text-lg">Reviews</h2>
+              <h2 className="font-bold text-lg">{t("reviews")}</h2>
               <span className="text-sm text-muted-foreground">({reviews.length})</span>
             </div>
             <div className="space-y-3">
@@ -462,7 +466,7 @@ export default function ServiceDetailPage() {
       {similar.length > 0 && (
         <div className="mx-auto max-w-6xl px-4 pb-8 mt-8">
           <div className="flex items-center gap-2.5 mb-4">
-            <h2 className="font-bold text-lg">Similar Services</h2>
+            <h2 className="font-bold text-lg">{t("similarServices")}</h2>
             <span className="text-sm text-muted-foreground">({similar.length})</span>
           </div>
           <div className="flex flex-col gap-3">

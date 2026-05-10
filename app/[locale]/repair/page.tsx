@@ -7,6 +7,7 @@ import {
   Car, Home, Wrench, Star, Image, CheckCircle2, ChevronDown,
   Sparkles, MapPin, ArrowRight, LocateFixed,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Footer } from "@/components/Footer";
 import { OrgCard } from "@/components/OrgCard";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
@@ -20,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import type { ServiceRecord } from "@/lib/types";
 import type { TopCategory } from "@/lib/categories";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { CATEGORY_COLORS, fmtNum } from "@/lib/utils";
 
 const PAGE_SIZE = 10;
@@ -183,23 +184,23 @@ function ActiveChips(props: ActiveChipsProps) {
   );
 }
 
-/* ─── Quick filter tabs ─── */
-const QUICK_FILTERS = [
-  { label: "All",         icon: null,   value: null,            type: "category" },
-  { label: "Automobiles", icon: Car,    value: "AUTOMOBILES",   type: "category" },
-  { label: "Real Estate", icon: Home,   value: "REAL_ESTATE",   type: "category" },
-  { label: "Other",       icon: Wrench, value: "OTHER",         type: "category" },
-  { label: "Top rated",   icon: Star,   value: "rating",        type: "sort" },
-  { label: "With photos", icon: Image,  value: "photos",        type: "photos" },
+/* ─── Quick filter tabs (labels set in component) ─── */
+const QUICK_FILTER_DEFS = [
+  { labelKey: "all",         icon: null,   value: null,            type: "category" },
+  { labelKey: "AUTOMOBILES", icon: Car,    value: "AUTOMOBILES",   type: "category" },
+  { labelKey: "REAL_ESTATE", icon: Home,   value: "REAL_ESTATE",   type: "category" },
+  { labelKey: "OTHER",       icon: Wrench, value: "OTHER",         type: "category" },
+  { labelKey: "rating",      icon: Star,   value: "rating",        type: "sort" },
+  { labelKey: "hasPhotos",   icon: Image,  value: "photos",        type: "photos" },
 ] as const;
 
-/* ─── Sort tabs ─── */
-const SORT_OPTIONS: { label: string; value: SortOption }[] = [
-  { label: "Relevance", value: "relevance" },
-  { label: "Top rated", value: "rating" },
-  { label: "Price ↑",   value: "price" },
-  { label: "Price ↓",   value: "price-desc" },
-  { label: "Popular",   value: "requests" },
+/* ─── Sort option keys ─── */
+const SORT_OPTION_KEYS: { key: "rating" | "price_asc" | "price_desc" | "newest" | null; value: SortOption }[] = [
+  { key: null,         value: "relevance" },
+  { key: "rating",    value: "rating" },
+  { key: "price_asc", value: "price" },
+  { key: "price_desc",value: "price-desc" },
+  { key: "newest",    value: "requests" },
 ];
 
 /* ════════════════════════════════
@@ -207,6 +208,8 @@ const SORT_OPTIONS: { label: string; value: SortOption }[] = [
 ════════════════════════════════ */
 function RepairContent() {
   const { user } = useAuth();
+  const t = useTranslations("repair");
+  const tCat = useTranslations("categories");
   const searchParams = useSearchParams();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -329,7 +332,7 @@ function RepairContent() {
     );
   }
 
-  function handleQuickFilter(filter: typeof QUICK_FILTERS[number]) {
+  function handleQuickFilter(filter: typeof QUICK_FILTER_DEFS[number]) {
     if (filter.type === "category") {
       setCategoryFilter(filter.value ? { category: filter.value as TopCategory } : {});
     } else if (filter.type === "sort") {
@@ -342,12 +345,12 @@ function RepairContent() {
   const activeCategory = categoryFilter.category ?? null;
 
   const createRequestAction = (() => {
-    if (!user) return <AuthModal trigger={<Button variant="outline" size="sm" className="rounded-xl">Log in to request</Button>} />;
+    if (!user) return <AuthModal trigger={<Button variant="outline" size="sm" className="rounded-xl">{t("createRequest") || "Log in to request"}</Button>} />;
     if (user.role !== "client") return null;
     return (
       <div className="flex gap-2">
         <AiRequestBot onCreated={() => void loadServices()} />
-        <RequestCreateDialog trigger={<Button size="sm" className="rounded-xl gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Post request</Button>} />
+        <RequestCreateDialog trigger={<Button size="sm" className="rounded-xl gap-1.5"><Sparkles className="h-3.5 w-3.5" /> {t("createRequest") || "Post request"}</Button>} />
       </div>
     );
   })();
@@ -390,14 +393,14 @@ function RepairContent() {
         {/* Header */}
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Service Catalog</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">Find verified contractors in Kazakhstan</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+            <p className="mt-0.5 text-sm text-muted-foreground">{t("subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="gap-1.5 rounded-xl hidden sm:inline-flex"
               onClick={useMyLocation} title="Use my location">
               <LocateFixed className="h-3.5 w-3.5" />
-              {city ? `📍 ${city}` : "Near me"}
+              {city ? `📍 ${city}` : t("nearMe")}
             </Button>
             {createRequestAction}
           </div>
@@ -416,17 +419,23 @@ function RepairContent() {
 
         {/* ── Quick filter tabs ── */}
         <div className="flex flex-wrap gap-2 mb-5">
-          {QUICK_FILTERS.map((f) => {
+          {QUICK_FILTER_DEFS.map((f) => {
             const isActive =
               f.type === "category" ? (f.value ? activeCategory === f.value : !activeCategory) :
               f.type === "sort"     ? sortBy === f.value :
               f.type === "photos"   ? hasPhotos : false;
             const Icon = f.icon;
+            const label = f.type === "category" && f.value
+              ? tCat(f.value as "AUTOMOBILES" | "REAL_ESTATE" | "OTHER")
+              : f.labelKey === "all" ? t("allCategories")
+              : f.labelKey === "rating" ? t("sortOptions.rating")
+              : f.labelKey === "hasPhotos" ? "📸"
+              : f.labelKey;
             return (
-              <button key={f.label} onClick={() => handleQuickFilter(f)}
+              <button key={f.labelKey} onClick={() => handleQuickFilter(f)}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${isActive ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/20" : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5"}`}>
                 {Icon && <Icon className="h-3.5 w-3.5" />}
-                {f.label}
+                {label}
               </button>
             );
           })}
@@ -484,10 +493,10 @@ function RepairContent() {
             <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
               {/* Sort tabs */}
               <div className="flex items-center gap-1 flex-wrap">
-                {SORT_OPTIONS.map(({ label, value }) => (
+                {SORT_OPTION_KEYS.map(({ key, value }) => (
                   <button key={value} onClick={() => setSortBy(value)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${sortBy === value ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
-                    {label}
+                    {key ? t(`sortOptions.${key}`) : t("sortBy")}
                   </button>
                 ))}
               </div>
@@ -496,7 +505,7 @@ function RepairContent() {
               <div className="flex items-center gap-3">
                 {!loading && (
                   <p className="text-xs text-muted-foreground hidden sm:block">
-                    <span className="font-bold text-foreground">{filtered.length}</span> of {services.length}
+                    <span className="font-bold text-foreground">{filtered.length}</span> {t("found") || "of"} {services.length}
                   </p>
                 )}
                 <div className="flex items-center gap-0.5 border border-border/50 rounded-xl p-0.5 bg-card">
@@ -560,13 +569,13 @@ function RepairContent() {
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mx-auto mb-5">
                   <Search className="h-7 w-7 text-muted-foreground" />
                 </div>
-                <h3 className="font-bold text-lg mb-1">No services found</h3>
+                <h3 className="font-bold text-lg mb-1">{t("noResults")}</h3>
                 <p className="text-sm text-muted-foreground mb-5 max-w-xs mx-auto">
-                  Try adjusting the filters, or describe your task and let companies come to you
+                  {t("noResultsDesc")}
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Button variant="outline" className="rounded-xl gap-2" onClick={resetFilters}>
-                    <X className="h-4 w-4" /> Reset filters
+                    <X className="h-4 w-4" /> {t("resetFilters")}
                   </Button>
                   {user?.role === "client" && (
                     <RequestCreateDialog trigger={
@@ -580,15 +589,15 @@ function RepairContent() {
                 <div className="mt-8 pt-6 border-t border-border/40">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Browse instead</p>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {[
-                      { label: "🚗 Automobiles", cat: "AUTOMOBILES" },
-                      { label: "🏠 Real Estate", cat: "REAL_ESTATE" },
-                      { label: "🔧 Other", cat: "OTHER" },
-                    ].map(({ label, cat }) => (
+                    {([
+                      { labelKey: "AUTOMOBILES" as const, emoji: "🚗", cat: "AUTOMOBILES" },
+                      { labelKey: "REAL_ESTATE" as const, emoji: "🏠", cat: "REAL_ESTATE" },
+                      { labelKey: "OTHER" as const, emoji: "🔧", cat: "OTHER" },
+                    ] as const).map(({ labelKey, emoji, cat }) => (
                       <button key={cat}
                         onClick={() => { resetFilters(); setCategoryFilter({ category: cat as TopCategory }); }}
                         className="rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all">
-                        {label}
+                        {emoji} {tCat(labelKey)}
                       </button>
                     ))}
                   </div>

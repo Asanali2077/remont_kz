@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -46,6 +47,8 @@ export interface FilterBarProps {
 }
 
 function FilterContent(props: FilterBarProps) {
+  const t = useTranslations("repair");
+  const tCommon = useTranslations("common");
   const {
     categoryFilter, onChangeCategoryFilter, showCategory = true,
     query = "", city,
@@ -63,11 +66,11 @@ function FilterContent(props: FilterBarProps) {
       {/* Search */}
       {showQuery && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Search</Label>
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tCommon("search")}</Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Name, service, tag…"
+              placeholder={t("searchPlaceholder")}
               value={query}
               onChange={(e) => onChangeQuery?.(e.target.value)}
               className="pl-9"
@@ -79,13 +82,13 @@ function FilterContent(props: FilterBarProps) {
       {/* City */}
       {showCity && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">City</Label>
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("city")}</Label>
           <Select value={city || "__any__"} onValueChange={(v) => onChangeCity?.(v === "__any__" ? undefined : v)}>
             <SelectTrigger>
-              <SelectValue placeholder="Any city" />
+              <SelectValue placeholder={t("allCities")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__any__">Any city</SelectItem>
+              <SelectItem value="__any__">{t("allCities")}</SelectItem>
               {KZ_CITIES.map((c) => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
@@ -97,7 +100,7 @@ function FilterContent(props: FilterBarProps) {
       {/* Category */}
       {showCategory && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Category</Label>
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("category")}</Label>
           <CategoryFilter value={categoryFilter ?? {}} onChange={(v) => onChangeCategoryFilter?.(v)} />
         </div>
       )}
@@ -105,7 +108,7 @@ function FilterContent(props: FilterBarProps) {
       {/* Price Range */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Price Range</Label>
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("priceRange")}</Label>
           <span className="text-xs font-medium">{priceRange[0].toLocaleString("ru-RU")} — {priceRange[1].toLocaleString("ru-RU")} ₸</span>
         </div>
         <div className="px-1 pt-1">
@@ -120,27 +123,27 @@ function FilterContent(props: FilterBarProps) {
       {/* Rating */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Min. Rating</Label>
-          <span className="text-xs font-medium">{minRating > 0 ? `${minRating.toFixed(1)} ★` : "Any"}</span>
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">★</Label>
+          <span className="text-xs font-medium">{minRating > 0 ? `${minRating.toFixed(1)} ★` : tCommon("all")}</span>
         </div>
         <div className="px-1 pt-1">
           <Slider min={0} max={5} step={0.5} value={[minRating]} onValueChange={(v) => onChangeMinRating(v[0] as number)} />
-          <div className="flex justify-between mt-1 text-xs text-muted-foreground"><span>Any</span><span>5.0 ★</span></div>
+          <div className="flex justify-between mt-1 text-xs text-muted-foreground"><span>{tCommon("all")}</span><span>5.0 ★</span></div>
         </div>
       </div>
 
       {/* Sort */}
       {showSort && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sort By</Label>
+          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("sortBy")}</Label>
           <Select value={sortBy} onValueChange={(v) => onChangeSort?.(v as SortOption)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="relevance">Relevance</SelectItem>
-              <SelectItem value="rating">Highest rated</SelectItem>
-              <SelectItem value="price">Price: low to high</SelectItem>
-              <SelectItem value="price-desc">Price: high to low</SelectItem>
-              <SelectItem value="requests">Most popular</SelectItem>
+              <SelectItem value="relevance">{t("sortBy")}</SelectItem>
+              <SelectItem value="rating">{t("sortOptions.rating")}</SelectItem>
+              <SelectItem value="price">{t("sortOptions.price_asc")}</SelectItem>
+              <SelectItem value="price-desc">{t("sortOptions.price_desc")}</SelectItem>
+              <SelectItem value="requests">{t("sortOptions.newest")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -154,13 +157,13 @@ function FilterContent(props: FilterBarProps) {
           onCheckedChange={(v) => onChangeHasPhotos?.(!!v)}
         />
         <label htmlFor="has-photos" className="text-sm flex items-center gap-1.5 cursor-pointer select-none">
-          <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" /> With photos only
+          <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" /> {t("licensed")}
         </label>
       </div>
 
       {onReset && (
         <Button variant="outline" onClick={onReset} className="w-full gap-2">
-          <X className="h-4 w-4" /> Reset all filters
+          <X className="h-4 w-4" /> {tCommon("reset")}
         </Button>
       )}
     </div>
@@ -169,6 +172,8 @@ function FilterContent(props: FilterBarProps) {
 
 export function FilterBar(props: FilterBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useTranslations("repair");
+  const tCommon = useTranslations("common");
 
   return (
     <>
@@ -177,7 +182,7 @@ export function FilterBar(props: FilterBarProps) {
         <CardContent className="pt-5 pb-5">
           <div className="flex items-center gap-2 mb-5 pb-4 border-b">
             <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold text-sm">{props.title ?? "Filters"}</span>
+            <span className="font-semibold text-sm">{props.title ?? t("filterTitle")}</span>
           </div>
           <FilterContent {...props} />
         </CardContent>
@@ -189,14 +194,14 @@ export function FilterBar(props: FilterBarProps) {
           <div className="flex items-center justify-between mb-4">
             <DialogTrigger asChild>
               <Button size="sm" variant="outline" className="gap-2">
-                <Filter className="h-4 w-4" /> Filters
+                <Filter className="h-4 w-4" /> {t("filterTitle")}
               </Button>
             </DialogTrigger>
           </div>
           <DialogContent className="max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <SlidersHorizontal className="h-4 w-4" /> Filters
+                <SlidersHorizontal className="h-4 w-4" /> {t("filterTitle")}
               </DialogTitle>
             </DialogHeader>
             <FilterContent
@@ -204,7 +209,7 @@ export function FilterBar(props: FilterBarProps) {
               onApply={() => { props.onApply?.(); setMobileOpen(false); }}
             />
             <Button className="w-full mt-2" onClick={() => setMobileOpen(false)}>
-              Apply
+              {tCommon("apply")}
             </Button>
           </DialogContent>
         </Dialog>
