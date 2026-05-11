@@ -9,6 +9,7 @@ const ITEMS = [
   { label: "Messages",       icon: MessageSquare,  href: "/chat" },
   { label: "Saved Services", icon: Heart,          href: "/favorites" },
   { label: "Notifications",  icon: Bell,           href: "/notifications" },
+  { label: "My Payments",    icon: CreditCard,     href: "/my-payments" },
   { label: "Billing",        icon: CreditCard,     href: "/billing" },
   { label: "Profile",        icon: User,           href: "/profile" },
 ];

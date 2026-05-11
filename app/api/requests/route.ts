@@ -41,6 +41,7 @@ const createRequestSchema = z
     imageUrl: z.string().min(1).optional(),
     budgetFrom: z.number().positive().optional(),
     budgetTo: z.number().positive().optional(),
+    deadline: z.string().datetime().optional().nullable(),
   })
   .superRefine((data, ctx) => {
     if (!data.serviceId) {
@@ -257,6 +258,7 @@ export async function POST(request: NextRequest) {
         imageUrl: validatedData.imageUrl,
         budgetFrom: validatedData.budgetFrom ?? null,
         budgetTo: validatedData.budgetTo ?? null,
+        deadline: validatedData.deadline ? new Date(validatedData.deadline) : null,
         status: RequestStatus.NEW,
         expiresAt,
       },

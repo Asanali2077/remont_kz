@@ -42,6 +42,7 @@ export interface CreateRequestPayload {
   imageUrl?: string;
   budgetFrom?: number;
   budgetTo?: number;
+  deadline?: string;
 }
 
 class ApiClient {

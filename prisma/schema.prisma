@@ -155,6 +155,7 @@ model Request {
   budgetFrom    Float?
   budgetTo    Float?
   expiresAt   DateTime?
+  deadline    DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -237,6 +238,10 @@ model Payment {
   amount      Float
   status      PaymentStatus @default(PENDING)
   method      String        @default("card")
+  discountAmount Float      @default(0)
+  promoCodeId  String?
+  promoCode    PromoCode?   @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  kaspiOrderId String?
   paidAt      DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -246,6 +251,7 @@ model Payment {
 
   @@index([requestId])
   @@index([clientId])
+  @@index([promoCodeId])
 }
 
 model PortfolioPhoto {
@@ -277,3 +283,18 @@ model AuditLog {
   @@index([createdAt])
 }
 
+model PromoCode {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  discount    Float     // percentage 0-100
+  maxUses     Int?      // null = unlimited
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  payments    Payment[]
+
+  @@index([code])
+}

@@ -144,6 +144,7 @@ export interface RequestRecord {
   budgetFrom?: number | null;
   budgetTo?: number | null;
   expiresAt?: string | null;
+  deadline?: string | null;
   createdAt: string;
   updatedAt: string;
   client?: UserSummary;

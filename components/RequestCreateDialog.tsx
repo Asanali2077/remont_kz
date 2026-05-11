@@ -24,23 +24,33 @@ interface Props {
   trigger: ReactNode;
   service?: ServiceRecord;
   onCreated?: () => Promise<void> | void;
+  defaultValues?: {
+    description?: string;
+    city?: string;
+    budgetFrom?: number;
+    budgetTo?: number;
+  };
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
+export function RequestCreateDialog({ trigger, service, onCreated, defaultValues, open: controlledOpen, onOpenChange }: Props) {
   const t = useTranslations("requestCreate");
   const tCat = useTranslations("categories");
   const STEPS = [t("step1"), t("step2"), t("step3")];
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const [step, setStep] = useState(0);
 
   /* Step 1 */
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(defaultValues?.description ?? "");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>({});
 
   /* Step 2 */
-  const [city, setCity] = useState(service?.city || "");
-  const [budgetFrom, setBudgetFrom] = useState("");
-  const [budgetTo, setBudgetTo] = useState("");
+  const [city, setCity] = useState(defaultValues?.city ?? service?.city ?? "");
+  const [budgetFrom, setBudgetFrom] = useState(defaultValues?.budgetFrom != null ? String(defaultValues.budgetFrom) : "");
+  const [budgetTo, setBudgetTo] = useState(defaultValues?.budgetTo != null ? String(defaultValues.budgetTo) : "");
+  const [deadline, setDeadline] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -71,9 +81,17 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
   }
 
   function resetAll() {
-    setStep(0); setDescription(""); setCategoryFilter({});
-    setCity(service?.city || ""); setBudgetFrom(""); setBudgetTo("");
+    setStep(0); setDescription(defaultValues?.description ?? ""); setCategoryFilter({});
+    setCity(defaultValues?.city ?? service?.city ?? "");
+    setBudgetFrom(defaultValues?.budgetFrom != null ? String(defaultValues.budgetFrom) : "");
+    setBudgetTo(defaultValues?.budgetTo != null ? String(defaultValues.budgetTo) : "");
+    setDeadline("");
     setFile(null); setPreview(null);
+  }
+
+  function setOpen(v: boolean) {
+    if (onOpenChange) onOpenChange(v);
+    else setInternalOpen(v);
   }
 
   function handleClose(v: boolean) {
@@ -90,10 +108,12 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
       const budgetFromNum = budgetFrom ? parseFloat(budgetFrom) : undefined;
       const budgetToNum = budgetTo ? parseFloat(budgetTo) : budgetFromNum;
 
+      const deadlineIso = deadline ? new Date(deadline).toISOString() : undefined;
+
       if (service) {
-        await api.createRequest({ serviceId: service.id, companyId: service.companyId, description: description.trim(), imageUrl, budgetFrom: budgetFromNum, budgetTo: budgetToNum });
+        await api.createRequest({ serviceId: service.id, companyId: service.companyId, description: description.trim(), imageUrl, budgetFrom: budgetFromNum, budgetTo: budgetToNum, deadline: deadlineIso });
       } else {
-        await api.createRequest({ description: description.trim(), category: categoryFilter.category ? CATEGORY_MAP[categoryFilter.category] : undefined, city: city.trim(), imageUrl, budgetFrom: budgetFromNum, budgetTo: budgetToNum });
+        await api.createRequest({ description: description.trim(), category: categoryFilter.category ? CATEGORY_MAP[categoryFilter.category] : undefined, city: city.trim(), imageUrl, budgetFrom: budgetFromNum, budgetTo: budgetToNum, deadline: deadlineIso });
       }
 
       toast.success("Request submitted! Companies will respond shortly.");
@@ -207,6 +227,17 @@ export function RequestCreateDialog({ trigger, service, onCreated }: Props) {
                   <Input value={budgetTo} onChange={e => setBudgetTo(e.target.value)} type="number" placeholder={t("budgetTo")} className="rounded-xl h-10" />
                 </div>
                 <p className="text-[11px] text-muted-foreground">Leave empty if not sure. Companies will suggest their price.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Дедлайн (когда нужно выполнить)</label>
+                <Input
+                  type="date"
+                  value={deadline}
+                  min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                  max={new Date(Date.now() + 90 * 86400000).toISOString().split("T")[0]}
+                  onChange={e => setDeadline(e.target.value)}
+                />
               </div>
 
               <div className="space-y-1.5">
