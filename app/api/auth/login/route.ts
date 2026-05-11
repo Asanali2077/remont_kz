@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { verifyPassword, generateToken } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/utils";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -18,6 +19,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const { recaptchaToken } = body as { recaptchaToken?: string };
+
+    const captchaOk = await verifyRecaptcha(recaptchaToken ?? "");
+    if (!captchaOk) {
+      return NextResponse.json({ error: "reCAPTCHA verification failed" }, { status: 400 });
+    }
+
     const validatedData = loginSchema.parse(body);
 
     const user = await prisma.user.findUnique({

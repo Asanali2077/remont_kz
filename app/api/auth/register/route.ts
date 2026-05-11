@@ -7,6 +7,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/utils";
 import { sendWelcomeEmail, sendVerificationEmail } from "@/lib/email";
 import { randomUUID } from "crypto";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,6 +28,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const { recaptchaToken } = body as { recaptchaToken?: string };
+
+    const captchaOk = await verifyRecaptcha(recaptchaToken ?? "");
+    if (!captchaOk) {
+      return NextResponse.json({ error: "reCAPTCHA verification failed" }, { status: 400 });
+    }
+
     const validatedData = registerSchema.parse(body);
 
     // Check if user already exists
