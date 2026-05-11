@@ -106,6 +106,15 @@ function OfferCard({ offer, requestId, onAccept, onReject, accepting }: {
   );
 }
 
+/* ── Deadline countdown ── */
+function DeadlineCountdown({ deadline }: { deadline: string }) {
+  const days = Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000);
+  if (days < 0) return <span className="text-xs text-destructive font-medium">Просрочен</span>;
+  if (days === 0) return <span className="text-xs text-destructive font-medium">Сегодня</span>;
+  if (days === 1) return <span className="text-xs text-orange-500 font-medium">Завтра</span>;
+  return <span className="text-xs text-muted-foreground">Осталось {days} д.</span>;
+}
+
 /* ── Expiry helper ── */
 function getExpiry(expiresAt: string | null | undefined): { label: string; expired: boolean } | null {
   if (!expiresAt) return null;
@@ -131,8 +140,14 @@ export default function MyRequestsPage() {
   const [reviewText, setReviewText] = useState("");
   const [reviewHover, setReviewHover] = useState(0);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [repeatData, setRepeatData] = useState<{ description: string; city?: string; budgetFrom?: number; budgetTo?: number } | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => { void load(); }, []);
+
+  useEffect(() => {
+    if (repeatData) setCreateOpen(true);
+  }, [repeatData]);
 
   async function load() {
     setLoading(true);
@@ -194,6 +209,9 @@ export default function MyRequestsPage() {
                 </Button>
               }
               onCreated={load}
+              open={createOpen}
+              onOpenChange={(v) => { setCreateOpen(v); if (!v) setRepeatData(null); }}
+              defaultValues={repeatData ?? undefined}
             />
           </div>
 
@@ -305,6 +323,7 @@ export default function MyRequestsPage() {
                                 {req.city && <span>📍 {req.city}</span>}
                                 <span>{new Date(req.createdAt).toLocaleDateString("en", { day: "numeric", month: "short" })}</span>
                                 {expiry && <span className={expiry.expired ? "text-destructive font-semibold" : "text-amber-600"}>{expiry.label}</span>}
+                                {req.status === "new" && req.deadline && <DeadlineCountdown deadline={req.deadline} />}
                               </div>
                             </div>
                             <StatusBadge status={isExpired ? "expired" : req.status} />
@@ -413,6 +432,21 @@ export default function MyRequestsPage() {
                                     <CreditCard className="h-3.5 w-3.5" /> {tCommon("submit")}
                                   </Button>
                                 </Link>
+                              )}
+                              {req.status === "completed" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 rounded-xl text-xs"
+                                  onClick={() => setRepeatData({
+                                    description: req.description,
+                                    city: req.city ?? undefined,
+                                    budgetFrom: req.budgetFrom ?? undefined,
+                                    budgetTo: req.budgetTo ?? undefined,
+                                  })}
+                                >
+                                  Повторить заявку
+                                </Button>
                               )}
                             </div>
                             {req.status === "completed" && req.rating === null && (
