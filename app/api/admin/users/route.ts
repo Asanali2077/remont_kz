@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
         emailVerified: true,
         isBlocked: true,
         blockReason: true,
+        isVerified: true,
         lastActiveAt: true,
         createdAt: true,
         _count: { select: { clientRequests: true, services: true } },

@@ -17,7 +17,8 @@ export async function GET(
       select: {
         id: true, email: true, role: true, name: true, phone: true,
         avatarUrl: true, address: true, emailVerified: true,
-        isBlocked: true, blockReason: true, lastActiveAt: true, createdAt: true,
+        isBlocked: true, blockReason: true, isVerified: true,
+        lastActiveAt: true, createdAt: true,
         _count: { select: { clientRequests: true, services: true } },
       },
     });
@@ -48,7 +49,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Cannot block admin accounts" }, { status: 403 });
     }
 
-    const allowed = ["isBlocked", "blockReason", "name", "emailVerified"] as const;
+    const allowed = ["isBlocked", "blockReason", "name", "emailVerified", "isVerified"] as const;
     const data: Record<string, unknown> = {};
     for (const key of allowed) {
       if (key in body) data[key] = body[key];
@@ -60,7 +61,12 @@ export async function PATCH(
 
     const updated = await prisma.user.update({ where: { id }, data });
 
-    const action = body.isBlocked === true ? "block_user" : body.isBlocked === false ? "unblock_user" : "edit_user";
+    const action =
+      body.isBlocked === true ? "block_user" :
+      body.isBlocked === false ? "unblock_user" :
+      body.isVerified === true ? "verify_company" :
+      body.isVerified === false ? "unverify_company" :
+      "edit_user";
     void logAudit(authResult.user.userId, action, "user", id, { changes: data });
 
     return NextResponse.json({ id: updated.id, isBlocked: updated.isBlocked, blockReason: updated.blockReason });
