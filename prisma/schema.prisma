@@ -240,7 +240,7 @@ model Payment {
   method      String        @default("card")
   discountAmount Float      @default(0)
   promoCodeId  String?
-  promoCode    PromoCode?   @relation(fields: [promoCodeId], references: [id])
+  promoCode    PromoCode?   @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
   kaspiOrderId String?
   paidAt      DateTime?
   createdAt   DateTime      @default(now())
@@ -251,6 +251,7 @@ model Payment {
 
   @@index([requestId])
   @@index([clientId])
+  @@index([promoCodeId])
 }
 
 model PortfolioPhoto {
@@ -291,6 +292,7 @@ model PromoCode {
   expiresAt   DateTime?
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   payments    Payment[]
 
