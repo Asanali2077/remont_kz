@@ -153,7 +153,7 @@ export async function uploadFile(
   await writeFile(join(uploadPath, filename), buf);
 
   return {
-    url: `/uploads/${subfolder}/${filename}`,
+    url: `/api/files/${subfolder}/${filename}`,
     filename,
     size: file.size,
     mimetype: file.type,
