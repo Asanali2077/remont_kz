@@ -59,6 +59,7 @@ export async function GET(
             name: true,
             email: true,
             phone: true,
+            isVerified: true,
           },
         },
         _count: {
@@ -170,6 +171,7 @@ export async function PUT(
             name: true,
             email: true,
             phone: true,
+            isVerified: true,
           },
         },
         _count: {

@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           images: { orderBy: { order: "asc" } },
-          company: { select: { id: true, name: true, email: true, phone: true } },
+          company: { select: { id: true, name: true, email: true, phone: true, isVerified: true } },
           _count: { select: { requests: true } },
         },
         orderBy: [{ active: "desc" }, { createdAt: "desc" }],

@@ -58,6 +58,7 @@ export interface UserSummary {
   name?: string | null;
   phone?: string | null;
   avatarUrl?: string | null;
+  isVerified?: boolean | null;
 }
 
 export interface ServiceImageRecord {
