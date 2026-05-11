@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import {
   ArrowLeft, MapPin, Star, CheckCircle2, Loader2,
-  Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, ImageIcon,
+  Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, ImageIcon, BadgeCheck,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -278,7 +278,12 @@ export default function ServiceDetailPage() {
                   <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
                     {(service.company.name ?? service.company.email)[0].toUpperCase()}
                   </div>
-                  <span className="font-semibold text-sm">{service.company.name}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-sm">{service.company.name}</span>
+                    {service.company.isVerified && (
+                      <BadgeCheck className="h-5 w-5 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   {service.company.phone && (
@@ -321,6 +326,9 @@ export default function ServiceDetailPage() {
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Building2 className="h-4 w-4" />
                 <span>{service.company.name}</span>
+                {service.company.isVerified && (
+                  <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
+                )}
               </div>
             </div>
 
