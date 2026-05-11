@@ -18,8 +18,8 @@ export type User = {
 
 type AuthContextValue = {
   user: User;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, role: "client" | "company", name?: string, phone?: string) => Promise<{ verifyUrl?: string }>;
+  login: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
+  register: (email: string, password: string, role: "client" | "company", name?: string, phone?: string, recaptchaToken?: string) => Promise<{ verifyUrl?: string }>;
   logout: () => void;
   loading: boolean;
   updateUser: (data: { name?: string | null; phone?: string | null }) => void;
@@ -80,9 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, recaptchaToken?: string) => {
     try {
-      const response = await api.login(email, password);
+      const response = await api.login(email, password, recaptchaToken);
       const role = response.user.role.toLowerCase() as UserRole;
       setUser({
         id: response.user.id,
@@ -109,10 +109,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     role: "client" | "company",
     name?: string,
-    phone?: string
+    phone?: string,
+    recaptchaToken?: string
   ): Promise<{ verifyUrl?: string }> => {
     try {
-      const response = await api.register({ email, password, role, name, phone });
+      const response = await api.register({ email, password, role, name, phone, recaptchaToken });
       setUser({
         id: response.user.id,
         email: response.user.email,

@@ -123,6 +123,7 @@ class ApiClient {
     role: "client" | "company";
     name?: string;
     phone?: string;
+    recaptchaToken?: string;
   }) {
     return this.request<AuthResponse>("/auth/register", {
       method: "POST",
@@ -130,10 +131,10 @@ class ApiClient {
     });
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, recaptchaToken?: string) {
     return this.request<AuthResponse>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, recaptchaToken }),
     });
   }
 

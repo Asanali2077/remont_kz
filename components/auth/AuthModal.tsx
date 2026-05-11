@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { Eye, EyeOff, Loader2, Wrench, CheckCircle2, Mail } from "lucide-react";
 
 export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactNode; defaultMode?: "login" | "register" }) {
   const t = useTranslations("auth");
   const { login, register } = useAuth();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "register">(defaultMode);
   const [email, setEmail] = useState("");
@@ -37,11 +39,12 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
     setError("");
     setLoading(true);
     try {
+      const recaptchaToken = executeRecaptcha ? await executeRecaptcha(mode === "login" ? "login" : "register") : "";
       if (mode === "login") {
-        await login(email, password);
+        await login(email, password, recaptchaToken);
         setOpen(false);
       } else {
-        const result = await register(email, password, role, name, phone);
+        const result = await register(email, password, role, name, phone, recaptchaToken);
         // Always show the "check your email" screen after registration
         setRegisteredEmail(email);
         if (result?.verifyUrl) setDevVerifyUrl(result.verifyUrl);
