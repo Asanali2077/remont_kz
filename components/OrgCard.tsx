@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Heart, GitCompare, Star, CheckCircle2, ArrowRight, Camera } from "lucide-react";
+import { MapPin, Heart, GitCompare, Star, CheckCircle2, ArrowRight, Camera, BadgeCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -152,9 +152,12 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
         </Link>
 
         {/* Row 3: Company */}
-        <p className="text-xs text-muted-foreground mb-2 truncate">
-          {service.company?.name}
-        </p>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+          <span className="truncate">{service.company?.name}</span>
+          {service.company?.isVerified && (
+            <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
+          )}
+        </div>
 
         {/* Row 4: Description */}
         <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed flex-1">
