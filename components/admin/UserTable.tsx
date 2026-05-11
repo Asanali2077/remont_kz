@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Ban, Unlock, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Ban, Unlock, Trash2, ChevronLeft, ChevronRight, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BlockUserDialog } from "./BlockUserDialog";
@@ -15,6 +15,7 @@ export interface AdminUser {
   phone?: string | null;
   emailVerified: boolean;
   isBlocked: boolean;
+  isVerified: boolean;
   blockReason?: string | null;
   lastActiveAt?: string | null;
   createdAt: string;
@@ -28,10 +29,11 @@ interface UserTableProps {
   pages: number;
   onPageChange: (page: number) => void;
   onRefresh: () => void;
+  onVerify: (id: string, value: boolean) => void;
   token: string;
 }
 
-export function UserTable({ users, total, page, pages, onPageChange, onRefresh, token }: UserTableProps) {
+export function UserTable({ users, total, page, pages, onPageChange, onRefresh, onVerify, token }: UserTableProps) {
   const [blockTarget, setBlockTarget] = useState<AdminUser | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -82,6 +84,20 @@ export function UserTable({ users, total, page, pages, onPageChange, onRefresh, 
     onRefresh();
   };
 
+  const handleVerify = async (u: AdminUser) => {
+    setLoadingId(u.id);
+    try {
+      await patchUser(u.id, { isVerified: !u.isVerified });
+      toast.success(u.isVerified ? `Верификация снята: ${u.name ?? u.email}` : `${u.name ?? u.email} верифицирован`);
+      onVerify(u.id, !u.isVerified);
+      onRefresh();
+    } catch {
+      toast.error("Не удалось изменить статус верификации");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   return (
     <>
       <div className="text-xs text-muted-foreground mb-3">Всего: {total}</div>
@@ -101,7 +117,10 @@ export function UserTable({ users, total, page, pages, onPageChange, onRefresh, 
             {users.map((u) => (
               <tr key={u.id} className="hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-3">
-                  <p className="font-medium truncate max-w-[160px]">{u.name ?? "—"}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-medium truncate max-w-[160px]">{u.name ?? "—"}</p>
+                    {u.isVerified && <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" />}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate max-w-[160px] md:hidden">{u.email}</p>
                 </td>
                 <td className="px-4 py-3">
@@ -142,6 +161,16 @@ export function UserTable({ users, total, page, pages, onPageChange, onRefresh, 
                         title="Заблокировать"
                       >
                         <Ban className="h-3.5 w-3.5 text-amber-600" />
+                      </Button>
+                    )}
+                    {u.role === "COMPANY" && (
+                      <Button
+                        size="icon" variant="ghost" className="h-7 w-7"
+                        disabled={loadingId === u.id}
+                        onClick={() => handleVerify(u)}
+                        title={u.isVerified ? "Снять верификацию" : "Верифицировать"}
+                      >
+                        <BadgeCheck className={`h-3.5 w-3.5 ${u.isVerified ? "text-blue-500" : "text-muted-foreground"}`} />
                       </Button>
                     )}
                     <Button
