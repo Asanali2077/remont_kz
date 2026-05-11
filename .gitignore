@@ -45,6 +45,7 @@ next-env.d.ts
 .claude/
 
 # docs/plans
-docs/
+# docs/
 
 /generated/prisma
+.superpowers/
