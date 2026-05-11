@@ -65,8 +65,31 @@ export async function POST(
       );
     }
 
+    const body = await request.json().catch(() => ({}));
+    const promoCodeInput = typeof body.promoCode === "string" ? body.promoCode.toUpperCase() : null;
+
+    let discountAmount = 0;
+    let promoCodeId: string | null = null;
+
+    if (promoCodeInput) {
+      const promo = await prisma.promoCode.findUnique({ where: { code: promoCodeInput } });
+      if (
+        promo &&
+        promo.isActive &&
+        (!promo.expiresAt || promo.expiresAt > new Date()) &&
+        (promo.maxUses === null || promo.usedCount < promo.maxUses)
+      ) {
+        discountAmount = Math.round((amount * promo.discount) / 100);
+        promoCodeId = promo.id;
+        await prisma.promoCode.update({
+          where: { id: promo.id },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
+    }
+
     const payment = await prisma.payment.create({
-      data: { requestId: params.requestId, clientId: authResult.user.userId, amount },
+      data: { requestId: params.requestId, clientId: authResult.user.userId, amount, discountAmount, promoCodeId },
     });
 
     return NextResponse.json(payment, { status: 201 });
