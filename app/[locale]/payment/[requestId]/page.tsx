@@ -74,7 +74,8 @@ export default function PaymentPage() {
       if (!payment) {
         const r = await fetch(`/api/payments/${requestId}`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${user.token}` },
+          headers: { Authorization: `Bearer ${user.token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ promoCode: promoApplied?.code ?? null }),
         });
         if (!r.ok) {
           const d = await r.json();
