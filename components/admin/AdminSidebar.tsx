@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
-import { LayoutDashboard, Users, Briefcase, ClipboardList, LogOut, ScrollText } from "lucide-react";
+import { LayoutDashboard, Users, Briefcase, ClipboardList, LogOut, ScrollText, Tag } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,7 @@ export function AdminSidebar() {
     { href: "/admin/services" as const, label: t("services"), icon: Briefcase },
     { href: "/admin/requests" as const, label: t("requests"), icon: ClipboardList },
     { href: "/admin/audit" as const, label: t("auditLog"), icon: ScrollText },
+    { href: "/admin/promo" as const, label: t("promo"), icon: Tag },
   ];
 
   return (
