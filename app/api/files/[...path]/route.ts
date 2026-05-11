@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR
@@ -37,13 +37,16 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (!fs.existsSync(filePath)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
   const ext = path.extname(filePath).toLowerCase();
   const mimeType = MIME[ext] ?? "application/octet-stream";
-  const fileBuffer = fs.readFileSync(filePath);
+
+  let fileBuffer: ArrayBuffer;
+  try {
+    const buf = await fs.readFile(filePath);
+    fileBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   return new NextResponse(fileBuffer, {
     headers: { "Content-Type": mimeType, "Cache-Control": "private, max-age=3600" },

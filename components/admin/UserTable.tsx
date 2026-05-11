@@ -87,10 +87,8 @@ export function UserTable({ users, total, page, pages, onPageChange, onRefresh, 
   const handleVerify = async (u: AdminUser) => {
     setLoadingId(u.id);
     try {
-      await patchUser(u.id, { isVerified: !u.isVerified });
       toast.success(u.isVerified ? `Верификация снята: ${u.name ?? u.email}` : `${u.name ?? u.email} верифицирован`);
       onVerify(u.id, !u.isVerified);
-      onRefresh();
     } catch {
       toast.error("Не удалось изменить статус верификации");
     } finally {

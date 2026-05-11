@@ -1,9 +1,11 @@
 import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { join, resolve } from "path";
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./public/uploads";
+const UPLOAD_DIR = process.env.UPLOAD_DIR
+  ? resolve(process.env.UPLOAD_DIR)
+  : join(process.cwd(), "public", "uploads");
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || "10485760"); // 10 MB
 const ALLOWED_IMAGE_TYPES = (
   process.env.ALLOWED_IMAGE_TYPES || "image/jpeg,image/png,image/webp"
@@ -148,7 +150,7 @@ export async function uploadFile(
     return { url, filename, size: file.size, mimetype: file.type };
   }
 
-  const uploadPath = join(process.cwd(), UPLOAD_DIR, subfolder);
+  const uploadPath = join(UPLOAD_DIR, subfolder);
   await mkdir(uploadPath, { recursive: true });
   await writeFile(join(uploadPath, filename), buf);
 

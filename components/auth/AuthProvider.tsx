@@ -128,7 +128,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = error instanceof Error ? error.message : "Registration failed";
       toast.error(message);
       throw error;
-      return {};
     }
   };
 
