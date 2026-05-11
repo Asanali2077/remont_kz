@@ -248,6 +248,70 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const authResult = await requireAuth()(request);
+    if ("error" in authResult) return authResult.error;
+
+    const { id } = params;
+
+    if (authResult.user.role !== "CLIENT") {
+      return NextResponse.json({ error: "Forbidden: Only clients can edit requests" }, { status: 403 });
+    }
+
+    const existing = await prisma.request.findUnique({
+      where: { id },
+      select: { clientId: true, status: true },
+    });
+    if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (existing.clientId !== authResult.user.userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (existing.status !== RequestStatus.NEW) {
+      return NextResponse.json({ error: "Can only edit requests with status NEW" }, { status: 400 });
+    }
+
+    const editSchema = z.object({
+      description: z.string().min(10).optional(),
+      budgetFrom: z.number().positive().optional().nullable(),
+      budgetTo: z.number().positive().optional().nullable(),
+      city: z.string().optional(),
+      deadline: z.string().datetime().optional().nullable(),
+    });
+
+    const body = await request.json().catch(() => ({}));
+    const parsed = editSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Validation error", details: parsed.error.flatten() }, { status: 400 });
+    }
+
+    const offerCount = await prisma.requestOffer.count({ where: { requestId: id } });
+    if (offerCount > 0) {
+      await prisma.requestOffer.deleteMany({ where: { requestId: id } });
+    }
+
+    const updateData: Record<string, unknown> = {};
+    if (parsed.data.description !== undefined) updateData.description = parsed.data.description;
+    if (parsed.data.budgetFrom !== undefined) updateData.budgetFrom = parsed.data.budgetFrom;
+    if (parsed.data.budgetTo !== undefined) updateData.budgetTo = parsed.data.budgetTo;
+    if (parsed.data.city !== undefined) updateData.city = parsed.data.city;
+    if (parsed.data.deadline !== undefined) updateData.deadline = parsed.data.deadline ? new Date(parsed.data.deadline) : null;
+
+    const updated = await prisma.request.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return NextResponse.json({ ...updated, offersReset: offerCount > 0 });
+  } catch (error) {
+    console.error("Edit request error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
