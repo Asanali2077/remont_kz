@@ -510,7 +510,7 @@ export default function CompanyDashboardPage() {
     { id: "overview",  label: t("overview"),  icon: LayoutDashboard, badge: totalBadge > 0 ? totalBadge : undefined },
     { id: "requests",  label: t("requests"),  icon: ClipboardList,   badge: totalBadge > 0 ? totalBadge : undefined },
     { id: "services",  label: t("services"),  icon: Briefcase },
-    { id: "calendar",  label: "Календарь",    icon: CalendarDays },
+    { id: "calendar",  label: "Calendar",      icon: CalendarDays },
   ];
 
   const EXTRA: { id: Tab; label: string; icon: React.ElementType; badge?: number }[] = [

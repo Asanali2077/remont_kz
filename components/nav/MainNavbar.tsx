@@ -51,7 +51,7 @@ function NotificationBell({ role }: { role: "client" | "company" }) {
         <div className="absolute right-0 top-full mt-2 w-80 bg-popover border border-border rounded-xl shadow-lg z-50 overflow-hidden">
           <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
             <span className="text-sm font-semibold">Notifications</span>
-            <Link href={role === "company" ? "/notifications" : "/my-requests?tab=notifications"} onClick={() => setOpen(false)} className="text-xs text-primary hover:underline">See all</Link>
+            <Link href={role === "company" ? "/company/dashboard?tab=notifications" : "/my-requests?tab=notifications"} onClick={() => setOpen(false)} className="text-xs text-primary hover:underline">See all</Link>
           </div>
           {items.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">No new notifications</div>
