@@ -6,18 +6,16 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { OrgCard } from "@/components/OrgCard";
 import { api } from "@/lib/api";
 import type { ServiceRecord } from "@/lib/types";
-import { KZ_CITIES } from "@/lib/cities";
 import {
   Car, Home, Wrench, Search, ClipboardList, CheckCircle2,
-  Star, ArrowRight, Shield, Zap, Users, ChevronRight, ChevronDown, Award,
+  Star, ArrowRight, Shield, Zap, Users, ChevronRight, Award,
   MapPin, Clock, TrendingUp,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 
 /* ─── Animated counter ─── */
 function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -158,81 +156,6 @@ function ActivityTicker() {
 }
 
 /* ─── Cinematic full-screen slider (hero background) ─── */
-function CinematicSlider() {
-  const [pos, setPos] = useState(50);
-  const [slide, setSlide] = useState(0);
-  const [fading, setFading] = useState(false);
-  const hovered = useRef(false);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (hovered.current) return;
-      setFading(true);
-      setTimeout(() => {
-        setSlide((s) => (s + 1) % BA_SLIDES.length);
-        setPos(50);
-        setFading(false);
-      }, 500);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const current = BA_SLIDES[slide];
-
-  return (
-    <div
-      className="absolute inset-0 cursor-col-resize select-none"
-      style={{ opacity: fading ? 0 : 1, transition: "opacity 0.5s" }}
-      onMouseEnter={() => { hovered.current = true; }}
-      onMouseLeave={() => { hovered.current = false; }}
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setPos(Math.max(5, Math.min(95, ((e.clientX - rect.left) / rect.width) * 100)));
-      }}
-      onTouchMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setPos(Math.max(5, Math.min(95, ((e.touches[0].clientX - rect.left) / rect.width) * 100)));
-      }}
-    >
-      {/* AFTER — full bg */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={current.after.url} alt="after" className="absolute inset-0 w-full h-full object-cover" />
-
-      {/* BEFORE — clipped */}
-      <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={current.before.url} alt="before" className="w-full h-full object-cover" />
-      </div>
-
-      {/* Divider line + handle */}
-      <div className="absolute top-0 bottom-0 w-0.5 bg-white/70 shadow-[0_0_12px_rgba(255,255,255,0.6)]"
-        style={{ left: `${pos}%` }}>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/90 backdrop-blur-sm shadow-xl flex items-center justify-center">
-          <div className="flex gap-0.5">
-            <div className="w-0.5 h-4 bg-slate-500 rounded" />
-            <div className="w-0.5 h-4 bg-slate-500 rounded" />
-          </div>
-        </div>
-      </div>
-
-      {/* BEFORE / AFTER labels */}
-      <div className="absolute top-20 left-4 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full z-30">BEFORE</div>
-      <div className="absolute top-20 right-4 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full z-30">AFTER</div>
-
-      {/* Slide name + dots */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2">
-        <span className="bg-black/40 backdrop-blur-sm text-white/80 text-xs px-3 py-1 rounded-full">{current.label}</span>
-        <div className="flex gap-1.5">
-          {BA_SLIDES.map((_, i) => (
-            <button key={i} onClick={() => { setFading(true); setTimeout(() => { setSlide(i); setPos(50); setFading(false); }, 400); }}
-              className={`h-1.5 rounded-full transition-all ${i === slide ? "w-5 bg-white" : "w-1.5 bg-white/40"}`} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Before/After slider ─── */
 const BA_SLIDES = [
   {
@@ -357,61 +280,6 @@ function BeforeAfterSlider() {
   );
 }
 
-/* ─── Company logos marquee ─── */
-const COMPANIES = [
-  "AutoCity KZ", "StroiMaster", "ElectroServ", "CleanPro", "PlumbingKZ",
-  "RemontBytovoy", "AstanaFix", "AlmatyRepair", "TechService Pro", "BuildKazakhstan",
-  "QuickFix KZ", "MasterHands", "ProRenovation", "AutoDiag", "HomeComfort",
-];
-
-function CompanyMarquee() {
-  return (
-    <div className="relative overflow-hidden py-5">
-      {/* Fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-background to-transparent pointer-events-none" />
-
-      <div className="flex animate-[marquee_30s_linear_infinite]">
-        {[...COMPANIES, ...COMPANIES].map((name, i) => (
-          <div key={i} className="flex items-center gap-3 px-5 shrink-0">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-[11px] font-black text-primary shrink-0">
-              {name[0]}
-            </div>
-            <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">{name}</span>
-            <div className="w-1 h-1 rounded-full bg-border ml-2 shrink-0" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─── Search bar ─── */
-
-/* ─── Constants ─── */
-const CATEGORIES = [
-  {
-    icon: Car, label: "Automobiles", desc: "Body repair, diagnostics, detailing",
-    href: "/repair?category=automobiles",
-    gradient: "from-blue-500 to-cyan-500",
-    bg: "bg-blue-50 dark:bg-blue-950/40", border: "border-blue-100 dark:border-blue-900",
-    count: "80+ services",
-  },
-  {
-    icon: Home, label: "Real Estate", desc: "Renovation, plumbing, electrical",
-    href: "/repair?category=real-estate",
-    gradient: "from-emerald-500 to-teal-500",
-    bg: "bg-emerald-50 dark:bg-emerald-950/40", border: "border-emerald-100 dark:border-emerald-900",
-    count: "95+ services",
-  },
-  {
-    icon: Wrench, label: "Other Services", desc: "Appliances, furniture, equipment",
-    href: "/repair?category=other",
-    gradient: "from-violet-500 to-purple-500",
-    bg: "bg-violet-50 dark:bg-violet-950/40", border: "border-violet-100 dark:border-violet-900",
-    count: "40+ services",
-  },
-];
 
 /* ─── Scroll progress bar ─── */
 function ScrollProgress() {
@@ -511,13 +379,6 @@ export default function HomePage() {
     { n: "03", icon: CheckCircle2,  title: t("step3Title"), desc: t("step3Desc") },
   ];
 
-  const FEATURES = [
-    { icon: Shield, title: t("benefit1Title"), desc: t("benefit1Desc"), color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600" },
-    { icon: Star,   title: t("benefit2Title"), desc: t("benefit2Desc"), color: "bg-amber-50 dark:bg-amber-950/40 text-amber-600" },
-    { icon: Zap,    title: t("benefit3Title"), desc: t("benefit3Desc"), color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600" },
-    { icon: Users,  title: "200+ companies",   desc: "Wide network covering all major cities in Kazakhstan.", color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600" },
-  ];
-
   // Show toast if redirected from session expiry
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.search.includes("session_expired=1")) {
@@ -526,7 +387,6 @@ export default function HomePage() {
     }
   }, []);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   const [featuredServices, setFeaturedServices] = useState<ServiceRecord[]>([]);

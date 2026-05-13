@@ -105,18 +105,6 @@ function FlowDot({ delay = 0, duration = 2, color = "bg-primary" }: { delay?: nu
   );
 }
 
-function HFlowDot({ delay = 0, duration = 2, color = "bg-primary" }: { delay?: number; duration?: number; color?: string }) {
-  return (
-    <motion.div
-      className={`absolute h-2 w-2 rounded-full ${color} shadow-lg`}
-      initial={{ left: "0%", opacity: 0 }}
-      animate={{ left: ["0%", "100%", "100%", "0%"], opacity: [0, 1, 1, 0] }}
-      transition={{ duration, delay, repeat: Infinity, ease: "linear" }}
-      style={{ top: "calc(50% - 4px)" }}
-    />
-  );
-}
-
 /* ─── Architecture interactive diagram ─── */
 function ArchDiagram() {
   const ref = useRef(null);
@@ -383,7 +371,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-6xl">
           <FadeUp>
             <div className="text-center mb-14">
-              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">What's built</p>
+              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">What&apos;s built</p>
               <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Platform features</h2>
               <p className="text-muted-foreground text-lg max-w-lg mx-auto">
                 12 major feature areas, 34+ API endpoints, production-grade code.

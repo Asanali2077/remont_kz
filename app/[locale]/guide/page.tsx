@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import {
   ChevronDown, BookOpen, Star, Briefcase, Shield, User,
   Search, ThumbsUp, ThumbsDown, Clock, Play, Mail,
   MessageSquare, Phone, X, Zap, CheckCircle2,
-  ClipboardList, Send, Building2, ArrowRight,
+  ClipboardList, Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
