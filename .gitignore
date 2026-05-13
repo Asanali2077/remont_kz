@@ -12,6 +12,8 @@
 # next.js
 /.next/
 /out/
+/.local-run/
+/public/uploads/
 
 # production
 /build
@@ -26,6 +28,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env*.local
 
 # vercel
@@ -34,3 +37,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# git worktrees
+.worktrees/
+
+# Claude Code
+.claude/
+
+# docs/plans
+# docs/
+
+/generated/prisma
+.superpowers/

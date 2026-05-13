@@ -1,19 +1,28 @@
 "use client";
 
 import { Toaster } from "sonner";
-import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
-import { LangProvider } from "@/components/nav/LangSwitcher";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ThemeProvider } from "next-themes";
+import { CompareProvider } from "@/components/CompareContext";
+import { CompareBar } from "@/components/CompareBar";
+import { MobileNav } from "@/components/MobileNav";
+import { OfflineToast } from "@/components/OfflineToast";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
-    <LangProvider>
-      <AuthProvider>
-        <FavoritesProvider>
-          {children}
-          <Toaster />
-        </FavoritesProvider>
-      </AuthProvider>
-    </LangProvider>
+    <GoogleReCaptchaProvider reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? ""}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <AuthProvider>
+          <CompareProvider>
+            {children}
+            <CompareBar />
+            <MobileNav />
+            <OfflineToast />
+            <Toaster />
+          </CompareProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </GoogleReCaptchaProvider>
   );
 }

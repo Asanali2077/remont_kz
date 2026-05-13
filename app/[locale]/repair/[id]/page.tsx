@@ -1,0 +1,489 @@
+/* eslint-disable @next/next/no-img-element */
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
+import {
+  ArrowLeft, MapPin, Star, CheckCircle2, Loader2,
+  Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, ImageIcon, BadgeCheck,
+} from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { RequestCreateDialog } from "@/components/RequestCreateDialog";
+import { Currency } from "@/components/Currency";
+import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
+import { SERVICE_CATEGORY_LABELS, type ServiceRecord, type ReviewRecord } from "@/lib/types";
+import { OrgCard } from "@/components/OrgCard";
+import { toast } from "sonner";
+import { CATEGORY_COLORS } from "@/lib/utils";
+
+/* ── Lightbox ── */
+function Lightbox({ images, startIndex, onClose }: {
+  images: { url: string }[];
+  startIndex: number;
+  onClose: () => void;
+}) {
+  const [idx, setIdx] = useState(startIndex);
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") setIdx((i) => (i + 1) % images.length);
+      if (e.key === "ArrowLeft") setIdx((i) => (i - 1 + images.length) % images.length);
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [images.length, onClose]);
+
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center" onClick={onClose}>
+      <button className="absolute top-4 right-4 text-white/80 hover:text-white" onClick={onClose}>
+        <X className="h-7 w-7" />
+      </button>
+      {images.length > 1 && (
+        <>
+          <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white bg-black/40 rounded-full p-2"
+            onClick={(e) => { e.stopPropagation(); setIdx((i) => (i - 1 + images.length) % images.length); }}>
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white bg-black/40 rounded-full p-2"
+            onClick={(e) => { e.stopPropagation(); setIdx((i) => (i + 1) % images.length); }}>
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </>
+      )}
+      <img src={images[idx].url} alt={`Photo ${idx + 1}`}
+        className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
+        onClick={(e) => e.stopPropagation()} />
+      {images.length > 1 && (
+        <div className="absolute bottom-4 flex gap-2">
+          {images.map((_, i) => (
+            <button key={i}
+              className={`w-2 h-2 rounded-full transition-colors ${i === idx ? "bg-white" : "bg-white/40"}`}
+              onClick={(e) => { e.stopPropagation(); setIdx(i); }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Location card: Google Maps iframe embed + 2GIS button ── */
+function LocationCard({ address, city, locationLabel, openInLabel }: { address?: string | null; city?: string | null; locationLabel: string; openInLabel: string }) {
+  if (!address && !city) return null;
+
+  const displayAddress = [address, city].filter(Boolean).join(", ");
+  const fullQuery = [address, city, "Kazakhstan"].filter(Boolean).join(", ");
+  const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(fullQuery)}&output=embed&z=15&hl=ru`;
+  const twoGisUrl = `https://2gis.kz/search/${encodeURIComponent(displayAddress)}`;
+
+  return (
+    <div className="space-y-3">
+      <h2 className="font-semibold text-lg">{locationLabel}</h2>
+
+      <p className="text-sm text-muted-foreground flex items-start gap-1.5">
+        <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+        {displayAddress}
+      </p>
+
+      {/* Google Maps iframe — works with address string, no API key needed */}
+      <div className="rounded-xl overflow-hidden border shadow-sm">
+        <iframe
+          src={embedUrl}
+          width="100%"
+          height="260"
+          style={{ border: 0, display: "block" }}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Map location"
+        />
+      </div>
+
+      {/* 2GIS navigation button */}
+      <a
+        href={twoGisUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-semibold bg-[#1ba052] hover:bg-[#179047] text-white transition-colors shadow-sm"
+      >
+        <svg viewBox="0 0 24 24" className="h-5 w-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+        </svg>
+        {openInLabel}
+      </a>
+    </div>
+  );
+}
+
+export default function ServiceDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { user } = useAuth();
+  const t = useTranslations("service");
+  const tCommon = useTranslations("common");
+
+  const [service, setService] = useState<ServiceRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [reviews, setReviews] = useState<ReviewRecord[]>([]);
+  const [similar, setSimilar] = useState<ServiceRecord[]>([]);
+  const [portfolio, setPortfolio] = useState<{ id: string; url: string; caption: string | null }[]>([]);
+  const [portfolioLightbox, setPortfolioLightbox] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    void (async () => {
+      try {
+        const [svc, revs, sim] = await Promise.all([
+          api.getService(id),
+          api.getServiceReviews(id).catch(() => []),
+          api.getSimilarServices(id).catch(() => []),
+        ]);
+        setService(svc);
+        setReviews(revs);
+        setSimilar(sim);
+        // Load portfolio after service is loaded
+        fetch(`/api/portfolio?companyId=${svc.companyId}`)
+          .then((r) => r.json())
+          .then(setPortfolio)
+          .catch(() => null);
+      } catch {
+        toast.error("Service not found");
+        router.push("/repair");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id, router]);
+
+  const requestButton = (() => {
+    if (!service) return null;
+    if (!user) return (
+      <AuthModal trigger={
+        <Button size="lg" className="w-full gap-2">
+          <CheckCircle2 className="h-4 w-4" /> {t("createRequest")}
+        </Button>
+      } />
+    );
+    if (user.role !== "client") return (
+      <Button size="lg" disabled className="w-full">{t("createRequest")}</Button>
+    );
+    return (
+      <RequestCreateDialog service={service} trigger={
+        <Button size="lg" className="w-full gap-2 shadow-lg shadow-primary/25">
+          <CheckCircle2 className="h-4 w-4" /> {t("createRequest")}
+        </Button>
+      } />
+    );
+  })();
+
+  if (loading) return (
+    <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    </div>
+  );
+  if (!service) return null;
+
+  const images = (service.images?.length ?? 0) > 0
+    ? service.images
+    : [{ url: "https://placehold.co/800x600/e2e8f0/94a3b8?text=No+photo", id: "ph", serviceId: service.id, order: 0, createdAt: "" }];
+
+  const mainImage = images[0].url;
+  const thumbImages = images.slice(1, 5);
+
+  return (
+    <div className="min-h-screen bg-muted/30">
+      {lightboxIdx !== null && (
+        <Lightbox images={images} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />
+      )}
+
+      <div className="mx-auto max-w-6xl px-4 py-6">
+
+        {/* Breadcrumb */}
+        <button onClick={() => router.back()}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5 group">
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> {tCommon("back")}
+        </button>
+
+        {/* ══ TOP: gallery LEFT + action card RIGHT ══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
+
+          {/* Gallery — 3/5 */}
+          <div className="lg:col-span-3 space-y-2">
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer bg-muted"
+              onClick={() => setLightboxIdx(0)}>
+              <img src={mainImage} alt={service.name}
+                className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+              {images.length > 1 && (
+                <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2.5 py-1 text-white text-xs font-medium">
+                  <Camera className="h-3 w-3" /> {images.length}
+                </div>
+              )}
+            </div>
+            {thumbImages.length > 0 && (
+              <div className="flex gap-2">
+                {thumbImages.map((img, i) => (
+                  <div key={img.url}
+                    className="relative flex-1 aspect-[4/3] rounded-xl overflow-hidden cursor-pointer bg-muted"
+                    onClick={() => setLightboxIdx(i + 1)}>
+                    <img src={img.url} alt={`Photo ${i + 2}`}
+                      className="h-full w-full object-cover hover:scale-105 transition-transform duration-300" />
+                    {i === 3 && images.length > 5 && (
+                      <div className="absolute inset-0 bg-black/55 flex items-center justify-center text-white font-bold text-sm rounded-xl">
+                        +{images.length - 5}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Action card — 2/5 */}
+          <div className="lg:col-span-2">
+            <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-5 lg:sticky lg:top-20">
+              {/* Price */}
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Price range</p>
+                <p className="text-3xl font-black tracking-tight">
+                  <Currency value={service.priceFrom} />
+                  {service.priceTo !== service.priceFrom && <> – <Currency value={service.priceTo} /></>}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">KZT</p>
+              </div>
+
+              {/* Rating */}
+              {typeof service.rating === "number" && (
+                <div className="flex items-center gap-2 py-3 border-y border-border/40">
+                  <div className="flex gap-0.5">
+                    {[1,2,3,4,5].map((s) => (
+                      <Star key={s} className={`h-4 w-4 ${s <= Math.round(service.rating!) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`} />
+                    ))}
+                  </div>
+                  <span className="font-bold text-sm">{service.rating.toFixed(1)}</span>
+                  <span className="text-sm text-muted-foreground">· {service._count?.requests ?? 0} requests</span>
+                </div>
+              )}
+
+              {/* CTA */}
+              {requestButton}
+
+              {/* Company block */}
+              <div className="pt-1 space-y-3">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{t("company")}</p>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                    {(service.company.name ?? service.company.email)[0].toUpperCase()}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-sm">{service.company.name}</span>
+                    {service.company.isVerified && (
+                      <BadgeCheck className="h-5 w-5 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {service.company.phone && (
+                    <a href={`tel:${service.company.phone}`}
+                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors rounded-xl hover:bg-primary/5 p-2 -mx-2">
+                      <Phone className="h-3.5 w-3.5 shrink-0" /> {service.company.phone}
+                    </a>
+                  )}
+                  <a href={`mailto:${service.company.email}`}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors rounded-xl hover:bg-primary/5 p-2 -mx-2">
+                    <Mail className="h-3.5 w-3.5 shrink-0" /> {service.company.email}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ══ BOTTOM: info LEFT + map RIGHT ══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+          {/* Info — 3/5 */}
+          <div className="lg:col-span-3 space-y-5">
+
+            {/* Badges row */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${CATEGORY_COLORS[service.category] ?? CATEGORY_COLORS.other}`}>
+                {SERVICE_CATEGORY_LABELS[service.category]}
+              </span>
+              {service.city && (
+                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5" /> {service.city}
+                </span>
+              )}
+            </div>
+
+            {/* Title */}
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-1.5">{service.name}</h1>
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <Building2 className="h-4 w-4" />
+                <span>{service.company.name}</span>
+                {service.company.isVerified && (
+                  <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-card border border-border/50 rounded-2xl p-5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">{t("description")}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{service.description}</p>
+            </div>
+
+            {/* Availability */}
+            {(service.startDate || service.endDate) && (
+              <div className="bg-card border border-border/50 rounded-2xl p-5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Availability</p>
+                <div className="flex gap-6 text-sm">
+                  {service.startDate && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">From</p>
+                      <p className="font-semibold">{new Date(service.startDate).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric" })}</p>
+                    </div>
+                  )}
+                  {service.endDate && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">Until</p>
+                      <p className="font-semibold">{new Date(service.endDate).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric" })}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {service.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {service.tags.map((tag) => (
+                  <span key={tag} className="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Map — 2/5 */}
+          <div className="lg:col-span-2">
+            <LocationCard address={service.address} city={service.city} locationLabel={t("location")} openInLabel="Open in 2GIS" />
+          </div>
+        </div>
+
+        {/* ══ REVIEWS ══ */}
+        {reviews.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/40">
+                <MessageSquare className="h-4 w-4 text-amber-600" />
+              </div>
+              <h2 className="font-bold text-lg">{t("reviews")}</h2>
+              <span className="text-sm text-muted-foreground">({reviews.length})</span>
+            </div>
+            <div className="space-y-3">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-card border border-border/50 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                        {(review.client?.name ?? review.client?.email ?? "?")[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {review.client?.name ?? review.client?.email ?? "Anonymous"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(review.createdAt).toLocaleDateString("en", {
+                            year: "numeric", month: "long", day: "numeric",
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-4 w-4 ${star <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {review.review && (
+                    <p className="text-sm text-muted-foreground leading-relaxed pl-10">
+                      {review.review}
+                    </p>
+                  )}
+                  {review.companyReply && (
+                    <div className="pl-10 ml-2 border-l-2 border-primary/20">
+                      <p className="text-xs font-semibold text-muted-foreground mb-0.5">Company reply:</p>
+                      <p className="text-sm text-muted-foreground italic">{review.companyReply}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══ PORTFOLIO ══ */}
+        {portfolio.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-950/40">
+                <ImageIcon className="h-4 w-4 text-purple-600" />
+              </div>
+              <h2 className="font-bold text-lg">Portfolio</h2>
+              <span className="text-sm text-muted-foreground">({portfolio.length} photos)</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {portfolio.map((photo, i) => (
+                <button
+                  key={photo.id}
+                  onClick={() => setPortfolioLightbox(i)}
+                  className="group relative aspect-square rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.url} alt={photo.caption ?? "Portfolio"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {photo.caption && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-xs text-white truncate">{photo.caption}</p>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {portfolioLightbox !== null && (
+          <Lightbox
+            images={portfolio}
+            startIndex={portfolioLightbox}
+            onClose={() => setPortfolioLightbox(null)}
+          />
+        )}
+      </div>
+
+      {/* ══ SIMILAR SERVICES ══ */}
+      {similar.length > 0 && (
+        <div className="mx-auto max-w-6xl px-4 pb-8 mt-8">
+          <div className="flex items-center gap-2.5 mb-4">
+            <h2 className="font-bold text-lg">{t("similarServices")}</h2>
+            <span className="text-sm text-muted-foreground">({similar.length})</span>
+          </div>
+          <div className="flex flex-col gap-3">
+            {similar.map((s) => <OrgCard key={s.id} service={s} />)}
+          </div>
+        </div>
+      )}
+
+      <Footer />
+    </div>
+  );
+}

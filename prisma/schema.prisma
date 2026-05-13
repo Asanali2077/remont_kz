@@ -1,0 +1,300 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CLIENT
+  COMPANY
+  ADMIN
+}
+
+enum ServiceCategory {
+  AUTOMOBILES
+  REAL_ESTATE
+  PLUMBING
+  ELECTRICAL
+  PAINTING
+  CLEANING
+  RENOVATION
+  WELDING
+  ROOFING
+  OTHER
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum RequestStatus {
+  NEW
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  AUDIO
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  password            String
+  role                UserRole
+  name                String?
+  phone               String?
+  avatarUrl           String?
+  address             String?
+  lastActiveAt        DateTime?
+  emailVerified       Boolean   @default(false)
+  emailVerifyToken    String?   @unique
+  resetToken          String?   @unique
+  resetTokenExpiresAt DateTime?
+  isBlocked           Boolean   @default(false)
+  blockReason         String?
+  isVerified          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  services           Service[]
+  clientRequests     Request[]       @relation("ClientRequests")
+  companyRequests    Request[]       @relation("CompanyRequests")
+  sentMessages       Message[]       @relation("SentMessages")
+  receivedMessages   Message[]       @relation("ReceivedMessages")
+  sentOffers         RequestOffer[]  @relation("CompanyOffers")
+  favorites          Favorite[]
+  payments           Payment[]
+  portfolio          PortfolioPhoto[]
+  auditLogs          AuditLog[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Service {
+  id                String          @id @default(uuid())
+  name              String
+  category          ServiceCategory
+  description       String          @db.Text
+  priceFrom         Float
+  priceTo           Float
+  active            Boolean         @default(true)
+  city              String?
+  rating            Float?
+  licensed          Boolean         @default(false)
+  startDate         DateTime?
+  endDate           DateTime?
+  tags              String[]        @default([])
+  customAttributes  Json?
+  address           String?
+  lat               Float?
+  lng               Float?
+  aiSummary         String?         @db.Text
+  aiSummaryAt       DateTime?
+  companyId         String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // Relations
+  company           User            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  images            ServiceImage[]
+  requests          Request[]
+  favorites         Favorite[]
+
+  @@index([companyId])
+  @@index([category])
+  @@index([city])
+  @@index([active])
+}
+
+model ServiceImage {
+  id        String   @id @default(uuid())
+  serviceId String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+}
+
+model Request {
+  id          String        @id @default(uuid())
+  clientId    String
+  serviceId   String?
+  companyId   String?
+  description String        @db.Text
+  category    ServiceCategory?
+  city        String?
+  imageUrl    String?
+  status      RequestStatus @default(NEW)
+  rating        Int?
+  review        String?     @db.Text
+  companyReply  String?     @db.Text
+  budgetFrom    Float?
+  budgetTo    Float?
+  expiresAt   DateTime?
+  deadline    DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  client      User          @relation("ClientRequests", fields: [clientId], references: [id], onDelete: Cascade)
+  service     Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  company     User?         @relation("CompanyRequests", fields: [companyId], references: [id], onDelete: SetNull)
+  messages    Message[]
+  offers      RequestOffer[]
+  payment     Payment?
+
+  @@index([clientId])
+  @@index([companyId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([category])
+  @@index([city])
+  @@index([expiresAt])
+  @@index([category, city, status])
+}
+
+model RequestOffer {
+  id        String      @id @default(uuid())
+  requestId String
+  companyId String
+  price     Int
+  message   String?
+  status    OfferStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  request   Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  company   User     @relation("CompanyOffers", fields: [companyId], references: [id])
+
+  @@unique([requestId, companyId])
+  @@index([requestId])
+  @@index([companyId])
+}
+
+model Message {
+  id          String      @id @default(uuid())
+  requestId   String?
+  senderId    String
+  receiverId  String
+  content     String      @db.Text
+  type        MessageType @default(TEXT)
+  imageUrl    String?
+  audioUrl    String?
+  read        Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  request     Request?    @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  sender      User        @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User        @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  serviceId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serviceId])
+  @@index([userId])
+  @@index([serviceId])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  requestId   String        @unique
+  clientId    String
+  amount      Float
+  status      PaymentStatus @default(PENDING)
+  method      String        @default("card")
+  discountAmount Float      @default(0)
+  promoCodeId  String?
+  promoCode    PromoCode?   @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  kaspiOrderId String?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  request     Request       @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  client      User          @relation(fields: [clientId], references: [id])
+
+  @@index([requestId])
+  @@index([clientId])
+  @@index([promoCodeId])
+}
+
+model PortfolioPhoto {
+  id          String   @id @default(uuid())
+  companyId   String
+  url         String
+  caption     String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  company     User     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  action     String
+  entity     String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor      User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model PromoCode {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  discount    Float     // percentage 0-100
+  maxUses     Int?      // null = unlimited
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  payments    Payment[]
+
+  @@index([code])
+}
