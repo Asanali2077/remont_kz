@@ -2,6 +2,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join, resolve } from "path";
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
+import sharp from "sharp";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR
   ? resolve(process.env.UPLOAD_DIR)
@@ -141,24 +142,38 @@ export async function uploadFile(
     throw new Error("File content does not match the declared type.");
   }
 
-  const ext = file.name.split(".").pop() ?? (subfolder === "images" ? "jpg" : "mp3");
-  const filename = `${Date.now()}-${randomUUID()}.${ext}`;
+  // Compress images: resize to max 1920px wide, convert to WebP at quality 80
+  let finalBuf: Buffer = buf;
+  let finalMime = file.type;
+  let finalExt = file.name.split(".").pop() ?? (subfolder === "images" ? "jpg" : "mp3");
+
+  if (subfolder === "images") {
+    const compressed = await sharp(buf)
+      .resize({ width: 1920, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer();
+    finalBuf = Buffer.from(compressed);
+    finalMime = "image/webp";
+    finalExt = "webp";
+  }
+
+  const filename = `${Date.now()}-${randomUUID()}.${finalExt}`;
 
   // Upload to S3 if configured, otherwise local disk
   if (S3_ENDPOINT && S3_BUCKET && S3_KEY && S3_SECRET) {
-    const url = await uploadToS3(buf, filename, subfolder, file.type);
-    return { url, filename, size: file.size, mimetype: file.type };
+    const url = await uploadToS3(finalBuf, filename, subfolder, finalMime);
+    return { url, filename, size: finalBuf.length, mimetype: finalMime };
   }
 
   const uploadPath = join(UPLOAD_DIR, subfolder);
   await mkdir(uploadPath, { recursive: true });
-  await writeFile(join(uploadPath, filename), buf);
+  await writeFile(join(uploadPath, filename), finalBuf);
 
   return {
     url: `/api/files/${subfolder}/${filename}`,
     filename,
-    size: file.size,
-    mimetype: file.type,
+    size: finalBuf.length,
+    mimetype: finalMime,
   };
 }
 

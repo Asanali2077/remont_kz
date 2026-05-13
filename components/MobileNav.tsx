@@ -23,7 +23,7 @@ export function MobileNav() {
 
   const COMPANY_ITEMS = [
     { href: "/",                    icon: Home,          label: t("catalog") },
-    { href: "/repair",              icon: Search,        label: t("catalog") },
+    { href: "/company/catalog",     icon: Search,        label: t("catalog") },
     { href: "/company/dashboard",   icon: ClipboardList, label: t("dashboard") },
     { href: "/chat",                icon: MessageSquare, label: t("chat") },
     { href: "/profile",             icon: User,          label: t("profile") },

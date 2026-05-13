@@ -6,8 +6,9 @@ import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { Briefcase, ClipboardList, Star, TrendingUp, Download } from "lucide-react";
+import { Briefcase, ClipboardList, Star, TrendingUp, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@/i18n/routing";
 
 /* Recharts loaded client-only to avoid SSR issues */
 const RechartsLine = dynamic(() => import("./RechartsLineChart"), { ssr: false });
@@ -154,9 +155,16 @@ export function CompanyStatistics() {
           <h2 className="text-2xl font-bold mb-1">{t("statistics")}</h2>
           <p className="text-muted-foreground text-sm">{t("stats.totalRequests")}</p>
         </div>
-        <Button variant="outline" size="sm" className="rounded-xl gap-2 shrink-0" onClick={handlePrintReport}>
-          <Download className="h-4 w-4" /> Export PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="rounded-xl gap-2 shrink-0" onClick={handlePrintReport}>
+            <Download className="h-4 w-4" /> Quick PDF
+          </Button>
+          <Link href="/company/report">
+            <Button size="sm" className="rounded-xl gap-2 shrink-0">
+              <FileText className="h-4 w-4" /> Full Report
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Top metric cards */}

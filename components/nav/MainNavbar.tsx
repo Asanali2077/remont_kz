@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import {
   LogOut, Menu, X, Moon, Sun, ChevronDown, ClipboardList,
   Bell, BookOpen, User, Settings, CreditCard, LayoutDashboard,
-  Heart, MessageSquare, Search, ShieldCheck, History,
+  Heart, MessageSquare, Search, ShieldCheck, History, Briefcase, Shield,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -134,6 +134,18 @@ export function MainNavbar() {
 
   function toggleTheme() { setTheme(theme === "dark" ? "light" : "dark"); }
 
+  /* ── company dropdown items ── */
+  const companyMenuItems = [
+    { href: "/company/dashboard",                    icon: LayoutDashboard, label: "Overview" },
+    { href: "/company/dashboard?tab=requests",       icon: ClipboardList,   label: "Requests" },
+    { href: "/company/dashboard?tab=services",       icon: Briefcase,       label: "Services" },
+    { href: "/company/dashboard?tab=notifications",  icon: Bell,            label: "Notifications" },
+    { href: "/company/dashboard?tab=messages",       icon: MessageSquare,   label: "Messages" },
+    { href: "/company/dashboard?tab=billing",        icon: CreditCard,      label: "Billing" },
+    { href: "/company/dashboard?tab=profile",        icon: User,            label: "Profile" },
+    { href: "/company/dashboard?tab=security",       icon: Shield,          label: "Security" },
+  ];
+
   /* ── client dropdown items ── */
   const clientMenuItems = [
     { href: "/my-requests",                    icon: ClipboardList, label: t("myRequests") },
@@ -229,47 +241,35 @@ export function MainNavbar() {
                       <p className="text-xs text-muted-foreground truncate capitalize">{user.role}</p>
                     </div>
 
-                    {/* Client-specific items */}
+                    {/* Client items */}
                     {user.role === "client" && clientMenuItems.map(({ href, icon: Icon, label }) => (
-                      <Link
-                        key={href}
-                        href={href}
+                      <Link key={href} href={href}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
-                        onClick={() => setDropdownOpen(false)}
-                      >
+                        onClick={() => setDropdownOpen(false)}>
                         <Icon className="h-4 w-4 text-muted-foreground" /> {label}
                       </Link>
                     ))}
 
-                    {/* Admin Panel link */}
+                    {/* Company items */}
+                    {user.role === "company" && companyMenuItems.map(({ href, icon: Icon, label }) => (
+                      <Link key={href} href={href}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                        onClick={() => setDropdownOpen(false)}>
+                        <Icon className="h-4 w-4 text-muted-foreground" /> {label}
+                      </Link>
+                    ))}
+
+                    {/* Admin */}
                     {user.role === "admin" && (
-                      <Link
-                        href="/admin/dashboard"
+                      <Link href="/admin/dashboard"
                         className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors text-red-600 dark:text-red-400 font-medium"
-                        onClick={() => setDropdownOpen(false)}
-                      >
+                        onClick={() => setDropdownOpen(false)}>
                         <ShieldCheck className="h-4 w-4" /> {t("adminPanel")}
                       </Link>
                     )}
 
-                    {/* Dashboard link for company */}
-                    {user.role === "company" && (
-                      <>
-                        <Link
-                          href={dashboardHref}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          <LayoutDashboard className="h-4 w-4 text-muted-foreground" /> {t("dashboard")}
-                        </Link>
-                        <Link href="/chat" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
-                          <MessageSquare className="h-4 w-4 text-muted-foreground" /> {t("chat")}
-                        </Link>
-                      </>
-                    )}
-
-                    {/* Profile / Settings — only for non-client (clients have them in clientMenuItems) */}
-                    {user.role !== "client" && (
+                    {/* Profile / Settings for admin only (company & client have them above) */}
+                    {user.role === "admin" && (
                       <>
                         <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
                           <User className="h-4 w-4 text-muted-foreground" /> {t("profile")}
@@ -278,11 +278,6 @@ export function MainNavbar() {
                           <Settings className="h-4 w-4 text-muted-foreground" /> {t("settings")}
                         </Link>
                       </>
-                    )}
-                    {user.role === "company" && (
-                      <Link href="/billing" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
-                        <CreditCard className="h-4 w-4 text-muted-foreground" /> {t("billing")}
-                      </Link>
                     )}
 
                     <div className="border-t">

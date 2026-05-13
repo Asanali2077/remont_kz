@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useRouter } from "@/i18n/routing";
 import { api } from "@/lib/api";
 import { Footer } from "@/components/Footer";
-import { Bell, CheckCircle2, Clock, MessageSquare, Star, Zap, Loader2 } from "lucide-react";
+import { Bell, CheckCircle2, Clock, MessageSquare, Star, Zap, Loader2, CheckCheck } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import type { RequestRecord } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
@@ -37,6 +37,11 @@ export default function NotificationsPage() {
 
   const notifs = useMemo(() => buildNotifications(requests), [requests]);
   const unread = notifs.filter(n => !n.read).length;
+
+  function markAllRead() {
+    localStorage.setItem("notif_checked_at", new Date().toISOString());
+    void api.getRequests().then(setRequests).catch(() => null);
+  }
 
   /* Group by date */
   const grouped = useMemo(() => {
@@ -71,6 +76,14 @@ export default function NotificationsPage() {
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">Your activity and updates</p>
           </div>
+          {unread > 0 && (
+            <button
+              onClick={markAllRead}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors border border-border/50 rounded-xl px-3 py-1.5 hover:bg-muted/60"
+            >
+              <CheckCheck className="h-4 w-4" /> {t("markAllRead")}
+            </button>
+          )}
         </div>
 
         <div className="flex gap-6 items-start">

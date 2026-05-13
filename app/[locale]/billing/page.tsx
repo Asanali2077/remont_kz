@@ -67,24 +67,13 @@ export default function BillingPage() {
 
               <div className="grid grid-cols-1 gap-3">
                 {PLANS.map((plan) => (
-                  <div key={plan.name} className={`relative rounded-xl border p-5 transition-all ${
+                  <div key={plan.name} className={`rounded-xl border p-5 transition-all ${
                     plan.popular
                       ? "border-primary bg-primary/5 dark:bg-primary/10"
                       : plan.current
                       ? "border-border/50 bg-muted/30"
                       : "border-border/50 bg-background"
                   }`}>
-                    {plan.popular && (
-                      <span className="absolute top-4 right-4 text-[11px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                        Most Popular
-                      </span>
-                    )}
-                    {plan.current && (
-                      <span className="absolute top-4 right-4 text-[11px] font-semibold bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                        Current plan
-                      </span>
-                    )}
-
                     <div className="flex items-start gap-5">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-1.5 mb-0.5">
@@ -106,7 +95,17 @@ export default function BillingPage() {
                         </div>
                       </div>
 
-                      <div className="shrink-0 mt-1">
+                      <div className="shrink-0 flex flex-col items-end gap-2">
+                        {plan.popular && (
+                          <span className="text-[11px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                            Most Popular
+                          </span>
+                        )}
+                        {plan.current && (
+                          <span className="text-[11px] font-semibold bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                            Current plan
+                          </span>
+                        )}
                         <Button
                           variant={plan.popular ? "default" : "outline"}
                           size="sm" className="rounded-xl"

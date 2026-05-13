@@ -8,7 +8,7 @@ import { Link } from "@/i18n/routing";
 import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
          AlertCircle, Sparkles, Building2, X, Heart, MessageSquare,
          BookOpen, Loader2, Eye, EyeOff, Bell, MapPin, User as UserIcon,
-         History, CalendarDays, BadgeCheck, CircleDashed } from "lucide-react";
+         History, CalendarDays, BadgeCheck, CircleDashed, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, ServiceRecord, SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -565,6 +565,7 @@ const STATUS_STYLE: Record<string, { label: string; color: string; icon: React.E
   in_progress: { label: "In Progress", color: "text-amber-600 bg-amber-500/10",  icon: CircleDashed },
   accepted:    { label: "Accepted",    color: "text-blue-600 bg-blue-500/10",    icon: CheckCircle2 },
   new:         { label: "New",         color: "text-muted-foreground bg-muted",  icon: Clock },
+  cancelled:   { label: "Cancelled",   color: "text-destructive bg-destructive/10", icon: X },
 };
 
 function HistoryPanel() {
@@ -573,7 +574,7 @@ function HistoryPanel() {
 
   useEffect(() => {
     void api.getRequests()
-      .then(reqs => setOrders(reqs.filter(r => r.status === "completed" || r.status === "in_progress" || r.status === "accepted")))
+      .then(reqs => setOrders(reqs.filter(r => ["completed", "in_progress", "accepted", "cancelled"].includes(r.status))))
       .catch(() => toast.error("Failed to load history"))
       .finally(() => setLoading(false));
   }, []);
@@ -623,9 +624,12 @@ function HistoryPanel() {
               {/* Main info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="font-semibold text-sm leading-snug truncate">
-                    {req.service?.name ?? req.description.slice(0, 60)}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm leading-snug truncate">
+                      {req.service?.name ?? req.description.slice(0, 60)}
+                    </p>
+                    <span className="font-mono text-[10px] text-muted-foreground/70">#{req.id.slice(0, 8).toUpperCase()}</span>
+                  </div>
                   <span className={`shrink-0 inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${st.color}`}>
                     {st.label}
                   </span>
@@ -884,19 +888,23 @@ export default function MyRequestsPage() {
                         const isExpired = expiry?.expired && req.status === "new" && !req.companyId;
                         const hasOffers = (req.offers?.length ?? 0) > 0;
                         const isAccepted = !!req.companyId && req.status !== "new";
-                        const borderColor = {
+                        const borderColor = ({
                           new:         "border-l-slate-300 dark:border-l-slate-600",
                           accepted:    "border-l-blue-400",
                           in_progress: "border-l-amber-400",
                           completed:   "border-l-green-500",
-                        }[req.status] ?? "border-l-border";
+                          cancelled:   "border-l-red-400",
+                        } as Record<string, string>)[req.status] ?? "border-l-border";
 
                         return (
                           <div key={req.id} className={`bg-card rounded-2xl border border-l-4 overflow-hidden ${borderColor}`}>
                             <div className="px-5 pt-5 pb-3">
                               <div className="flex items-start justify-between gap-3 mb-3">
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-bold text-base leading-snug">{req.service?.name || "Custom request"}</h3>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="font-bold text-base leading-snug">{req.service?.name || "Custom request"}</h3>
+                                    <span className="font-mono text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">#{req.id.slice(0, 8).toUpperCase()}</span>
+                                  </div>
                                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
                                     {req.category && <span>{SERVICE_CATEGORY_LABELS[req.category]}</span>}
                                     {req.city && <span>📍 {req.city}</span>}
@@ -993,17 +1001,31 @@ export default function MyRequestsPage() {
 
                               <div className="flex items-center justify-between pt-1">
                                 <div className="flex gap-2">
-                                  {req.status === "new" && !isExpired && (
+                                  {(req.status === "new" && !isExpired) && (
                                     <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs text-muted-foreground"
                                       onClick={() => setCancelId(req.id)}>
                                       {t("deleteRequest")}
                                     </Button>
                                   )}
-                                  {req.status === "completed" && (
-                                    <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs"
-                                      onClick={() => setRepeatData({ description: req.description, city: req.city ?? undefined, budgetFrom: req.budgetFrom ?? undefined, budgetTo: req.budgetTo ?? undefined })}>
-                                      Повторить заявку
+                                  {(req.status === "accepted" || req.status === "in_progress") && (
+                                    <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
+                                      onClick={() => setCancelId(req.id)}>
+                                      ✕ Отменить заказ
                                     </Button>
+                                  )}
+                                  {req.status === "completed" && (
+                                    <>
+                                      <Link href={`/order-summary/${req.id}`}>
+                                        <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/5">
+                                          <FileText className="h-3.5 w-3.5" />
+                                          Документ
+                                        </Button>
+                                      </Link>
+                                      <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs"
+                                        onClick={() => setRepeatData({ description: req.description, city: req.city ?? undefined, budgetFrom: req.budgetFrom ?? undefined, budgetTo: req.budgetTo ?? undefined })}>
+                                        Повторить заявку
+                                      </Button>
+                                    </>
                                   )}
                                 </div>
                                 {req.status === "completed" && req.rating === null && (

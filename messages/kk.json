@@ -197,11 +197,13 @@
       "accepted": "Қабылданды",
       "in_progress": "Жұмыста",
       "completed": "Аяқталды",
+      "cancelled": "Болдырылмады",
       "expired": "Мерзімі өтті",
       "NEW": "Жаңа",
       "ACCEPTED": "Қабылданды",
       "IN_PROGRESS": "Жұмыста",
-      "COMPLETED": "Аяқталды"
+      "COMPLETED": "Аяқталды",
+      "CANCELLED": "Болдырылмады"
     },
     "budget": "Бюджет",
     "description": "Сипаттама",

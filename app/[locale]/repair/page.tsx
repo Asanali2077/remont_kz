@@ -5,8 +5,9 @@ import { useSearchParams } from "next/navigation";
 import {
   Search, Info, LayoutList, LayoutGrid, X, SlidersHorizontal,
   Car, Home, Wrench, Star, Image, CheckCircle2, ChevronDown,
-  Sparkles, MapPin, ArrowRight, LocateFixed, Map,
+  Sparkles, MapPin, ArrowRight, LocateFixed, Map, Heart,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { Footer } from "@/components/Footer";
 import { OrgCard } from "@/components/OrgCard";
@@ -16,7 +17,6 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { FilterBar, SortOption } from "@/components/filters/FilterBar";
 import type { CategoryFilterValue } from "@/components/filters/CategoryFilter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import type { ServiceRecord } from "@/lib/types";
 import type { TopCategory } from "@/lib/categories";
@@ -72,9 +72,23 @@ function GridCard({ service }: { service: ServiceRecord }) {
   const { user } = useAuth();
   const isClient = user?.role === "client";
   const [imgError, setImgError] = useState(false);
+  const [isFav, setIsFav] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
   const img = !imgError && service.images[0]?.url ? service.images[0].url : null;
 
   const CAT_LABEL: Record<string, string> = { automobiles: "Auto", "real-estate": "Real Estate", other: "Other" };
+
+  async function toggleFavorite(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isClient || favLoading) return;
+    setFavLoading(true);
+    try {
+      if (isFav) { await api.removeFavorite(service.id); setIsFav(false); toast.success("Removed from saved"); }
+      else { await api.addFavorite(service.id); setIsFav(true); toast.success("Saved to favorites"); }
+    } catch { toast.error("Failed to update favorites"); }
+    finally { setFavLoading(false); }
+  }
 
   return (
     <div className="group flex flex-col bg-card rounded-2xl border border-border/50 overflow-hidden hover:shadow-lg hover:border-border hover:-translate-y-0.5 transition-all duration-200">
@@ -93,6 +107,23 @@ function GridCard({ service }: { service: ServiceRecord }) {
             {service.images.length} photos
           </div>
         )}
+        {/* Favorite button */}
+        <div className="absolute top-2.5 right-2.5" onClick={e => e.preventDefault()}>
+          {isClient ? (
+            <button onClick={(e) => void toggleFavorite(e)} disabled={favLoading}
+              className={`flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 ${
+                isFav ? "bg-rose-500 text-white shadow-sm" : "bg-black/30 text-white hover:bg-black/50"
+              }`}>
+              <Heart className={`h-3.5 w-3.5 ${isFav ? "fill-white" : ""}`} />
+            </button>
+          ) : !user ? (
+            <AuthModal trigger={
+              <button className="flex h-7 w-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors">
+                <Heart className="h-3.5 w-3.5" />
+              </button>
+            } />
+          ) : null}
+        </div>
       </Link>
 
       <div className="flex flex-col flex-1 p-4 gap-2">
@@ -240,12 +271,15 @@ function RepairContent() {
   const [minRating, setMinRating] = useState(0);
   const [hasPhotos, setHasPhotos] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
-  const [viewMode, setViewMode] = useState<"list" | "grid" | "map">(() => {
-    if (typeof window === "undefined") return "list";
-    return (localStorage.getItem("catalog:view") as "list" | "grid" | "map") ?? "list";
-  });
+  const [viewMode, setViewMode] = useState<"list" | "grid" | "map">("list");
+  useEffect(() => {
+    const saved = localStorage.getItem("catalog:view") as "list" | "grid" | "map" | null;
+    if (saved && ["list", "grid", "map"].includes(saved)) setViewMode(saved);
+  }, []);
   const [page, setPage] = useState(1);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
 
   /* Load data */
   useEffect(() => { void loadServices(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -286,6 +320,10 @@ function RepairContent() {
         }
         if (categoryFilter.subcategory && !s.tags.includes(categoryFilter.subcategory)) return false;
         if (hasPhotos && s.images.length === 0) return false;
+        // Radius filter: only apply to services that have coordinates
+        if (userCoords && radiusKm && s.lat != null && s.lng != null) {
+          if (haversineKm(userCoords.lat, userCoords.lng, s.lat, s.lng) > radiusKm) return false;
+        }
         return true;
       })
       .sort((a, b) => {
@@ -300,7 +338,7 @@ function RepairContent() {
           }
         }
       });
-  }, [services, query, city, priceRange, minRating, categoryFilter, hasPhotos, sortBy]);
+  }, [services, query, city, priceRange, minRating, categoryFilter, hasPhotos, sortBy, userCoords, radiusKm]);
 
   /* Pagination */
   const visible = filtered.slice(0, page * PAGE_SIZE);
@@ -312,6 +350,7 @@ function RepairContent() {
   function resetFilters() {
     setQuery(""); setCity(undefined); setCategoryFilter({});
     setPriceRange([0, maxPrice]); setMinRating(0); setHasPhotos(false); setSortBy("relevance");
+    setUserCoords(null); setRadiusKm(null);
   }
 
   function toggleView(mode: "list" | "grid" | "map") {
@@ -319,13 +358,16 @@ function RepairContent() {
     localStorage.setItem("catalog:view", mode);
   }
 
-  function useMyLocation() {
+  function handleGetLocation() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setUserCoords({ lat: latitude, lng: longitude });
+        setRadiusKm(10); // default 10 km radius
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&accept-language=en`,
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`,
             { headers: { "User-Agent": "Remont.kz/1.0" } }
           );
           const data = await res.json() as { address?: { city?: string; town?: string; village?: string } };
@@ -333,8 +375,17 @@ function RepairContent() {
           if (detectedCity) setCity(detectedCity);
         } catch { /* silent */ }
       },
-      () => { /* permission denied */ }
+      () => { toast.error("Location access denied"); }
     );
+  }
+
+  function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   const activeCategory = categoryFilter.category ?? null;
@@ -366,11 +417,23 @@ function RepairContent() {
             <p className="mt-0.5 text-sm text-muted-foreground">{t("subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5 rounded-xl hidden sm:inline-flex"
-              onClick={useMyLocation} title="Use my location">
+            <Button variant={userCoords ? "default" : "outline"} size="sm" className="gap-1.5 rounded-xl hidden sm:inline-flex"
+              onClick={() => {
+                if (userCoords) { setUserCoords(null); setRadiusKm(null); }
+                else handleGetLocation();
+              }} title="Use my location">
               <LocateFixed className="h-3.5 w-3.5" />
-              {city ? city : t("nearMe")}
+              {userCoords ? `≤${radiusKm}km` : (city ? city : t("nearMe"))}
             </Button>
+            {userCoords && (
+              <select
+                value={radiusKm ?? 10}
+                onChange={e => setRadiusKm(Number(e.target.value))}
+                className="h-8 rounded-xl border border-border/50 bg-card px-2 text-xs hidden sm:block"
+              >
+                {[5, 10, 20, 50].map(km => <option key={km} value={km}>{km} km</option>)}
+              </select>
+            )}
             {createRequestAction}
           </div>
         </div>
@@ -491,7 +554,7 @@ function RepairContent() {
             {/* Loading skeletons */}
             {loading && (
               viewMode === "grid"
-                ? <div className="grid grid-cols-2 gap-3">{[1,2,3,4].map(i => <ShimmerCard key={i} grid />)}</div>
+                ? <div className="grid grid-cols-2 md:grid-cols-3 gap-3">{[1,2,3,4].map(i => <ShimmerCard key={i} grid />)}</div>
                 : <div className="space-y-3">{[1,2,3].map(i => <ShimmerCard key={i} />)}</div>
             )}
 
@@ -520,7 +583,7 @@ function RepairContent() {
               <>
                 {viewMode === "grid"
                   ? (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {visible.map((s) => (
                         <GridCard key={s.id} service={s} />
                       ))}

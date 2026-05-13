@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { authenticateRequest } from "@/lib/middleware";
+import { typingStore } from "@/app/api/chat/[requestId]/typing/route";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,21 @@ export async function GET(
               where: { requestId, receiverId: userId, read: false },
               data: { read: true },
             });
+          }
+
+          // Typing indicator — broadcast who else is typing (excluding current user)
+          const typingMap = typingStore.get(requestId);
+          if (typingMap) {
+            const now = Date.now();
+            const typers: string[] = [];
+            for (const [uid, expiresAt] of typingMap) {
+              if (uid !== userId && expiresAt > now) {
+                typers.push(uid);
+              } else if (expiresAt <= now) {
+                typingMap.delete(uid);
+              }
+            }
+            send({ type: "typing", typers });
           }
         } catch { /* db error, skip tick */ }
       }, 3000);

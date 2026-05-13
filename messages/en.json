@@ -197,11 +197,13 @@
       "accepted": "Accepted",
       "in_progress": "In Progress",
       "completed": "Completed",
+      "cancelled": "Cancelled",
       "expired": "Expired",
       "NEW": "New",
       "ACCEPTED": "Accepted",
       "IN_PROGRESS": "In Progress",
-      "COMPLETED": "Completed"
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
     },
     "budget": "Budget",
     "description": "Description",

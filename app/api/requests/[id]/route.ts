@@ -5,12 +5,13 @@ import { prisma } from "@/lib/db";
 import { requireAuth, requireClient, requireCompany } from "@/lib/middleware";
 import { sendRequestAcceptedEmail, sendJobCompletedEmail } from "@/lib/email";
 
-const requestStatuses = ["accepted", "in_progress", "completed"] as const;
+const requestStatuses = ["accepted", "in_progress", "completed", "cancelled"] as const;
 
 const requestStatusMap: Record<(typeof requestStatuses)[number], RequestStatus> = {
   accepted: RequestStatus.ACCEPTED,
   in_progress: RequestStatus.IN_PROGRESS,
   completed: RequestStatus.COMPLETED,
+  cancelled: RequestStatus.CANCELLED,
 };
 
 const updateRequestSchema = z.object({
@@ -334,11 +335,21 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden: You can only cancel your own requests" }, { status: 403 });
     }
 
-    if (existingRequest.status !== RequestStatus.NEW) {
-      return NextResponse.json({ error: "Only new requests can be cancelled" }, { status: 400 });
+    const cancellableStatuses: RequestStatus[] = [RequestStatus.NEW, RequestStatus.ACCEPTED, RequestStatus.IN_PROGRESS];
+    if (!cancellableStatuses.includes(existingRequest.status)) {
+      return NextResponse.json({ error: "Completed requests cannot be cancelled" }, { status: 400 });
     }
 
-    await prisma.request.delete({ where: { id: params.id } });
+    // NEW requests: physically delete (nothing to keep)
+    if (existingRequest.status === RequestStatus.NEW) {
+      await prisma.request.delete({ where: { id: params.id } });
+    } else {
+      // ACCEPTED / IN_PROGRESS: mark as CANCELLED to preserve history
+      await prisma.request.update({
+        where: { id: params.id },
+        data: { status: RequestStatus.CANCELLED, companyId: null },
+      });
+    }
 
     return NextResponse.json({ message: "Request cancelled" });
   } catch (error) {

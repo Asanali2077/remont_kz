@@ -65,6 +65,9 @@ export async function GET(request: NextRequest) {
     const tags = searchParams.get("tags");
     const hasPhotos = searchParams.get("hasPhotos");
     const search = searchParams.get("search");
+    const lat = searchParams.get("lat");
+    const lng = searchParams.get("lng");
+    const radiusKm = searchParams.get("radius"); // kilometres
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "50", 10)));
 
@@ -117,13 +120,70 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { tags: { hasSome: [search] } },
-        { company: { name: { contains: search, mode: "insensitive" } } },
-        { city: { contains: search, mode: "insensitive" } },
-      ];
+      const q = search.trim();
+      if (q) {
+        // Postgres FTS with plainto_tsquery (handles multi-word, no special syntax needed)
+        const ftsRows = await prisma.$queryRaw<{ id: string }[]>`
+          SELECT s.id
+          FROM "Service" s
+          LEFT JOIN "User" u ON u.id = s."companyId"
+          WHERE to_tsvector('simple',
+            coalesce(s.name, '') || ' ' ||
+            coalesce(s.description, '') || ' ' ||
+            coalesce(s.city, '') || ' ' ||
+            coalesce(u.name, '')
+          ) @@ plainto_tsquery('simple', ${q})
+          ORDER BY ts_rank(
+            to_tsvector('simple',
+              coalesce(s.name, '') || ' ' ||
+              coalesce(s.description, '') || ' ' ||
+              coalesce(s.city, '') || ' ' ||
+              coalesce(u.name, '')
+            ),
+            plainto_tsquery('simple', ${q})
+          ) DESC
+        `;
+
+        if (ftsRows.length > 0) {
+          where.id = { in: ftsRows.map(r => r.id) };
+        } else {
+          // Fallback to LIKE if FTS returns nothing (e.g., single partial word)
+          where.OR = [
+            { name: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+            { tags: { hasSome: [q] } },
+            { company: { name: { contains: q, mode: "insensitive" } } },
+            { city: { contains: q, mode: "insensitive" } },
+          ];
+        }
+      }
+    }
+
+    // Radius search using Haversine formula (only when lat/lng/radius provided)
+    if (lat && lng && radiusKm) {
+      const latF = parseFloat(lat);
+      const lngF = parseFloat(lng);
+      const km = parseFloat(radiusKm);
+      if (!isNaN(latF) && !isNaN(lngF) && !isNaN(km) && km > 0) {
+        const nearbyRows = await prisma.$queryRaw<{ id: string }[]>`
+          SELECT id FROM "Service"
+          WHERE lat IS NOT NULL AND lng IS NOT NULL AND active = true
+          AND (
+            6371 * acos(
+              cos(radians(${latF})) * cos(radians(lat)) *
+              cos(radians(lng) - radians(${lngF})) +
+              sin(radians(${latF})) * sin(radians(lat))
+            )
+          ) <= ${km}
+        `;
+        const nearbyIds = new Set(nearbyRows.map(r => r.id));
+        // Intersect with any existing id filter from FTS
+        if (where.id && typeof where.id === "object" && "in" in where.id) {
+          where.id = { in: (where.id.in as string[]).filter(id => nearbyIds.has(id)) };
+        } else {
+          where.id = { in: [...nearbyIds] };
+        }
+      }
     }
 
     const [services, total] = await Promise.all([

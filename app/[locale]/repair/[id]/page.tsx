@@ -4,10 +4,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { useRouter, Link } from "@/i18n/routing";
 import {
   ArrowLeft, MapPin, Star, CheckCircle2, Loader2,
-  Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, ImageIcon, BadgeCheck,
+  Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, BadgeCheck,
   Share2,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -128,11 +128,10 @@ export default function ServiceDetailPage() {
 
   const [service, setService] = useState<ServiceRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImg, setSelectedImg] = useState(0);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [reviews, setReviews] = useState<ReviewRecord[]>([]);
   const [similar, setSimilar] = useState<ServiceRecord[]>([]);
-  const [portfolio, setPortfolio] = useState<{ id: string; url: string; caption: string | null }[]>([]);
-  const [portfolioLightbox, setPortfolioLightbox] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -146,11 +145,6 @@ export default function ServiceDetailPage() {
         setService(svc);
         setReviews(revs);
         setSimilar(sim);
-        // Load portfolio after service is loaded
-        fetch(`/api/portfolio?companyId=${svc.companyId}`)
-          .then((r) => r.json())
-          .then(setPortfolio)
-          .catch(() => null);
       } catch {
         toast.error("Service not found");
         router.push("/repair");
@@ -231,15 +225,44 @@ export default function ServiceDetailPage() {
   );
   if (!service) return null;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.name,
+    description: service.description,
+    provider: {
+      "@type": "LocalBusiness",
+      name: service.company.name,
+      email: service.company.email,
+      ...(service.company.phone && { telephone: service.company.phone }),
+      ...(service.company.address && { address: { "@type": "PostalAddress", streetAddress: service.company.address, addressCountry: "KZ" } }),
+    },
+    areaServed: service.city ?? "Kazakhstan",
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "KZT",
+      priceSpecification: { "@type": "PriceSpecification", minPrice: service.priceFrom, maxPrice: service.priceTo, priceCurrency: "KZT" },
+    },
+    ...(typeof service.rating === "number" && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: service.rating.toFixed(1),
+        reviewCount: service._count?.requests ?? 0,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+  };
+
   const images = (service.images?.length ?? 0) > 0
     ? service.images
     : [{ url: "https://placehold.co/800x600/e2e8f0/94a3b8?text=No+photo", id: "ph", serviceId: service.id, order: 0, createdAt: "" }];
 
-  const mainImage = images[0].url;
-  const thumbImages = images.slice(1, 5);
+  const safeIdx = Math.min(selectedImg, images.length - 1);
 
   return (
     <div className="min-h-screen bg-muted/30">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {lightboxIdx !== null && (
         <Lightbox images={images} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />
       )}
@@ -253,37 +276,36 @@ export default function ServiceDetailPage() {
         </button>
 
         {/* ══ TOP: gallery LEFT + action card RIGHT ══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6 lg:items-stretch">
 
           {/* Gallery — 3/5 */}
-          <div className="lg:col-span-3 space-y-2">
-            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer bg-muted"
-              onClick={() => setLightboxIdx(0)}>
-              <img src={mainImage} alt={service.name}
-                className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
-              {images.length > 1 && (
-                <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2.5 py-1 text-white text-xs font-medium">
-                  <Camera className="h-3 w-3" /> {images.length}
-                </div>
-              )}
-            </div>
-            {thumbImages.length > 0 && (
-              <div className="flex gap-2">
-                {thumbImages.map((img, i) => (
-                  <div key={img.url}
-                    className="relative flex-1 aspect-[4/3] rounded-xl overflow-hidden cursor-pointer bg-muted"
-                    onClick={() => setLightboxIdx(i + 1)}>
-                    <img src={img.url} alt={`Photo ${i + 2}`}
-                      className="h-full w-full object-cover hover:scale-105 transition-transform duration-300" />
-                    {i === 3 && images.length > 5 && (
-                      <div className="absolute inset-0 bg-black/55 flex items-center justify-center text-white font-bold text-sm rounded-xl">
-                        +{images.length - 5}
-                      </div>
-                    )}
-                  </div>
-                ))}
+          <div className="lg:col-span-3 flex flex-col h-full">
+            {/* Main image — fills remaining height after thumbnail strip */}
+            <div className="relative flex-1 min-h-[240px] rounded-2xl overflow-hidden cursor-pointer bg-muted"
+              onClick={() => setLightboxIdx(safeIdx)}>
+              <img src={images[safeIdx].url} alt={service.name}
+                className="h-full w-full object-cover transition-all duration-300 hover:scale-[1.03]" />
+              <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2.5 py-1 text-white text-xs font-medium">
+                <Camera className="h-3 w-3" /> {safeIdx + 1} / {images.length}
               </div>
-            )}
+            </div>
+
+            {/* Thumbnail strip — always visible */}
+            <div className="flex gap-2 mt-2 overflow-x-auto pb-1 shrink-0" style={{ scrollbarWidth: "thin" }}>
+              {images.map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => setSelectedImg(i)}
+                  className={`relative shrink-0 w-20 h-14 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                    i === safeIdx
+                      ? "border-primary shadow-md shadow-primary/20 scale-[1.04]"
+                      : "border-transparent opacity-60 hover:opacity-90"
+                  }`}
+                >
+                  <img src={img.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Action card — 2/5 */}
@@ -350,17 +372,22 @@ export default function ServiceDetailPage() {
               {/* Company block */}
               <div className="pt-1 space-y-3">
                 <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{t("company")}</p>
-                <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
-                    {(service.company.name ?? service.company.email)[0].toUpperCase()}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-sm">{service.company.name}</span>
+                <Link href={`/company/${service.companyId}`}
+                  className="flex items-center gap-2.5 group hover:bg-primary/5 -mx-2 px-2 py-1.5 rounded-xl transition-colors">
+                  {service.company.avatarUrl ? (
+                    <img src={service.company.avatarUrl} alt={service.company.name ?? ""} className="h-9 w-9 rounded-xl object-cover border border-border shrink-0" />
+                  ) : (
+                    <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                      {(service.company.name ?? service.company.email)[0].toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-semibold text-sm group-hover:text-primary transition-colors truncate">{service.company.name}</span>
                     {service.company.isVerified && (
                       <BadgeCheck className="h-5 w-5 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
                     )}
                   </div>
-                </div>
+                </Link>
                 <div className="space-y-2">
                   {service.company.phone && (
                     <a href={`tel:${service.company.phone}`}
@@ -378,79 +405,115 @@ export default function ServiceDetailPage() {
           </div>
         </div>
 
-        {/* ══ BOTTOM: info LEFT + map RIGHT ══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        {/* ══ BOTTOM: full-width info ══ */}
+        <div className="space-y-5">
 
-          {/* Info — 3/5 */}
-          <div className="lg:col-span-3 space-y-5">
-
-            {/* Badges row */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${CATEGORY_COLORS[service.category] ?? CATEGORY_COLORS.other}`}>
-                {SERVICE_CATEGORY_LABELS[service.category]}
+          {/* Badges row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${CATEGORY_COLORS[service.category] ?? CATEGORY_COLORS.other}`}>
+              {SERVICE_CATEGORY_LABELS[service.category]}
+            </span>
+            {service.city && (
+              <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" /> {service.city}
               </span>
-              {service.city && (
-                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" /> {service.city}
-                </span>
+            )}
+          </div>
+
+          {/* Title */}
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-1.5">{service.name}</h1>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Building2 className="h-4 w-4" />
+              <span>{service.company.name}</span>
+              {service.company.isVerified && (
+                <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
               )}
             </div>
+          </div>
 
-            {/* Title */}
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-1.5">{service.name}</h1>
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Building2 className="h-4 w-4" />
-                <span>{service.company.name}</span>
-                {service.company.isVerified && (
-                  <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
+          {/* Description */}
+          <div className="bg-card border border-border/50 rounded-2xl p-5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">{t("description")}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{service.description}</p>
+          </div>
+
+          {/* Availability */}
+          {(service.startDate || service.endDate) && (
+            <div className="bg-card border border-border/50 rounded-2xl p-5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Availability</p>
+              <div className="flex gap-6 text-sm">
+                {service.startDate && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">From</p>
+                    <p className="font-semibold">{new Date(service.startDate).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric" })}</p>
+                  </div>
+                )}
+                {service.endDate && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">Until</p>
+                    <p className="font-semibold">{new Date(service.endDate).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric" })}</p>
+                  </div>
                 )}
               </div>
             </div>
+          )}
 
-            {/* Description */}
-            <div className="bg-card border border-border/50 rounded-2xl p-5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">{t("description")}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{service.description}</p>
+          {/* Tags */}
+          {service.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {service.tags.map((tag) => (
+                <span key={tag} className="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+                  {tag}
+                </span>
+              ))}
             </div>
+          )}
 
-            {/* Availability */}
-            {(service.startDate || service.endDate) && (
-              <div className="bg-card border border-border/50 rounded-2xl p-5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Availability</p>
-                <div className="flex gap-6 text-sm">
-                  {service.startDate && (
-                    <div>
-                      <p className="text-muted-foreground text-xs">From</p>
-                      <p className="font-semibold">{new Date(service.startDate).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric" })}</p>
-                    </div>
+          {/* Company card — full width */}
+          <div className="bg-card border border-border/50 rounded-2xl p-5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">{t("company")}</p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <Link href={`/company/${service.companyId}`} className="flex items-center gap-3 flex-1 min-w-0 group">
+                {service.company.avatarUrl ? (
+                  <img src={service.company.avatarUrl} alt={service.company.name ?? ""} className="h-12 w-12 rounded-2xl object-cover border border-border shrink-0" />
+                ) : (
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-lg font-black text-primary shrink-0">
+                    {(service.company.name ?? service.company.email)[0].toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-base truncate group-hover:text-primary transition-colors">{service.company.name}</span>
+                    {service.company.isVerified && (
+                      <BadgeCheck className="h-5 w-5 text-blue-500 shrink-0" aria-label="Верифицированная компания" />
+                    )}
+                  </div>
+                  {service.company.address && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <MapPin className="h-3 w-3 shrink-0" /> {service.company.address}
+                    </p>
                   )}
-                  {service.endDate && (
-                    <div>
-                      <p className="text-muted-foreground text-xs">Until</p>
-                      <p className="font-semibold">{new Date(service.endDate).toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric" })}</p>
-                    </div>
-                  )}
+                  <p className="text-xs text-primary/70 mt-0.5 group-hover:text-primary transition-colors">View profile →</p>
                 </div>
+              </Link>
+              <div className="flex flex-wrap gap-3 shrink-0">
+                {service.company.phone && (
+                  <a href={`tel:${service.company.phone}`}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors bg-muted/50 hover:bg-primary/5 rounded-xl px-3 py-2">
+                    <Phone className="h-3.5 w-3.5 shrink-0" /> {service.company.phone}
+                  </a>
+                )}
+                <a href={`mailto:${service.company.email}`}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors bg-muted/50 hover:bg-primary/5 rounded-xl px-3 py-2">
+                  <Mail className="h-3.5 w-3.5 shrink-0" /> {service.company.email}
+                </a>
               </div>
-            )}
-
-            {/* Tags */}
-            {service.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {service.tags.map((tag) => (
-                  <span key={tag} className="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
 
-          {/* Map — 2/5 */}
-          <div className="lg:col-span-2">
-            <LocationCard address={service.address} city={service.city} locationLabel={t("location")} openInLabel="Open in 2GIS" />
-          </div>
+          {/* Map — full width */}
+          <LocationCard address={service.address} city={service.city} locationLabel={t("location")} openInLabel="Open in 2GIS" />
         </div>
 
         {/* ══ REVIEWS ══ */}
@@ -508,42 +571,6 @@ export default function ServiceDetailPage() {
           </div>
         )}
 
-        {/* ══ PORTFOLIO ══ */}
-        {portfolio.length > 0 && (
-          <div className="mt-8">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-950/40">
-                <ImageIcon className="h-4 w-4 text-purple-600" />
-              </div>
-              <h2 className="font-bold text-lg">Portfolio</h2>
-              <span className="text-sm text-muted-foreground">({portfolio.length} photos)</span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {portfolio.map((photo, i) => (
-                <button
-                  key={photo.id}
-                  onClick={() => setPortfolioLightbox(i)}
-                  className="group relative aspect-square rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={photo.url} alt={photo.caption ?? "Portfolio"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  {photo.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="text-xs text-white truncate">{photo.caption}</p>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        {portfolioLightbox !== null && (
-          <Lightbox
-            images={portfolio}
-            startIndex={portfolioLightbox}
-            onClose={() => setPortfolioLightbox(null)}
-          />
-        )}
       </div>
 
       {/* ══ SIMILAR SERVICES ══ */}

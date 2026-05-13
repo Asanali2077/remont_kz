@@ -1,24 +1,29 @@
 User-agent: *
 Allow: /
-Allow: /repair
-Allow: /repair/*
-Allow: /companies
-Allow: /company/*
-Allow: /guide
-Allow: /compare
 
+# Public pages
+Allow: /*/repair
+Allow: /*/repair/*
+Allow: /*/companies
+Allow: /*/company/*
+Allow: /*/guide
+Allow: /*/about
+Allow: /*/compare
+
+# Private — do not index
 Disallow: /api/
-Disallow: /settings
-Disallow: /billing
-Disallow: /profile
-Disallow: /my-requests
-Disallow: /favorites
-Disallow: /notifications
-Disallow: /chat
-Disallow: /chat/*
-Disallow: /company/dashboard
-Disallow: /forgot-password
-Disallow: /reset-password
-Disallow: /verify-email
+Disallow: /*/admin/
+Disallow: /*/chat/
+Disallow: /*/profile/
+Disallow: /*/settings/
+Disallow: /*/billing/
+Disallow: /*/favorites/
+Disallow: /*/my-requests/
+Disallow: /*/notifications/
+Disallow: /*/payment/
+Disallow: /*/forgot-password/
+Disallow: /*/reset-password/
+Disallow: /*/verify-email/
+Disallow: /*/company/dashboard/
 
 Sitemap: https://remont.kz/sitemap.xml

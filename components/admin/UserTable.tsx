@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Ban, Unlock, Trash2, ChevronLeft, ChevronRight, BadgeCheck } from "lucide-react";
+import { Ban, Unlock, Trash2, ChevronLeft, ChevronRight, BadgeCheck, CheckSquare, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BlockUserDialog } from "./BlockUserDialog";
@@ -36,6 +36,51 @@ interface UserTableProps {
 export function UserTable({ users, total, page, pages, onPageChange, onRefresh, onVerify, token }: UserTableProps) {
   const [blockTarget, setBlockTarget] = useState<AdminUser | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  const allSelected = users.length > 0 && users.every(u => selected.has(u.id));
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(users.map(u => u.id)));
+  const toggleOne = (id: string) => setSelected(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const bulkBlock = async () => {
+    if (!selected.size || !confirm(`Заблокировать ${selected.size} пользователей?`)) return;
+    setBulkLoading(true);
+    try {
+      await Promise.all([...selected].map(id =>
+        fetch(`/api/admin/users/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ isBlocked: true }),
+        })
+      ));
+      toast.success(`Заблокировано: ${selected.size}`);
+      setSelected(new Set());
+      onRefresh();
+    } catch { toast.error("Ошибка при массовой блокировке"); }
+    finally { setBulkLoading(false); }
+  };
+
+  const bulkDelete = async () => {
+    if (!selected.size || !confirm(`Удалить ${selected.size} пользователей? Необратимо.`)) return;
+    setBulkLoading(true);
+    try {
+      await Promise.all([...selected].map(id =>
+        fetch(`/api/admin/users/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      ));
+      toast.success(`Удалено: ${selected.size}`);
+      setSelected(new Set());
+      onRefresh();
+    } catch { toast.error("Ошибка при массовом удалении"); }
+    finally { setBulkLoading(false); }
+  };
 
   const patchUser = async (id: string, data: Record<string, unknown>) => {
     const res = await fetch(`/api/admin/users/${id}`, {
@@ -98,11 +143,31 @@ export function UserTable({ users, total, page, pages, onPageChange, onRefresh, 
 
   return (
     <>
-      <div className="text-xs text-muted-foreground mb-3">Всего: {total}</div>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-muted-foreground">Всего: {total}</span>
+        {selected.size > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Выбрано: {selected.size}</span>
+            <Button size="sm" variant="outline" className="h-7 rounded-lg text-xs gap-1 text-amber-600 border-amber-300 hover:bg-amber-50"
+              disabled={bulkLoading} onClick={() => void bulkBlock()}>
+              <Ban className="h-3 w-3" /> Блок. всех
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 rounded-lg text-xs gap-1 text-destructive border-destructive/30 hover:bg-destructive/5"
+              disabled={bulkLoading} onClick={() => void bulkDelete()}>
+              <Trash2 className="h-3 w-3" /> Удалить всех
+            </Button>
+          </div>
+        )}
+      </div>
       <div className="rounded-lg border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
+              <th className="px-4 py-3 w-8">
+                <button onClick={toggleAll} className="text-muted-foreground hover:text-foreground">
+                  {allSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+                </button>
+              </th>
               <th className="text-left px-4 py-3 font-medium">Пользователь</th>
               <th className="text-left px-4 py-3 font-medium">Роль</th>
               <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Email</th>
@@ -113,7 +178,12 @@ export function UserTable({ users, total, page, pages, onPageChange, onRefresh, 
           </thead>
           <tbody className="divide-y">
             {users.map((u) => (
-              <tr key={u.id} className="hover:bg-muted/30 transition-colors">
+              <tr key={u.id} className={`hover:bg-muted/30 transition-colors ${selected.has(u.id) ? "bg-primary/5" : ""}`}>
+                <td className="px-4 py-3">
+                  <button onClick={() => toggleOne(u.id)} className="text-muted-foreground hover:text-foreground">
+                    {selected.has(u.id) ? <CheckSquare className="h-4 w-4 text-primary" /> : <Square className="h-4 w-4" />}
+                  </button>
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
                     <p className="font-medium truncate max-w-[160px]">{u.name ?? "—"}</p>

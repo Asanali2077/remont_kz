@@ -25,6 +25,8 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [otherIsTyping, setOtherIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +63,7 @@ export default function ChatPage() {
 
     es.onmessage = (e) => {
       try {
-        const payload = JSON.parse(e.data) as { type: string; data?: unknown[] };
+        const payload = JSON.parse(e.data) as { type: string; data?: unknown[]; typers?: string[] };
         if (payload.type === "messages" && Array.isArray(payload.data)) {
           setMessages((prev) => {
             const incoming = payload.data as typeof prev;
@@ -69,6 +71,9 @@ export default function ChatPage() {
             const newMsgs = incoming.filter((m) => !existingIds.has(m.id));
             return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev;
           });
+        }
+        if (payload.type === "typing") {
+          setOtherIsTyping(Array.isArray(payload.typers) && payload.typers.length > 0);
         }
       } catch { /* parse error */ }
     };
@@ -236,6 +241,20 @@ export default function ChatPage() {
             );
           })}
 
+          {/* Typing indicator */}
+          {otherIsTyping && (
+            <div className="flex items-end gap-2 justify-start">
+              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-[11px] font-bold text-primary shrink-0 mb-0.5">
+                {otherInitial}
+              </div>
+              <div className="bg-card border border-border/50 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
+                <span className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
+                <span className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
+              </div>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -258,7 +277,16 @@ export default function ChatPage() {
             <Input
               ref={inputRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                // Send typing signal (debounced — fire immediately, auto-expire on server after 4s)
+                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                void fetch(`/api/chat/${requestId}/typing`, {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${(() => { try { return JSON.parse(localStorage.getItem("session:user") ?? "{}").token ?? ""; } catch { return ""; } })()}` },
+                });
+                typingTimeoutRef.current = setTimeout(() => typingTimeoutRef.current = null, 2000);
+              }}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(); } }}
               placeholder={t("messagePlaceholder")}
               disabled={sending || uploadingFile}

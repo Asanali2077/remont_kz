@@ -197,6 +197,7 @@
       "accepted": "Принята",
       "in_progress": "В работе",
       "completed": "Завершена",
+      "cancelled": "Отменена",
       "expired": "Истекла",
       "NEW": "Новая",
       "ACCEPTED": "Принята",

@@ -40,6 +40,7 @@ enum RequestStatus {
   ACCEPTED
   IN_PROGRESS
   COMPLETED
+  CANCELLED
 }
 
 enum MessageType {
@@ -64,6 +65,7 @@ model User {
   phone               String?
   avatarUrl           String?
   address             String?
+  description         String?   @db.Text
   lastActiveAt        DateTime?
   emailVerified       Boolean   @default(false)
   emailVerifyToken    String?   @unique
@@ -72,6 +74,8 @@ model User {
   isBlocked           Boolean   @default(false)
   blockReason         String?
   isVerified          Boolean   @default(false)
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean   @default(false)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 

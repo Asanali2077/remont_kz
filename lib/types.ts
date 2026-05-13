@@ -14,7 +14,7 @@ export type ServiceCategory =
 
 export type OfferStatus = "pending" | "accepted" | "rejected";
 
-export type RequestStatus = "new" | "accepted" | "in_progress" | "completed";
+export type RequestStatus = "new" | "accepted" | "in_progress" | "completed" | "cancelled";
 
 export type MessageType = "text" | "image" | "audio";
 
@@ -49,6 +49,7 @@ export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
   accepted: "Accepted",
   in_progress: "In Progress",
   completed: "Completed",
+  cancelled: "Cancelled",
 };
 
 export interface UserSummary {
@@ -58,6 +59,7 @@ export interface UserSummary {
   name?: string | null;
   phone?: string | null;
   avatarUrl?: string | null;
+  address?: string | null;
   isVerified?: boolean | null;
 }
 
@@ -159,6 +161,7 @@ export interface ProfileRecord {
   phone: string | null;
   avatarUrl: string | null;
   address: string | null;
+  description: string | null;
   role: string;
   createdAt: string;
 }

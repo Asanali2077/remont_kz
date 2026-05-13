@@ -104,6 +104,7 @@ export function RequestsManagement() {
     accepted: requests.filter(r => r.status === "accepted").length,
     in_progress: requests.filter(r => r.status === "in_progress").length,
     completed: requests.filter(r => r.status === "completed").length,
+    cancelled: requests.filter(r => r.status === "cancelled").length,
   }), [requests]);
 
   if (loading) return (
@@ -239,19 +240,23 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
   onReply?: (id: string) => void;
 }) {
   const tReq = useTranslations("requests");
-  const borderColor = {
+  const borderColor = ({
     new: "border-l-slate-300 dark:border-l-slate-600",
     accepted: "border-l-blue-400",
     in_progress: "border-l-amber-400",
     completed: "border-l-green-500",
-  }[req.status] ?? "border-l-border";
+    cancelled: "border-l-red-400",
+  } as Record<string, string>)[req.status] ?? "border-l-border";
 
   return (
     <div className={`bg-card border border-l-4 rounded-2xl overflow-hidden ${borderColor}`}>
       <div className="px-5 py-4">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="min-w-0 flex-1">
-            <h4 className="font-bold text-sm leading-snug">{req.service?.name || "Custom request"}</h4>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-bold text-sm leading-snug">{req.service?.name || "Custom request"}</h4>
+              <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">#{req.id.slice(0, 8).toUpperCase()}</span>
+            </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
               {req.client?.name && <span>👤 {req.client.name}</span>}
               {req.category && <span>{SERVICE_CATEGORY_LABELS[req.category]}</span>}
@@ -320,7 +325,10 @@ function UnassignedCard({ req, myId, onOffer }: {
     <div className="bg-card border border-border/50 rounded-2xl px-5 py-4 hover:border-primary/30 hover:shadow-sm transition-all">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0 flex-1">
-          <h4 className="font-semibold text-sm">{req.service?.name || "Custom request"}</h4>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h4 className="font-semibold text-sm">{req.service?.name || "Custom request"}</h4>
+            <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">#{req.id.slice(0, 8).toUpperCase()}</span>
+          </div>
           <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">
             {req.category && <span>{SERVICE_CATEGORY_LABELS[req.category]}</span>}
             {req.city && <span>📍 {req.city}</span>}
