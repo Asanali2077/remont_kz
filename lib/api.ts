@@ -275,20 +275,12 @@ class ApiClient {
     await this.request(`/favorites/${serviceId}`, { method: "DELETE" });
   }
 
-  async generateAiSummary(serviceId: string): Promise<{ aiSummary: string }> {
-    return this.request("/ai/summary", { method: "POST", body: JSON.stringify({ serviceId }) });
-  }
-
   async deleteAccount(password: string): Promise<{ message: string }> {
     return this.request("/auth/me", { method: "DELETE", body: JSON.stringify({ password }) });
   }
 
   async getNotificationCount(): Promise<{ unreadMessages: number; newOffers: number; total: number }> {
     return this.request("/notifications/count");
-  }
-
-  async sendAiBotMessage(messages: { role: string; content: string }[], collectedData: object): Promise<{ message: string; done?: boolean; data?: CreateRequestPayload }> {
-    return this.request("/ai/request-bot", { method: "POST", body: JSON.stringify({ messages, collectedData }) });
   }
 
   async deleteRequest(id: string) {
@@ -483,8 +475,6 @@ function normalizeService(service: Record<string, unknown>): ServiceRecord {
     address: rawService.address ?? null,
     lat: rawService.lat ?? null,
     lng: rawService.lng ?? null,
-    aiSummary: rawService.aiSummary ?? null,
-    aiSummaryAt: rawService.aiSummaryAt ?? null,
     startDate: rawService.startDate ?? null,
     endDate: rawService.endDate ?? null,
   };

@@ -11,7 +11,6 @@ import { useTranslations } from "next-intl";
 import { Footer } from "@/components/Footer";
 import { OrgCard } from "@/components/OrgCard";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
-import { AiRequestBot } from "@/components/AiRequestBot";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { FilterBar, SortOption } from "@/components/filters/FilterBar";
@@ -348,10 +347,7 @@ function RepairContent() {
     if (!user) return <AuthModal trigger={<Button variant="outline" size="sm" className="rounded-xl">{t("createRequest") || "Log in to request"}</Button>} />;
     if (user.role !== "client") return null;
     return (
-      <div className="flex gap-2">
-        <AiRequestBot onCreated={() => void loadServices()} />
-        <RequestCreateDialog trigger={<Button size="sm" className="rounded-xl gap-1.5"><Sparkles className="h-3.5 w-3.5" /> {t("createRequest") || "Post request"}</Button>} />
-      </div>
+      <RequestCreateDialog trigger={<Button size="sm" className="rounded-xl gap-1.5"><Sparkles className="h-3.5 w-3.5" /> {t("createRequest") || "Post request"}</Button>} />
     );
   })();
 

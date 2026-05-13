@@ -491,7 +491,7 @@ export const TOP_CATEGORY_LABELS: Record<TopCategory, string> = {
 
 /** All groups for a given top-category */
 export function getCategoryGroups(category: TopCategory): string[] {
-  return Object.keys(SERVICE_CATEGORIES[category]);
+  return Object.keys(SERVICE_CATEGORIES[category] ?? {});
 }
 
 /** All subcategories for a group */
@@ -507,6 +507,7 @@ export function getServices(category: TopCategory, group: string, subcategory: s
 /** All specific services for a category (for search/tags) */
 export function getAllServicesForCategory(category: TopCategory): string[] {
   const groups = SERVICE_CATEGORIES[category];
+  if (!groups) return [];
   return Object.values(groups).flatMap((subs) =>
     Object.values(subs).flatMap((services) => services)
   );

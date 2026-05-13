@@ -264,7 +264,7 @@ export function MainNavbar() {
                     <Link href="/settings" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
                       <Settings className="h-4 w-4 text-muted-foreground" /> {t("settings")}
                     </Link>
-                    {user.role === "client" && (
+                    {user.role === "company" && (
                       <Link href="/billing" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
                         <CreditCard className="h-4 w-4 text-muted-foreground" /> {t("billing")}
                       </Link>

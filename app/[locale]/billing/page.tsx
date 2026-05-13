@@ -44,16 +44,21 @@ export default function BillingPage() {
   const t = useTranslations("billing");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  useEffect(() => { if (!authLoading && !user) router.push("/"); }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (!authLoading && !user) router.push("/");
+    // Clients don't have billing — redirect to home
+    if (!authLoading && user && user.role !== "company") router.push("/");
+  }, [user, authLoading, router]);
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
-  if (!user) return null;
+  if (!user || user.role !== "company") return null;
 
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="mx-auto max-w-4xl px-4 py-10">
         <div className="flex gap-6 items-start">
-          <SettingsSidebar active="billing" />
+          <SettingsSidebar active="profile" />
 
           <div className="flex-1 min-w-0 space-y-4">
             <div className="bg-card border border-border/50 rounded-2xl p-6">

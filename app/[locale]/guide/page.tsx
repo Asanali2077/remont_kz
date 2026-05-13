@@ -2,10 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, BookOpen, Star, Briefcase, Shield, User,
   Search, ThumbsUp, ThumbsDown, Clock, Play, Mail,
   MessageSquare, Phone, X, Zap, CheckCircle2,
+  ClipboardList, Send, Building2, ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -211,6 +213,238 @@ function ArticleItem({ article, sectionId, query }: { article: Article; sectionI
   );
 }
 
+/* ─── Request lifecycle timeline ─── */
+const TIMELINE = [
+  {
+    n: "01",
+    who: "client",
+    icon: ClipboardList,
+    color: "from-blue-500 to-cyan-500",
+    bg: "bg-blue-50 dark:bg-blue-950/30",
+    border: "border-blue-200 dark:border-blue-800",
+    badge: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
+    title: "Client posts a request",
+    desc: "Describes the task, sets a budget range and city. Takes about 2 minutes.",
+    mockup: (
+      <div className="rounded-xl border border-border/50 bg-background p-4 space-y-2.5 shadow-sm">
+        <div className="text-xs font-semibold text-muted-foreground mb-3">New request</div>
+        <div className="h-3 bg-muted rounded w-full" />
+        <div className="h-3 bg-muted rounded w-4/5" />
+        <div className="flex gap-2 mt-3">
+          <div className="h-7 bg-muted rounded-lg flex-1 flex items-center px-2">
+            <div className="h-2 bg-muted-foreground/30 rounded w-16" />
+          </div>
+          <div className="h-7 bg-muted rounded-lg flex-1 flex items-center px-2">
+            <div className="h-2 bg-muted-foreground/30 rounded w-12" />
+          </div>
+        </div>
+        <div className="h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+          <div className="h-2 bg-primary/60 rounded w-20" />
+        </div>
+      </div>
+    ),
+  },
+  {
+    n: "02",
+    who: "company",
+    icon: Building2,
+    color: "from-emerald-500 to-teal-500",
+    bg: "bg-emerald-50 dark:bg-emerald-950/30",
+    border: "border-emerald-200 dark:border-emerald-800",
+    badge: "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300",
+    title: "Companies submit price offers",
+    desc: "Verified contractors see requests matching their category and city — and compete with offers.",
+    mockup: (
+      <div className="rounded-xl border border-border/50 bg-background p-4 space-y-2.5 shadow-sm">
+        <div className="text-xs font-semibold text-muted-foreground mb-3">Incoming offers</div>
+        {[["AutoCity KZ", "45,000 ₸", "★ 4.9"], ["StroiMaster", "38,000 ₸", "★ 4.7"]].map(([name, price, rating]) => (
+          <div key={name} className="flex items-center justify-between rounded-lg border border-border/40 px-3 py-2 bg-muted/30">
+            <div>
+              <div className="text-xs font-semibold">{name}</div>
+              <div className="text-[10px] text-muted-foreground">{rating}</div>
+            </div>
+            <div className="text-xs font-black text-primary">{price}</div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    n: "03",
+    who: "client",
+    icon: CheckCircle2,
+    color: "from-violet-500 to-purple-500",
+    bg: "bg-violet-50 dark:bg-violet-950/30",
+    border: "border-violet-200 dark:border-violet-800",
+    badge: "bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300",
+    title: "Client accepts the best offer",
+    desc: "Compare by price, rating and reviews — one click to confirm. The company is notified instantly.",
+    mockup: (
+      <div className="rounded-xl border border-border/50 bg-background p-4 shadow-sm">
+        <div className="text-xs font-semibold text-muted-foreground mb-3">Select offer</div>
+        <div className="rounded-lg border-2 border-primary/40 bg-primary/5 px-3 py-2.5 mb-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-bold">StroiMaster</span>
+            <span className="text-xs font-black text-primary">38,000 ₸</span>
+          </div>
+          <div className="flex gap-1">
+            {[1,2,3,4,5].map(i => <div key={i} className="h-2 w-2 rounded-full bg-amber-400" />)}
+          </div>
+        </div>
+        <div className="h-8 bg-primary rounded-lg flex items-center justify-center">
+          <div className="h-2 bg-primary-foreground/60 rounded w-16" />
+        </div>
+      </div>
+    ),
+  },
+  {
+    n: "04",
+    who: "both",
+    icon: MessageSquare,
+    color: "from-amber-500 to-orange-500",
+    bg: "bg-amber-50 dark:bg-amber-950/30",
+    border: "border-amber-200 dark:border-amber-800",
+    badge: "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300",
+    title: "Chat opens — work begins",
+    desc: "Direct messaging with file sharing. Company updates status: Accepted → In progress.",
+    mockup: (
+      <div className="rounded-xl border border-border/50 bg-background p-4 space-y-2 shadow-sm">
+        <div className="text-xs font-semibold text-muted-foreground mb-2">Chat</div>
+        <div className="flex justify-start">
+          <div className="bg-muted rounded-xl rounded-tl-sm px-3 py-1.5 text-xs max-w-[75%]">
+            When can you start?
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <div className="bg-primary text-primary-foreground rounded-xl rounded-tr-sm px-3 py-1.5 text-xs max-w-[75%]">
+            Tomorrow at 10am ✓
+          </div>
+        </div>
+        <div className="flex justify-start">
+          <div className="bg-muted rounded-xl rounded-tl-sm px-3 py-1.5 text-xs max-w-[75%]">
+            Perfect, see you then!
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    n: "05",
+    who: "client",
+    icon: Star,
+    color: "from-rose-500 to-pink-500",
+    bg: "bg-rose-50 dark:bg-rose-950/30",
+    border: "border-rose-200 dark:border-rose-800",
+    badge: "bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300",
+    title: "Job completed — leave a review",
+    desc: "Company marks job as done. Client rates the work 1–5 stars. Rating updates the company profile.",
+    mockup: (
+      <div className="rounded-xl border border-border/50 bg-background p-4 shadow-sm">
+        <div className="text-xs font-semibold text-muted-foreground mb-3">Rate your experience</div>
+        <div className="flex justify-center gap-1.5 mb-3">
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className={`h-7 w-7 rounded-lg flex items-center justify-center text-sm ${i <= 5 ? "bg-amber-100 dark:bg-amber-900/40 text-amber-500" : "bg-muted text-muted-foreground"}`}>
+              ★
+            </div>
+          ))}
+        </div>
+        <div className="h-3 bg-muted rounded w-full mb-1.5" />
+        <div className="h-3 bg-muted rounded w-3/4 mb-3" />
+        <div className="h-7 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center">
+          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Submit review</span>
+        </div>
+      </div>
+    ),
+  },
+];
+
+function StepCard({ step, index }: { step: typeof TIMELINE[0]; index: number }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const isLeft = index % 2 === 0;
+
+  return (
+    <motion.div ref={ref}
+      initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+      className={`relative grid grid-cols-1 md:grid-cols-2 gap-6 items-center ${!isLeft ? "md:[&>*:first-child]:order-2" : ""}`}
+    >
+      {/* Text side */}
+      <div className={`${step.bg} rounded-2xl border ${step.border} p-6`}>
+        <div className="flex items-start gap-4">
+          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${step.color} shadow-lg`}>
+            <step.icon className="h-6 w-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${step.badge}`}>
+                {step.who === "client" ? "CLIENT" : step.who === "company" ? "COMPANY" : "BOTH"}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono">{step.n}</span>
+            </div>
+            <h3 className="font-black text-base mb-2">{step.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Mockup side */}
+      <div className="px-2">
+        {step.mockup}
+      </div>
+    </motion.div>
+  );
+}
+
+function HowItWorksVisual() {
+  return (
+    <div className="rounded-3xl border border-border/50 bg-card p-8 my-10">
+      <div className="text-center mb-10">
+        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Visual guide</p>
+        <h2 className="text-2xl md:text-3xl font-black tracking-tight">How a request works</h2>
+        <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
+          From posting to completion in 5 steps — see what each side does
+        </p>
+      </div>
+
+      {/* Role legend */}
+      <div className="flex justify-center gap-4 mb-10 text-xs">
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+          <span className="text-muted-foreground">Client action</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+          <span className="text-muted-foreground">Company action</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+          <span className="text-muted-foreground">Both</span>
+        </div>
+      </div>
+
+      {/* Vertical timeline */}
+      <div className="relative space-y-6">
+        {/* Center line */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-border/50 hidden md:block" />
+
+        {TIMELINE.map((step, i) => (
+          <div key={step.n} className="relative">
+            {/* Center dot */}
+            <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
+              <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg ring-4 ring-background`}>
+                <span className="text-white text-[10px] font-black">{step.n}</span>
+              </div>
+            </div>
+            <StepCard step={step} index={i} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════
    MAIN PAGE
 ═══════════════════════════════ */
@@ -311,6 +545,9 @@ export default function GuidePage() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-10">
+
+        {/* ════ HOW IT WORKS VISUAL ════ */}
+        {!query && <HowItWorksVisual />}
 
         {/* ════ POPULAR QUESTIONS ════ */}
         {!query && (

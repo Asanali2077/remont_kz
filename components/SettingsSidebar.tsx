@@ -1,29 +1,24 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { User, Lock, CreditCard } from "lucide-react";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { User, Lock } from "lucide-react";
 
 interface NavItem {
-  id: "profile" | "security" | "billing";
+  id: "profile" | "security";
   label: string;
   icon: React.ElementType;
   href: string;
-  clientOnly?: boolean;
 }
 
 const ITEMS: NavItem[] = [
-  { id: "profile",  label: "Profile",  icon: User,       href: "/profile" },
-  { id: "security", label: "Security", icon: Lock,       href: "/settings" },
-  { id: "billing",  label: "Billing",  icon: CreditCard, href: "/billing", clientOnly: true },
+  { id: "profile",  label: "Profile",  icon: User, href: "/profile" },
+  { id: "security", label: "Security", icon: Lock, href: "/settings" },
 ];
 
-type ActiveId = "profile" | "security" | "billing";
+type ActiveId = "profile" | "security";
 
 export function SettingsSidebar({ active }: { active: ActiveId }) {
-  const { user } = useAuth();
-
-  const visible = ITEMS.filter((item) => !item.clientOnly || user?.role === "client");
+  const visible = ITEMS;
 
   return (
     <aside className="hidden md:block w-52 shrink-0">

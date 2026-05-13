@@ -34,6 +34,11 @@ export default function PaymentPage() {
   const [promoApplied, setPromoApplied] = useState<{ id: string; code: string; discount: number } | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
 
+  // Clients don't pay — redirect
+  useEffect(() => {
+    if (user && user.role === "client") router.push("/my-requests");
+  }, [user, router]);
+
   useEffect(() => {
     if (!user?.token) return;
     fetch(`/api/payments/${requestId}`, {

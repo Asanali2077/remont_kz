@@ -83,8 +83,7 @@ export interface ServiceRecord {
   address?: string | null;
   lat?: number | null;
   lng?: number | null;
-  aiSummary?: string | null;
-  aiSummaryAt?: string | null;
+
   startDate?: string | null;
   endDate?: string | null;
   companyId: string;

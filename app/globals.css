@@ -93,3 +93,9 @@
 .safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
+
+/* Hide reCAPTCHA badge — disclosure text shown in footer per Google policy */
+.grecaptcha-badge {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}

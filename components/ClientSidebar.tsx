@@ -1,7 +1,7 @@
 "use client";
 
 import { Link, usePathname } from "@/i18n/routing";
-import { ClipboardList, MessageSquare, Heart, CreditCard, User, Bell } from "lucide-react";
+import { ClipboardList, MessageSquare, Heart, User, Bell } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 const ITEMS = [
@@ -9,8 +9,6 @@ const ITEMS = [
   { label: "Messages",       icon: MessageSquare,  href: "/chat" },
   { label: "Saved Services", icon: Heart,          href: "/favorites" },
   { label: "Notifications",  icon: Bell,           href: "/notifications" },
-  { label: "My Payments",    icon: CreditCard,     href: "/my-payments" },
-  { label: "Billing",        icon: CreditCard,     href: "/billing" },
   { label: "Profile",        icon: User,           href: "/profile" },
 ];
 

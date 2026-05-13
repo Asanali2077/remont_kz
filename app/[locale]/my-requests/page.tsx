@@ -427,13 +427,6 @@ export default function MyRequestsPage() {
                                 </Button>
                               )}
                               {req.status === "completed" && (
-                                <Link href={`/payment/${req.id}`}>
-                                  <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1.5 border-green-300 text-green-700 dark:border-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/30">
-                                    <CreditCard className="h-3.5 w-3.5" /> {tCommon("submit")}
-                                  </Button>
-                                </Link>
-                              )}
-                              {req.status === "completed" && (
                                 <Button
                                   size="sm"
                                   variant="outline"
