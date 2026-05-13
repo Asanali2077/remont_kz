@@ -1,114 +1,328 @@
-# CLAUDE.md
+# CLAUDE.md — Remont.kz Project Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Full-stack repair services marketplace for Kazakhstan. Diploma project 2026.
+Stack: Next.js 14 · TypeScript · Tailwind CSS · shadcn/ui · Prisma 7 · PostgreSQL · Framer Motion · next-intl
 
-## Commands
+---
+
+## Quick Commands
 
 ```bash
-npm run dev          # Start development server at localhost:3000
+npm run dev          # Dev server at localhost:3000
 npm run build        # Production build
-npm run lint         # ESLint check
-npm run lint:fix     # ESLint auto-fix
-npm run type-check   # TypeScript check without emitting
+npm run type-check   # TypeScript check (must pass before commit)
+npm run lint         # ESLint
 
-npm run db:generate  # Regenerate Prisma client after schema changes
-npm run db:migrate   # Apply migrations (prisma migrate dev)
-npm run db:push      # Push schema without migration (prisma db push)
-npm run db:seed      # Seed with sample data (tsx prisma/seed.ts)
-npm run db:studio    # Open Prisma Studio GUI
+npm run db:generate  # Regen Prisma client after schema changes (always run after schema edit)
+npm run db:push      # Sync schema to DB (no migration history)
+npm run db:seed      # Seed demo data (password: password123)
+npm run db:studio    # Prisma Studio GUI
 ```
 
-No test framework is configured.
+---
+
+## Environment (.env)
+
+```env
+DATABASE_URL="postgresql://postgres:PASSWORD@localhost:5432/remont_kz"
+JWT_SECRET="remont-kz-jwt-secret-2024-diploma-project"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+NEXT_PUBLIC_API_URL="/api"
+
+# SMTP — Mailtrap sandbox (credentials in .env file)
+SMTP_HOST=sandbox.smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USER=1e0f43111229f4
+SMTP_PASS=2f93385123531d
+SMTP_FROM="Remont.kz <noreply@remont.kz>"
+
+# reCAPTCHA v3
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LdFsOcsAAAAAC7z2e_KFLgg8udvpD1yylu-WIW5
+RECAPTCHA_SECRET_KEY=6LdFsOcsAAAAAH46d_F4d4tS8aByy_NcL_sOVY2p
+
+# OpenRouter AI (free models)
+OPENROUTER_API_KEY="sk-or-v1-..."
+OPENROUTER_BOT_MODEL="google/gemma-4-31b-it:free"
+OPENROUTER_SUMMARY_MODEL="google/gemma-4-31b-it:free"
+```
+
+---
 
 ## Architecture
 
-Single Next.js 14 (App Router) application — frontend and backend in one repo.
+Single Next.js 14 monorepo — frontend + backend in one repo, App Router pattern.
+All pages are under `app/[locale]/` — i18n via `next-intl` (RU, EN, KZ locales).
 
-### Database layer
-- PostgreSQL via `@prisma/adapter-pg` (driver adapter pattern, not the default Prisma engine)
-- Prisma client is instantiated once with a `pg.Pool` in [lib/db.ts](lib/db.ts) and cached on `globalThis` to survive HMR
-- Schema: `User` (CLIENT | COMPANY roles) → `Service` → `ServiceImage`, `Request`, `Message`
+### Database
+- **PostgreSQL** via `@prisma/adapter-pg` driver adapter (pool-based, NOT default engine)
+- Prisma client singleton in `lib/db.ts` cached on `globalThis` to survive HMR
+- After ANY schema change: run `npm run db:push && npm run db:generate`
 
 ### Auth
-- JWT-based, stateless. Token is stored in `localStorage` under the key `session:user` as `{ token, ...user }`
-- [lib/auth.ts](lib/auth.ts) handles hashing (bcryptjs) and JWT sign/verify
-- API routes extract the token manually from `Authorization: Bearer <token>` — there is no Next.js middleware-level auth guard, only per-route checks
+- **JWT stateless** — token stored in `localStorage` as `session:user: { token, id, email, role, name, phone }`
+- `lib/auth.ts` — bcrypt (12 rounds), JWT sign/verify
+- `lib/middleware.ts` — per-route guards: `requireAuth()`, `requireClient()`, `requireCompany()`, `assertEmailVerified()`
+- All API routes extract token from `Authorization: Bearer <token>` header
+- `components/auth/AuthProvider.tsx` — React context, `useAuth()` hook
+- reCAPTCHA v3 on login + register via `react-google-recaptcha-v3`, verified server-side in `lib/recaptcha.ts`
+- Email verification enforced on: POST /api/services (create), POST /api/requests/[id]/offer
 
-### API routes (`app/api/`)
-| Route | Purpose |
-|---|---|
-| `auth/register`, `auth/login`, `auth/me` | Registration, login, current user |
-| `auth/profile` | GET/PUT user profile |
-| `auth/verify-email` | Email verification via token |
-| `auth/forgot-password`, `auth/reset-password` | Password reset flow |
-| `services/`, `services/[id]` | CRUD for services (company-only write) |
-| `requests/`, `requests/[id]` | Client creates, company updates status |
-| `requests/[id]/offer` | Company makes/deletes offer on a request |
-| `requests/[id]/accept-offer` | Client accepts a company's offer |
-| `requests/[id]/rate` | Client rates completed work |
-| `requests/expire` | Mark expired requests (called by cron) |
-| `messages/`, `messages/upload`, `messages/mark-read` | Chat + file upload + read receipts |
-| `chat/`, `chat/[requestId]/stream` | Chat inbox + SSE real-time stream |
-| `ai/request-bot`, `ai/summary` | AI assistant for requests + service summaries |
-| `favorites/`, `favorites/[serviceId]` | Client's saved services |
-| `notifications/count` | Unread messages + new offers count |
-| `companies/` | List all companies |
-| `health/` | DB health check |
+### API Client (frontend)
+All API calls go through `api` singleton from `lib/api.ts` (ApiClient class).
+- Reads token from localStorage
+- Normalises Prisma SCREAMING_SNAKE_CASE enums → frontend kebab-case
+- 401 handler: only redirects to `/?session_expired=1` if there WAS an active session AND endpoint is not an auth endpoint
 
-### Frontend data access
-All API calls go through the singleton `api` object from [lib/api.ts](lib/api.ts) (`ApiClient` class). It reads the token from `localStorage` and normalises Prisma SCREAMING_SNAKE_CASE enums to lowercase/kebab-case used in frontend types ([lib/types.ts](lib/types.ts)).
+### Enum Mapping (critical — maintain when adding enum values)
+```
+DB enum            → Frontend type
+AUTOMOBILES        → "automobiles"
+REAL_ESTATE        → "real-estate"
+PLUMBING           → "plumbing"
+ELECTRICAL         → "electrical"
+PAINTING           → "painting"
+CLEANING           → "cleaning"
+RENOVATION         → "renovation"
+WELDING            → "welding"
+ROOFING            → "roofing"
+OTHER              → "other"
+```
+Conversion: `fromDbCategory()` in `lib/api.ts`. Update all three categoryMap objects in:
+- `app/api/services/route.ts`
+- `app/api/services/[id]/route.ts`
+- `app/api/requests/route.ts`
 
-### Enum mapping
-Prisma enums use `SCREAMING_SNAKE_CASE` (e.g. `REAL_ESTATE`, `IN_PROGRESS`). Frontend types use lowercase/kebab (`"real-estate"`, `"in_progress"`). Conversion happens in `normalizeService` / `normalizeRequest` in `lib/api.ts` and must be maintained when adding new enum values.
+---
 
-### Key components
-- `components/auth/AuthProvider.tsx` — React context for current user session (`useAuth`)
-- `components/auth/AuthModal.tsx` — Login/register modal
-- `components/company/ProtectedRoute.tsx` — Client-side role guard
-- `components/company/` — Company dashboard: `KanbanBoard`, `ServicesManagement`, `ServiceEditModal`, `CompanyStatistics`, `CompanyOverview`, `RequestsManagement`, `OnboardingChecklist`
-- `components/nav/MainNavbar.tsx` — Sticky top nav with search, theme toggle, notifications bell
-- `components/MobileNav.tsx` — Bottom nav for mobile
-- `components/OrgCard.tsx` — Service listing card (favorite, compare, create request)
-- `components/RequestCreateDialog.tsx` — Multi-step dialog for creating a request
-- `components/AiRequestBot.tsx` — AI chat assistant for request creation
-- `components/CompareContext.tsx` + `CompareBar.tsx` — Compare up to 3 services
-- `components/filters/FilterBar.tsx` — Full filter panel for the services catalog
-- `components/ClientSidebar.tsx` — Client dashboard sidebar
+## Database Schema (8 models)
 
-### Business logic
-- **Request flow**: Client creates Request → Companies see unassigned requests matching their category/city → Company makes Offer → Client accepts → status: `new → accepted → in_progress → completed` → Client rates
-- **Middleware guards**: `requireAuth()`, `requireClient()`, `requireCompany()`, `assertEmailVerified()`
-- **Rate limiting**: In-memory (`lib/rate-limit.ts`), applied to login, register, forgot-password, messages, offers
-- **Real-time chat**: SSE via `GET /api/chat/[requestId]/stream`, frontend uses `EventSource`
-- **AI features**: Request creation bot (`/api/ai/request-bot`) + service AI summary (`/api/ai/summary`)
-- **Email notifications**: Sent on register, offer made, offer accepted, job completed (Nodemailer)
-- **Geocoding**: `lib/geocode.ts` — converts service address to lat/lng on create/update
+```
+User          — CLIENT | COMPANY | ADMIN roles. emailVerified, isBlocked, avatarUrl, etc.
+Service       — Company's listing. category (10 values), priceFrom/priceTo, city, tags, active
+ServiceImage  — Up to 10 images per service
+Request       — Client request. status: NEW→ACCEPTED→IN_PROGRESS→COMPLETED. expiresAt (14 days)
+RequestOffer  — Company bid on a request. status: PENDING|ACCEPTED|REJECTED. @@unique([requestId, companyId])
+Message       — Chat message. type: TEXT|IMAGE|AUDIO. read boolean
+Favorite      — Client saved service. @@unique([userId, serviceId])
+Payment       — Mock payment tied to Request. status: PENDING|PAID|FAILED|REFUNDED
+PortfolioPhoto — Company work photos
+AuditLog      — Admin action tracking
+PromoCode     — Discount codes for payments
+```
 
-### Pages (app router)
-| URL | Purpose |
-|---|---|
-| `/` | Homepage with hero, animations, featured services |
-| `/repair` | Services catalog with filters, sort, geolocation |
-| `/repair/[id]` | Service detail with gallery, reviews, AI summary |
-| `/company` | Company dashboard (protected: COMPANY only) |
-| `/my-requests` | Client's requests with offers and timeline |
-| `/chat`, `/chat/[requestId]` | Chat inbox and thread |
-| `/favorites` | Saved services |
-| `/compare` | Side-by-side service comparison |
-| `/notifications` | Notifications center |
-| `/guide` | FAQ / Help center |
-| `/profile`, `/settings` | Profile and security settings |
+---
 
-### File uploads
-Uploaded files are stored locally under `public/uploads/`. The upload API route is `app/api/messages/upload`. `UPLOAD_DIR`, `MAX_FILE_SIZE`, `ALLOWED_IMAGE_TYPES`, `ALLOWED_AUDIO_TYPES` are configured via env.
+## All API Routes
 
-### CORS
-`middleware.ts` adds CORS headers only to `/api/*`. The allowed origin is `CORS_ORIGIN` env var (defaults to `http://localhost:5173`).
+| Route | Method | Auth | Purpose |
+|-------|--------|------|---------|
+| `/api/auth/register` | POST | — | Register (Zod, reCAPTCHA, rate-limit 5/hr) |
+| `/api/auth/login` | POST | — | Login (rate-limit 10/15min), returns emailVerified |
+| `/api/auth/me` | GET/DELETE | Any | Get current user / Delete account (password confirm) |
+| `/api/auth/profile` | GET/PUT | Any | View/update profile |
+| `/api/auth/password` | PUT | Any | Change password |
+| `/api/auth/verify-email` | GET | — | Email verification via token |
+| `/api/auth/forgot-password` | POST | — | Send reset email |
+| `/api/auth/reset-password` | POST | — | Set new password (token required) |
+| `/api/services` | GET/POST | POST=Company | List/create services |
+| `/api/services/[id]` | GET/PUT/DELETE | PUT/DELETE=Company | Service CRUD |
+| `/api/services/[id]/reviews` | GET | — | Service reviews |
+| `/api/services/[id]/similar` | GET | — | Similar services |
+| `/api/services/[id]/images` | GET/POST | POST=Company | Manage service images |
+| `/api/requests` | GET/POST | POST=Client | List/create requests |
+| `/api/requests/[id]` | GET/PUT/DELETE | — | Request detail/update/cancel |
+| `/api/requests/[id]/offer` | POST/DELETE | Company | Submit/withdraw offer |
+| `/api/requests/[id]/accept-offer` | POST | Client | Accept company offer |
+| `/api/requests/[id]/rate` | POST | Client | Rate completed request (1-5 stars) |
+| `/api/requests/[id]/reply` | PUT | Company | Reply to review |
+| `/api/requests/expire` | GET | — | Mark expired requests (called by Vercel cron hourly) |
+| `/api/messages` | GET/POST | Any | Chat messages |
+| `/api/messages/upload` | POST | Any | Upload image/audio for chat |
+| `/api/messages/mark-read` | POST | Any | Mark messages read |
+| `/api/chat` | GET | Any | Chat inbox |
+| `/api/chat/[requestId]/stream` | GET | Any | SSE real-time chat (3s polling, timestamp-based) |
+| `/api/favorites` | GET/POST | Client | List/add favorites |
+| `/api/favorites/[serviceId]` | DELETE | Client | Remove favorite |
+| `/api/notifications/count` | GET | Any | Unread count (messages + offers) |
+| `/api/companies` | GET | — | List all companies |
+| `/api/company/[id]` | GET | — | Company public profile |
+| `/api/company/stats` | GET | Company | Dashboard statistics |
+| `/api/company/export` | GET | Company | CSV export |
+| `/api/health` | GET | — | DB health check |
+| `/api/payments/[requestId]` | GET/POST | Any | Get/create payment |
+| `/api/payments/[requestId]/confirm` | POST | Any | Confirm payment |
+| `/api/admin/*` | Various | Admin | User mgmt, audit logs, promo codes, services |
+| `/api/portfolio` | GET/POST/DELETE | Company | Portfolio photos |
+| `/api/promo/validate` | POST | Client | Validate promo code |
 
-## Documentation
-Full project docs in `docs/`:
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Stack, auth, DB setup, patterns
-- [docs/DATABASE.md](docs/DATABASE.md) — All models, enums, relations
-- [docs/API.md](docs/API.md) — Every API endpoint with params and auth
-- [docs/COMPONENTS.md](docs/COMPONENTS.md) — All components and hooks
-- [docs/PAGES.md](docs/PAGES.md) — All pages and their structure
+---
+
+## All Pages (app/[locale]/)
+
+| URL | Component | Notes |
+|-----|-----------|-------|
+| `/` | `page.tsx` | Full landing page with before/after slider, stats, categories, how-it-works, reviews, CTA |
+| `/repair` | `repair/page.tsx` | Service catalog with filters, search, grid/list view |
+| `/repair/[id]` | `repair/[id]/page.tsx` | Service detail, gallery, reviews, similar services |
+| `/companies` | `companies/page.tsx` | Company directory |
+| `/company/[id]` | `company/[id]/page.tsx` | Company public profile |
+| `/company/dashboard` | `company/dashboard/page.tsx` | Company dashboard (Kanban, stats, services, portfolio) |
+| `/company/catalog` | `company/catalog/page.tsx` | Company service catalog view |
+| `/my-requests` | `my-requests/page.tsx` | Client request list with offers, timeline |
+| `/chat` | `chat/page.tsx` | Chat inbox |
+| `/chat/[requestId]` | `chat/[requestId]/page.tsx` | Chat thread with SSE |
+| `/favorites` | `favorites/page.tsx` | Saved services |
+| `/compare` | `compare/page.tsx` | Side-by-side service comparison |
+| `/notifications` | `notifications/page.tsx` | Notification center |
+| `/profile` | `profile/page.tsx` | User profile edit |
+| `/settings` | `settings/page.tsx` | Password/security settings |
+| `/billing` | `billing/page.tsx` | **COMPANY ONLY** — billing/plans (clients redirected away) |
+| `/guide` | `guide/page.tsx` | FAQ / Help center with animated "how it works" |
+| `/about` | `about/page.tsx` | About page with architecture diagram |
+| `/verify-email` | `verify-email/page.tsx` | Email verification result |
+| `/forgot-password` | `forgot-password/page.tsx` | Password reset request |
+| `/reset-password` | `reset-password/page.tsx` | Set new password |
+| `/admin/*` | `admin/` | Admin panel (users, services, requests, audit, promo) |
+| `/payment/[requestId]` | `payment/[requestId]/page.tsx` | **COMPANY ONLY** — payment flow |
+
+---
+
+## Key Components
+
+| File | Purpose |
+|------|---------|
+| `components/auth/AuthProvider.tsx` | React context, `useAuth()`, session persistence |
+| `components/auth/AuthModal.tsx` | Login/register modal with reCAPTCHA, email verify screen |
+| `components/nav/MainNavbar.tsx` | Sticky navbar: search (Cmd+K), theme, i18n, notifications, user dropdown |
+| `components/MobileNav.tsx` | Bottom nav for mobile |
+| `components/ClientSidebar.tsx` | Client dashboard sidebar (My Requests, Chat, Favorites, Notifications, Profile) |
+| `components/SettingsSidebar.tsx` | Settings sidebar (Profile, Security only — no billing for clients) |
+| `components/Footer.tsx` | 4-column footer with all page links |
+| `components/OrgCard.tsx` | Service card (favorite, compare, request button) |
+| `components/RequestCreateDialog.tsx` | Multi-step request creation dialog |
+| `components/CompareContext.tsx` + `CompareBar.tsx` | Compare up to 3 services |
+| `components/filters/FilterBar.tsx` | Full filter panel (category, city, price, rating) |
+| `components/company/KanbanBoard.tsx` | Kanban for company request management |
+| `components/company/ServicesManagement.tsx` | Service CRUD in dashboard |
+| `components/company/ServiceEditModal.tsx` | Service create/edit form |
+| `components/company/CompanyStatistics.tsx` | Charts and stats |
+| `components/StatusBadge.tsx` | Unified request status badge |
+| `components/OfferDialog.tsx` | Offer submission dialog |
+| `components/OfflineToast.tsx` | Network status indicator |
+
+---
+
+## Business Logic
+
+### Request Lifecycle
+```
+Client creates Request (NEW, expires in 14 days)
+  → Companies see unassigned requests matching their category + city
+  → Company submits Offer (PENDING)
+  → Client accepts best Offer → Request becomes ACCEPTED, other offers → REJECTED
+  → Company updates: ACCEPTED → IN_PROGRESS → COMPLETED
+  → Client rates (1-5 stars) → Company average rating recalculated across all services
+```
+
+### Notifications
+- `lib/use-notifications.ts` — polls `GET /api/requests` every 30s, builds notification items
+- `GET /api/notifications/count` — fast endpoint for badge count
+- Guard: only fires if `localStorage.getItem("session:user")` exists (prevents 401 loop)
+
+### File Uploads
+- `lib/upload.ts` — magic-byte validation, local disk OR S3-compatible (via S3_* env vars)
+- Local: `public/uploads/images/` and `public/uploads/audio/`
+- Served via `GET /api/files/[...path]/route.ts`
+- Before/After photos: stored in `public/slides/` (apartment-before.jpg, car-after.jpg, etc.)
+
+### Real-time Chat
+- SSE at `GET /api/chat/[requestId]/stream`
+- Polls DB every 3 seconds for new messages since last timestamp
+- Auto-marks received messages as read
+- Cleans up on `request.signal` abort
+
+### Email Flow
+- `lib/email.ts` — 6 templates via Nodemailer
+- Mailtrap SMTP for dev (credentials in .env)
+- Triggers: register, verify-email, forgot-password, new-offer, offer-accepted, job-completed
+
+### i18n
+- `next-intl` with `app/[locale]/` routing
+- Locales: ru, en, kk
+- Config: `i18n/routing.ts`, `i18n/request.ts`, `i18n/config.ts`
+- Language switcher in navbar
+
+---
+
+## What Was REMOVED (don't add back)
+
+| Feature | Why Removed |
+|---------|-------------|
+| `AiRequestBot.tsx` | OpenRouter free tier rate limits made it unreliable |
+| `app/api/ai/` (both routes) | Same reason — AI features removed from frontend |
+| AI service summary | Removed |
+| Billing for clients | Remont.kz is **free for clients**. Billing page only for companies. |
+| `/my-payments` for clients | Same reason |
+| Payment button in my-requests | Same reason |
+| Billing link in client navbar | Same reason |
+| Billing in SettingsSidebar | Same reason |
+| Admin role visible to users | Admin panel exists at `/admin/*` but no UI link for regular users |
+| reCAPTCHA badge | Hidden via CSS (`.grecaptcha-badge { visibility: hidden }`). Disclosure in footer. |
+
+---
+
+## Key Files & Patterns
+
+### `lib/api.ts`
+ApiClient singleton. Key methods: `getServices`, `createRequest`, `makeOffer`, `acceptOffer`, `rateRequest`, `getChatInbox`, `uploadAvatar`, `deleteAccount`, `getNotificationCount`.
+After any API change, add the corresponding method here.
+
+### `lib/types.ts`
+All frontend TypeScript types. `ServiceCategory` has 10 values. `OfferStatus: "pending"|"accepted"|"rejected"`. `RequestStatus: "new"|"accepted"|"in_progress"|"completed"`.
+
+### `lib/utils.ts`
+`cn()`, `fmtNum()`, `formatBudget()`, `timeAgo()`, `sanitizeText()`, `CATEGORY_COLORS`, `CATEGORY_SHORT`.
+
+### `lib/categories.ts`
+`TopCategory = "AUTOMOBILES"|"REAL_ESTATE"|"OTHER"` (for CategoryFilter component hierarchy).
+New ServiceCategory values (plumbing, electrical, etc.) map to these 3 top-level categories via `CATEGORY_REVERSE_MAP` in `ServiceEditModal.tsx`.
+
+### Homepage (`app/[locale]/page.tsx`)
+Full landing page — ALL animations use `FadeUp`, `FadeLeft`, `FadeRight`, `ScaleIn`, `AnimatedBar` components defined at top of file.
+Side navigation: `SectionNav` component with `IntersectionObserver` per section.
+Sections with IDs: `hero`, `before-after`, `stats`, `categories`, `services`, `how-it-works`, `why-us`, `testimonials`, `cta`.
+Before/After slider auto-cycles every 5s, pauses on hover. Images from `public/slides/`.
+
+---
+
+## Demo Accounts (after `npm run db:seed`)
+Password for all: `password123`
+
+| Role | Email |
+|------|-------|
+| Company | stroymast@remont.kz |
+| Company | autocity@remont.kz |
+| Client | asel@remont.kz |
+| Client | dmitry@remont.kz |
+
+---
+
+## Cron & Deployment
+
+- `vercel.json` — hourly cron for `GET /api/requests/expire`
+- `Dockerfile` + `docker-compose.yml` — for containerised deployment
+- `.github/workflows/ci.yml` — lint, type-check, test, build with Postgres service
+- `next.config.js` — `output: "standalone"`, remotePatterns for images (no wildcard `**`)
+
+---
+
+## Common Gotchas
+
+1. **After schema changes**: always run `npm run db:push && npm run db:generate` or TypeScript errors will be confusing.
+2. **New ServiceCategory**: update the enum in schema + `lib/types.ts` + `fromDbCategory()` in `lib/api.ts` + all three `categoryMap` objects in service/request routes + `CATEGORY_COLORS` in utils + `CATEGORY_SHORT` in utils + `ServiceEditModal.tsx` CATEGORY_REVERSE_MAP.
+3. **401 redirect loop**: the 401 handler in `lib/api.ts` only redirects when `hadSession` is true AND endpoint is not `/auth/login|register|forgot-password|reset-password`.
+4. **useNotifications race condition**: the hook checks `localStorage.getItem("session:user")` before firing. Has a 300ms delay on first load to let AuthProvider write the token.
+5. **Billing/Payment pages** redirect clients to home. Don't add payment UI for clients anywhere.
+6. **reCAPTCHA badge** is intentionally hidden via globals.css. Required disclosure is in Footer.tsx.
+7. **Before/After slider** images live in `public/slides/` with naming: `apartment-before.jpg`, `apartment-after.jpg`, `car-before.jpg`, `car-after.jpg`, `bag-before.jpg`, `bag-after.jpg`, `headphones-before.jpg`, `headphones-after.jpg`, `watch-before.jpg`, `watch-after.jpg`.
+8. **Password requirements**: min 8 chars + at least 1 digit (enforced in register, change-password, reset-password routes AND reset-password page).
