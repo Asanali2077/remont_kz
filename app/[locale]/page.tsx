@@ -267,12 +267,12 @@ function BeforeAfterSlider() {
       </div>
 
       {/* Dot indicators */}
-      <div className="flex justify-center gap-2">
+      <div className="flex justify-center items-center gap-2 py-3">
         {BA_SLIDES.map((s, i) => (
           <button
             key={i}
             onClick={() => { setFading(true); setTimeout(() => { setSlide(i); setPos(50); setFading(false); }, 400); }}
-            className={`h-1.5 rounded-full transition-all ${i === slide ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"}`}
+            className={`h-2 rounded-full transition-all duration-300 ${i === slide ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"}`}
           />
         ))}
       </div>
@@ -341,7 +341,7 @@ function SectionNav() {
   if (!visible) return null;
 
   return (
-    <div className="fixed right-5 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2.5 hidden lg:flex">
+    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col items-center gap-2.5 bg-background/70 backdrop-blur-md border border-border/40 shadow-sm rounded-full px-1.5 py-3">
       {NAV_SECTIONS.map(({ id, label }, i) => (
         <button
           key={id}
@@ -355,7 +355,7 @@ function SectionNav() {
           <div className={`rounded-full transition-all duration-300 ${
             active === i
               ? "h-3 w-3 bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]"
-              : "h-2 w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+              : "h-2 w-2 bg-muted-foreground/40 hover:bg-muted-foreground/70"
           }`} />
         </button>
       ))}
@@ -390,6 +390,11 @@ export default function HomePage() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   const [featuredServices, setFeaturedServices] = useState<ServiceRecord[]>([]);
+  const [liveStats, setLiveStats] = useState<{ services: number; companies: number; completedRequests: number; avgRating: number } | null>(null);
+
+  useEffect(() => {
+    void fetch("/api/stats").then(r => r.json()).then(setLiveStats).catch(() => null);
+  }, []);
 
   useEffect(() => {
     void api.getServices({ active: true }).then((data) => {
@@ -596,10 +601,10 @@ export default function HomePage() {
           {/* Main 4 stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
             {[
-              { target: 200,  suffix: "+", label: "Verified companies",   sub: "across 14 cities",       icon: Users,        color: "from-blue-500 to-cyan-500" },
-              { target: 1500, suffix: "+", label: "Requests completed",   sub: "and growing daily",      icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
-              { target: 14,   suffix: "",  label: "Cities in Kazakhstan", sub: "from Almaty to Astana",  icon: MapPin,       color: "from-violet-500 to-purple-500" },
-              { target: 98,   suffix: "%", label: "Client satisfaction",  sub: "based on all reviews",   icon: TrendingUp,   color: "from-amber-500 to-orange-500" },
+              { target: liveStats?.companies ?? 200,          suffix: "+", label: "Verified companies",   sub: "across 14 cities",       icon: Users,        color: "from-blue-500 to-cyan-500" },
+              { target: liveStats?.completedRequests ?? 1500, suffix: "+", label: "Requests completed",   sub: "and growing daily",      icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
+              { target: liveStats?.services ?? 14,            suffix: "+", label: "Active services",      sub: "from Almaty to Astana",  icon: MapPin,       color: "from-violet-500 to-purple-500" },
+              { target: Math.round((liveStats?.avgRating ?? 4.8) * 10), suffix: "%", label: "Avg rating (×10)",  sub: "based on all reviews",   icon: TrendingUp,   color: "from-amber-500 to-orange-500" },
             ].map(({ target, suffix, label, sub, icon: Icon, color }, i) => (
               <ScaleIn key={label} delay={i * 0.12}>
                 <div className="relative group rounded-3xl border border-border/50 bg-card p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">

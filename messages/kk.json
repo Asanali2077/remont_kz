@@ -55,10 +55,12 @@
     "profile": "Профиль",
     "settings": "Параметрлер",
     "billing": "Төлем",
-    "notifications": "Хабарландырулар жоқ",
+    "notifications": "Хабарландырулар",
+    "orderHistory": "Тапсырыс тарихы",
     "seeAll": "Барлығын көру",
     "pressEnter": "Іздеу үшін Enter · Жабу үшін Esc",
-    "remontGuide": "Remont нұсқаулығы"
+    "remontGuide": "Remont нұсқаулығы",
+    "cabinet": "Кабинет"
   },
   "auth": {
     "welcomeBack": "Қош келдіңіз",
@@ -148,7 +150,8 @@
     "allCategories": "Барлық санаттар",
     "allCities": "Барлық қалалар",
     "services": "{count} қызмет",
-    "found": "Табылды"
+    "found": "Табылды",
+    "createRequest": "Өтінім қалдыру"
   },
   "categories": {
     "AUTOMOBILES": "Автомобильдер",

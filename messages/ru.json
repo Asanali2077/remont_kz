@@ -55,10 +55,12 @@
     "profile": "Профиль",
     "settings": "Настройки",
     "billing": "Оплата",
-    "notifications": "Уведомлений нет",
+    "notifications": "Уведомления",
+    "orderHistory": "История заказов",
     "seeAll": "Смотреть все",
     "pressEnter": "Нажмите Enter для поиска · Esc для закрытия",
-    "remontGuide": "Руководство Remont"
+    "remontGuide": "Руководство Remont",
+    "cabinet": "Кабинет"
   },
   "auth": {
     "welcomeBack": "С возвращением",
@@ -148,7 +150,8 @@
     "allCategories": "Все категории",
     "allCities": "Все города",
     "services": "{count} услуг",
-    "found": "Найдено"
+    "found": "Найдено",
+    "createRequest": "Оставить заявку"
   },
   "categories": {
     "AUTOMOBILES": "Автомобили",

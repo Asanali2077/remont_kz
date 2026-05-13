@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { ClientSidebar } from "@/components/ClientSidebar";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, CheckCircle2, XCircle, Clock, Tag } from "lucide-react";
@@ -37,7 +36,6 @@ export default function MyPaymentsPage() {
     <ProtectedRoute requiredRole="client">
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6 flex gap-6">
-          <ClientSidebar />
           <main className="flex-1 min-w-0 space-y-4">
             <h1 className="text-2xl font-bold">Мои платежи</h1>
 

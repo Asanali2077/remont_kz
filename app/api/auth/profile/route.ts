@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/middleware";
 const updateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   phone: z.string().max(20).optional().nullable(),
-  avatarUrl: z.string().url().optional().nullable(),
+  avatarUrl: z.string().optional().nullable(),
   address: z.string().max(200).optional().nullable(),
 });
 

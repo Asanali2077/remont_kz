@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import {
   Search, Info, LayoutList, LayoutGrid, X, SlidersHorizontal,
   Car, Home, Wrench, Star, Image, CheckCircle2, ChevronDown,
-  Sparkles, MapPin, ArrowRight, LocateFixed,
+  Sparkles, MapPin, ArrowRight, LocateFixed, Map,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Footer } from "@/components/Footer";
@@ -22,6 +22,12 @@ import type { ServiceRecord } from "@/lib/types";
 import type { TopCategory } from "@/lib/categories";
 import { Link } from "@/i18n/routing";
 import { CATEGORY_COLORS, fmtNum } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const ServiceMap = dynamic(
+  () => import("@/components/ServiceMap").then((m) => m.ServiceMap),
+  { ssr: false, loading: () => <div className="w-full h-[520px] rounded-2xl bg-muted animate-pulse" /> }
+);
 
 const PAGE_SIZE = 10;
 
@@ -153,49 +159,57 @@ interface ActiveChipsProps {
 }
 
 function ActiveChips(props: ActiveChipsProps) {
-  const chips: { label: string; onRemove: () => void }[] = [];
+  const chips: { key: string; label: React.ReactNode; onRemove: () => void }[] = [];
 
-  if (props.query) chips.push({ label: `"${props.query}"`, onRemove: props.onRemoveQuery });
-  if (props.city) chips.push({ label: `📍 ${props.city}`, onRemove: props.onRemoveCity });
-  if (props.categoryFilter.category) chips.push({ label: { AUTOMOBILES: "🚗 Automobiles", REAL_ESTATE: "🏠 Real Estate", OTHER: "🔧 Other" }[props.categoryFilter.category] ?? props.categoryFilter.category, onRemove: props.onRemoveCategory });
-  if (props.minRating > 0) chips.push({ label: `⭐ ${props.minRating}+`, onRemove: props.onRemoveRating });
-  if (props.hasPhotos) chips.push({ label: "📸 With photos", onRemove: props.onRemovePhotos });
-  if (props.sortBy !== "relevance") chips.push({ label: { rating: "↑ Top rated", price: "↑ Price", "price-desc": "↓ Price", requests: "🔥 Popular" }[props.sortBy] ?? props.sortBy, onRemove: props.onRemoveSort });
-  if (props.priceRange[0] > 0 || props.priceRange[1] < props.maxPrice) chips.push({ label: `${props.priceRange[0].toLocaleString()} – ${props.priceRange[1].toLocaleString()} ₸`, onRemove: props.onRemovePrice });
+  if (props.query)
+    chips.push({ key: "q", label: <><Search className="h-3 w-3" />&nbsp;&ldquo;{props.query}&rdquo;</>, onRemove: props.onRemoveQuery });
+  if (props.city)
+    chips.push({ key: "city", label: <><MapPin className="h-3 w-3" />{props.city}</>, onRemove: props.onRemoveCity });
+  if (props.categoryFilter.category)
+    chips.push({ key: "cat", label: (
+      { AUTOMOBILES: <><Car className="h-3 w-3" />Automobiles</>,
+        REAL_ESTATE:  <><Home className="h-3 w-3" />Real Estate</>,
+        OTHER:        <><Wrench className="h-3 w-3" />Other</> }[props.categoryFilter.category] ?? props.categoryFilter.category
+    ), onRemove: props.onRemoveCategory });
+  if (props.minRating > 0)
+    chips.push({ key: "rating", label: <><Star className="h-3 w-3 fill-current" />{props.minRating}+ stars</>, onRemove: props.onRemoveRating });
+  if (props.hasPhotos)
+    chips.push({ key: "photos", label: <><Image className="h-3 w-3" />With photos</>, onRemove: props.onRemovePhotos });
+  if (props.sortBy !== "relevance")
+    chips.push({ key: "sort", label: ({ rating: "Top rated", price: "Cheapest first", "price-desc": "Most expensive", requests: "Most popular" } as Record<string,string>)[props.sortBy] ?? props.sortBy, onRemove: props.onRemoveSort });
+  if (props.priceRange[0] > 0 || props.priceRange[1] < props.maxPrice)
+    chips.push({ key: "price", label: `${props.priceRange[0].toLocaleString()} – ${props.priceRange[1].toLocaleString()} ₸`, onRemove: props.onRemovePrice });
 
   if (chips.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4">
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide shrink-0">Active:</span>
-      {chips.map(({ label, onRemove }) => (
-        <button key={label} onClick={onRemove}
-          className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/15 transition-colors">
+      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide shrink-0">Active filters:</span>
+      {chips.map(({ key, label, onRemove }) => (
+        <button key={key} onClick={onRemove}
+          className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
           {label}
           <X className="h-3 w-3" />
         </button>
       ))}
       <button onClick={props.onReset}
-        className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/50 px-3 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/50 px-3 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
         <X className="h-3 w-3" /> Clear all
       </button>
     </div>
   );
 }
 
-/* ─── Quick filter tabs (labels set in component) ─── */
-const QUICK_FILTER_DEFS: { labelKey: string; icon: React.ElementType | null; value: string | null; type: string }[] = [
-  { labelKey: "all",         icon: null,   value: null,            type: "category" },
-  { labelKey: "AUTOMOBILES", icon: Car,    value: "AUTOMOBILES",   type: "category" },
-  { labelKey: "REAL_ESTATE", icon: Home,   value: "REAL_ESTATE",   type: "category" },
-  { labelKey: "OTHER",       icon: Wrench, value: "OTHER",         type: "category" },
-  { labelKey: "rating",      icon: Star,   value: "rating",        type: "sort" },
-  { labelKey: "hasPhotos",   icon: Image,  value: "photos",        type: "photos" },
-] as const;
+/* ─── Category tabs ─── */
+const CATEGORY_TABS: { labelKey: string; icon: React.ElementType | null; value: TopCategory | null }[] = [
+  { labelKey: "all",         icon: null,   value: null },
+  { labelKey: "AUTOMOBILES", icon: Car,    value: "AUTOMOBILES" },
+  { labelKey: "REAL_ESTATE", icon: Home,   value: "REAL_ESTATE" },
+  { labelKey: "OTHER",       icon: Wrench, value: "OTHER" },
+];
 
 /* ─── Sort option keys ─── */
-const SORT_OPTION_KEYS: { key: "rating" | "price_asc" | "price_desc" | "newest" | null; value: SortOption }[] = [
-  { key: null,         value: "relevance" },
+const SORT_OPTION_KEYS: { key: "rating" | "price_asc" | "price_desc" | "newest"; value: SortOption }[] = [
   { key: "rating",    value: "rating" },
   { key: "price_asc", value: "price" },
   { key: "price_desc",value: "price-desc" },
@@ -226,23 +240,16 @@ function RepairContent() {
   const [minRating, setMinRating] = useState(0);
   const [hasPhotos, setHasPhotos] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
-  const [viewMode, setViewMode] = useState<"list" | "grid">(() => {
+  const [viewMode, setViewMode] = useState<"list" | "grid" | "map">(() => {
     if (typeof window === "undefined") return "list";
-    return (localStorage.getItem("catalog:view") as "list" | "grid") ?? "list";
+    return (localStorage.getItem("catalog:view") as "list" | "grid" | "map") ?? "list";
   });
   const [page, setPage] = useState(1);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [stickyQuery, setStickyQuery] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
 
   /* Load data */
   useEffect(() => { void loadServices(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* Scroll detection for sticky bar */
-  useEffect(() => {
-    const handler = () => setIsScrolled(window.scrollY > 180);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
 
   async function loadServices() {
     setLoading(true);
@@ -266,7 +273,7 @@ function RepairContent() {
 
   /* Filter + sort */
   const filtered = useMemo(() => {
-    const q = (query || stickyQuery).trim().toLowerCase();
+    const q = query.trim().toLowerCase();
     return services
       .filter((s) => {
         if (q && ![s.name, s.company.name ?? "", s.city ?? "", s.description, ...s.tags].join(" ").toLowerCase().includes(q)) return false;
@@ -293,7 +300,7 @@ function RepairContent() {
           }
         }
       });
-  }, [services, query, stickyQuery, city, priceRange, minRating, categoryFilter, hasPhotos, sortBy]);
+  }, [services, query, city, priceRange, minRating, categoryFilter, hasPhotos, sortBy]);
 
   /* Pagination */
   const visible = filtered.slice(0, page * PAGE_SIZE);
@@ -305,10 +312,9 @@ function RepairContent() {
   function resetFilters() {
     setQuery(""); setCity(undefined); setCategoryFilter({});
     setPriceRange([0, maxPrice]); setMinRating(0); setHasPhotos(false); setSortBy("relevance");
-    setStickyQuery("");
   }
 
-  function toggleView(mode: "list" | "grid") {
+  function toggleView(mode: "list" | "grid" | "map") {
     setViewMode(mode);
     localStorage.setItem("catalog:view", mode);
   }
@@ -331,16 +337,6 @@ function RepairContent() {
     );
   }
 
-  function handleQuickFilter(filter: typeof QUICK_FILTER_DEFS[number]) {
-    if (filter.type === "category") {
-      setCategoryFilter(filter.value ? { category: filter.value as TopCategory } : {});
-    } else if (filter.type === "sort") {
-      setSortBy(filter.value as SortOption);
-    } else if (filter.type === "photos") {
-      setHasPhotos((v) => !v);
-    }
-  }
-
   const activeCategory = categoryFilter.category ?? null;
 
   const createRequestAction = (() => {
@@ -360,29 +356,6 @@ function RepairContent() {
   return (
     <div className="min-h-screen bg-muted/30 dark:bg-background" ref={scrollRef}>
 
-      {/* ════ STICKY MINI-BAR ════ */}
-      <div className={`fixed top-14 left-0 right-0 z-30 transition-all duration-300 ${isScrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
-        <div className="bg-background/95 backdrop-blur-md border-b border-border/50 shadow-sm">
-          <div className="mx-auto max-w-6xl px-4 py-2.5 flex items-center gap-2">
-            <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input value={stickyQuery} onChange={(e) => setStickyQuery(e.target.value)}
-                placeholder="Search services…" className="pl-9 h-8 text-sm rounded-xl" />
-            </div>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{filtered.length}</span> results
-            </div>
-            {activeFilterCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-xs font-bold px-2.5 py-0.5">
-                <SlidersHorizontal className="h-3 w-3" /> {activeFilterCount}
-              </span>
-            )}
-            <Button variant="ghost" size="sm" className="h-8 rounded-xl text-xs gap-1" onClick={resetFilters}>
-              <X className="h-3 w-3" /> Reset
-            </Button>
-          </div>
-        </div>
-      </div>
 
       <main className="mx-auto max-w-6xl px-4 py-8">
 
@@ -396,7 +369,7 @@ function RepairContent() {
             <Button variant="outline" size="sm" className="gap-1.5 rounded-xl hidden sm:inline-flex"
               onClick={useMyLocation} title="Use my location">
               <LocateFixed className="h-3.5 w-3.5" />
-              {city ? `📍 ${city}` : t("nearMe")}
+              {city ? city : t("nearMe")}
             </Button>
             {createRequestAction}
           </div>
@@ -413,109 +386,107 @@ function RepairContent() {
           </div>
         )}
 
-        {/* ── Quick filter tabs ── */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          {QUICK_FILTER_DEFS.map((f) => {
-            const isActive =
-              f.type === "category" ? (f.value ? activeCategory === f.value : !activeCategory) :
-              f.type === "sort"     ? sortBy === f.value :
-              f.type === "photos"   ? hasPhotos : false;
-            const Icon = f.icon;
-            const label = f.type === "category" && f.value
-              ? tCat(f.value as "AUTOMOBILES" | "REAL_ESTATE" | "OTHER")
-              : f.labelKey === "all" ? t("allCategories")
-              : f.labelKey === "rating" ? t("sortOptions.rating")
-              : f.labelKey === "hasPhotos" ? "📸"
-              : f.labelKey;
-            return (
-              <button key={f.labelKey} onClick={() => handleQuickFilter(f)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${isActive ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/20" : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5"}`}>
-                {Icon && <Icon className="h-3.5 w-3.5" />}
-                {label}
-              </button>
-            );
-          })}
+        {/* ── Category tabs + controls ── */}
+        <div className="border-b border-border/50 mb-5">
+          {/* Row 1: category tabs */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-0 hide-scrollbar">
+            {CATEGORY_TABS.map((tab) => {
+              const isActive = tab.value ? activeCategory === tab.value : !activeCategory;
+              const Icon = tab.icon;
+              const label = tab.value
+                ? tCat(tab.value as "AUTOMOBILES" | "REAL_ESTATE" | "OTHER")
+                : t("allCategories");
+              return (
+                <button
+                  key={tab.labelKey}
+                  onClick={() => setCategoryFilter(tab.value ? { category: tab.value } : {})}
+                  className={`relative inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors duration-150
+                    ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  {Icon && <Icon className="h-4 w-4" />}
+                  {label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Two-column layout */}
-        <div className="flex gap-6 items-start">
+        {/* Full-width results */}
+        <div>
 
-          {/* Sidebar */}
-          <aside className="hidden md:block w-64 shrink-0 sticky top-28">
-            <FilterBar
-              title="Filters"
-              categoryFilter={categoryFilter} onChangeCategoryFilter={setCategoryFilter}
-              query={query} city={city} priceRange={priceRange} minRating={minRating}
-              hasPhotos={hasPhotos} sortBy={sortBy} priceMin={0} priceMax={maxPrice} priceStep={1000}
-              onChangeQuery={setQuery} onChangeCity={setCity} onChangePriceRange={setPriceRange}
-              onChangeMinRating={setMinRating} onChangeHasPhotos={setHasPhotos}
-              onChangeSort={setSortBy} onReset={resetFilters}
-            />
-          </aside>
+          {/* Controls bar: Filters + Sort + Count + View */}
+          <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
 
-          {/* Mobile filter */}
-          <div className="md:hidden w-full mb-2">
-            <FilterBar
-              categoryFilter={categoryFilter} onChangeCategoryFilter={setCategoryFilter}
-              query={query} city={city} priceRange={priceRange} minRating={minRating}
-              hasPhotos={hasPhotos} sortBy={sortBy} priceMin={0} priceMax={maxPrice} priceStep={1000}
-              onChangeQuery={setQuery} onChangeCity={setCity} onChangePriceRange={setPriceRange}
-              onChangeMinRating={setMinRating} onChangeHasPhotos={setHasPhotos}
-              onChangeSort={setSortBy} onReset={resetFilters}
-            />
-          </div>
+              {/* Filters button */}
+              <Button variant="outline" size="sm" className="h-8 rounded-xl gap-2 border-border/70"
+                onClick={() => setFilterOpen(true)}>
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-black px-1">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
 
-          {/* Results area */}
-          <div className="flex-1 min-w-0">
+              <div className="h-5 w-px bg-border/60 mx-0.5" />
 
-            {/* Active filter chips */}
-            {!loading && (
-              <ActiveChips
-                query={query} city={city} categoryFilter={categoryFilter}
-                minRating={minRating} hasPhotos={hasPhotos} sortBy={sortBy}
-                maxPrice={maxPrice} priceRange={priceRange}
-                onRemoveQuery={() => setQuery("")}
-                onRemoveCity={() => setCity(undefined)}
-                onRemoveCategory={() => setCategoryFilter({})}
-                onRemoveRating={() => setMinRating(0)}
-                onRemovePhotos={() => setHasPhotos(false)}
-                onRemoveSort={() => setSortBy("relevance")}
-                onRemovePrice={() => setPriceRange([0, maxPrice])}
-                onReset={resetFilters}
-              />
-            )}
-
-            {/* Sort + View controls */}
-            <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
               {/* Sort tabs */}
-              <div className="flex items-center gap-1 flex-wrap">
-                {SORT_OPTION_KEYS.map(({ key, value }) => (
-                  <button key={value} onClick={() => setSortBy(value)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${sortBy === value ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
-                    {key ? t(`sortOptions.${key}`) : t("sortBy")}
+              <span className="text-xs text-muted-foreground font-medium hidden sm:block">Sort:</span>
+              {SORT_OPTION_KEYS.map(({ key, value }) => (
+                <button key={value} onClick={() => setSortBy(sortBy === value ? "relevance" : value)}
+                  className={`h-8 px-3 rounded-xl text-xs font-semibold transition-all ${
+                    sortBy === value
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}>
+                  {t(`sortOptions.${key}`)}
+                </button>
+              ))}
+            </div>
+
+            {/* Right: count + view toggle */}
+            <div className="flex items-center gap-3">
+              {!loading && (
+                <p className="text-xs text-muted-foreground hidden sm:block">
+                  <span className="font-semibold text-foreground">{filtered.length}</span> {t("found") || "results"}
+                </p>
+              )}
+              <div className="flex items-center gap-0.5 border border-border/50 rounded-xl p-0.5 bg-card">
+                {([
+                  { mode: "list" as const, Icon: LayoutList, label: "List" },
+                  { mode: "grid" as const, Icon: LayoutGrid, label: "Grid" },
+                  { mode: "map"  as const, Icon: Map,        label: "Map"  },
+                ] as const).map(({ mode, Icon, label }) => (
+                  <button key={mode} onClick={() => toggleView(mode)} title={label}
+                    className={`p-1.5 rounded-lg transition-all ${viewMode === mode ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                    <Icon className="h-4 w-4" />
                   </button>
                 ))}
               </div>
-
-              {/* Right: count + view toggle */}
-              <div className="flex items-center gap-3">
-                {!loading && (
-                  <p className="text-xs text-muted-foreground hidden sm:block">
-                    <span className="font-bold text-foreground">{filtered.length}</span> {t("found") || "of"} {services.length}
-                  </p>
-                )}
-                <div className="flex items-center gap-0.5 border border-border/50 rounded-xl p-0.5 bg-card">
-                  <button onClick={() => toggleView("list")}
-                    className={`p-1.5 rounded-lg transition-all ${viewMode === "list" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-                    <LayoutList className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => toggleView("grid")}
-                    className={`p-1.5 rounded-lg transition-all ${viewMode === "grid" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-                    <LayoutGrid className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
             </div>
+          </div>
+
+          {/* Active filter chips */}
+          {!loading && (
+            <ActiveChips
+              query={query} city={city} categoryFilter={categoryFilter}
+              minRating={minRating} hasPhotos={hasPhotos} sortBy={sortBy}
+              maxPrice={maxPrice} priceRange={priceRange}
+              onRemoveQuery={() => setQuery("")}
+              onRemoveCity={() => setCity(undefined)}
+              onRemoveCategory={() => setCategoryFilter({})}
+              onRemoveRating={() => setMinRating(0)}
+              onRemovePhotos={() => setHasPhotos(false)}
+              onRemoveSort={() => setSortBy("relevance")}
+              onRemovePrice={() => setPriceRange([0, maxPrice])}
+              onReset={resetFilters}
+            />
+          )}
 
             {/* Loading skeletons */}
             {loading && (
@@ -524,8 +495,28 @@ function RepairContent() {
                 : <div className="space-y-3">{[1,2,3].map(i => <ShimmerCard key={i} />)}</div>
             )}
 
+            {/* Map view */}
+            {!loading && viewMode === "map" && (
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">
+                    {filtered.filter(s => s.city && ["Almaty","Astana","Shymkent","Karaganda","Aktobe","Taraz","Pavlodar","Oskemen","Semey","Atyrau","Kostanay","Kyzylorda","Oral","Petropavl","Aktau","Temirtau","Turkestan"].includes(s.city)).length} services on map
+                  </span>
+                  <span className="text-xs text-muted-foreground">— click a marker to see details</span>
+                </div>
+                <ServiceMap
+                  services={filtered.filter(s => !!s.city)}
+                  onServiceClick={(id) => window.open(`/repair/${id}`, "_blank")}
+                />
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Services without a city are not shown on the map.
+                </p>
+              </div>
+            )}
+
             {/* Results */}
-            {!loading && filtered.length > 0 && (
+            {!loading && filtered.length > 0 && viewMode !== "map" && (
               <>
                 {viewMode === "grid"
                   ? (
@@ -586,24 +577,65 @@ function RepairContent() {
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Browse instead</p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {([
-                      { labelKey: "AUTOMOBILES" as const, emoji: "🚗", cat: "AUTOMOBILES" },
-                      { labelKey: "REAL_ESTATE" as const, emoji: "🏠", cat: "REAL_ESTATE" },
-                      { labelKey: "OTHER" as const, emoji: "🔧", cat: "OTHER" },
-                    ] as const).map(({ labelKey, emoji, cat }) => (
+                      { labelKey: "AUTOMOBILES" as const, Icon: Car,    cat: "AUTOMOBILES" },
+                      { labelKey: "REAL_ESTATE" as const, Icon: Home,   cat: "REAL_ESTATE" },
+                      { labelKey: "OTHER" as const,       Icon: Wrench, cat: "OTHER" },
+                    ] as const).map(({ labelKey, Icon, cat }) => (
                       <button key={cat}
                         onClick={() => { resetFilters(); setCategoryFilter({ category: cat as TopCategory }); }}
-                        className="rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all">
-                        {emoji} {tCat(labelKey)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all">
+                        <Icon className="h-3.5 w-3.5" /> {tCat(labelKey)}
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
             )}
-          </div>
         </div>
       </main>
       <Footer />
+
+      {/* ── Filter drawer overlay ── */}
+      {filterOpen && (
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          onClick={() => setFilterOpen(false)} />
+      )}
+
+      {/* ── Filter drawer ── */}
+      <div className={`fixed inset-y-0 right-0 z-50 w-80 bg-background border-l border-border/50 shadow-2xl flex flex-col transition-transform duration-300 ${filterOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 shrink-0">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+            <h2 className="font-bold text-sm">Filters</h2>
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-black px-1.5">
+                {activeFilterCount}
+              </span>
+            )}
+          </div>
+          <button onClick={() => setFilterOpen(false)}
+            className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-5">
+          <FilterBar
+            title="Filters"
+            categoryFilter={categoryFilter} onChangeCategoryFilter={setCategoryFilter}
+            query={query} city={city} priceRange={priceRange} minRating={minRating}
+            hasPhotos={hasPhotos} sortBy={sortBy} priceMin={0} priceMax={maxPrice} priceStep={1000}
+            onChangeQuery={setQuery} onChangeCity={setCity} onChangePriceRange={setPriceRange}
+            onChangeMinRating={setMinRating} onChangeHasPhotos={setHasPhotos}
+            onChangeSort={setSortBy} onReset={resetFilters}
+          />
+        </div>
+        <div className="px-5 py-4 border-t border-border/50 shrink-0">
+          <Button className="w-full rounded-xl gap-2" onClick={() => setFilterOpen(false)}>
+            <CheckCircle2 className="h-4 w-4" />
+            Show {filtered.length} result{filtered.length !== 1 ? "s" : ""}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

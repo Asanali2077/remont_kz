@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useRouter } from "@/i18n/routing";
 import { api } from "@/lib/api";
-import { ClientSidebar } from "@/components/ClientSidebar";
 import { Footer } from "@/components/Footer";
 import { Bell, CheckCircle2, Clock, MessageSquare, Star, Zap, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -75,8 +74,6 @@ export default function NotificationsPage() {
         </div>
 
         <div className="flex gap-6 items-start">
-          <ClientSidebar />
-
           <div className="flex-1 min-w-0">
             {notifs.length === 0 ? (
               <div className="bg-card border border-border/50 rounded-2xl py-16 text-center">

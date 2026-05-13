@@ -2,17 +2,23 @@
 "use client";
 import { useTranslations } from "next-intl";
 import { CATEGORY_COLORS, fmtNum } from "@/lib/utils";
+import dynamic from "next/dynamic";
 
 import { useCompare } from "@/components/CompareContext";
 import { SERVICE_CATEGORY_LABELS } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Clock, CheckCircle2, X, ArrowLeft, GitCompare } from "lucide-react";
+import { MapPin, Star, Clock, CheckCircle2, X, ArrowLeft, GitCompare, TrendingDown } from "lucide-react";
 import { Link, useRouter } from "@/i18n/routing";
 import { useEffect } from "react";
 import { Footer } from "@/components/Footer";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
+
+const CompareRadar = dynamic(() => import("@/components/CompareRadar"), {
+  ssr: false,
+  loading: () => <div className="bg-card border border-border/50 rounded-2xl h-[380px] animate-pulse mt-4" />,
+});
 
 export default function ComparePage() {
   const t = useTranslations("compare");
@@ -106,24 +112,53 @@ export default function ComparePage() {
             },
             {
               label: t("price"),
-              render: (s: typeof selected[0]) => (
-                <span className="text-base font-bold">
-                  {fmtNum(s.priceFrom)}
-                  {s.priceTo !== s.priceFrom && <> – {fmtNum(s.priceTo)}</>}
-                  <span className="text-xs font-normal text-muted-foreground ml-1">₸</span>
-                </span>
-              ),
+              render: (s: typeof selected[0]) => {
+                const prices   = selected.map(x => x.priceFrom ?? 0);
+                const minPrice = Math.min(...prices);
+                const isCheap  = (s.priceFrom ?? 0) === minPrice;
+                const pctDiff  = isCheap || minPrice === 0 ? null
+                  : Math.round((((s.priceFrom ?? 0) - minPrice) / minPrice) * 100);
+                return (
+                  <div>
+                    <span className={`text-base font-bold ${isCheap && selected.length > 1 ? "text-green-600 dark:text-green-400" : ""}`}>
+                      {fmtNum(s.priceFrom)}
+                      {s.priceTo !== s.priceFrom && <> – {fmtNum(s.priceTo)}</>}
+                      <span className="text-xs font-normal text-muted-foreground ml-1">₸</span>
+                    </span>
+                    {isCheap && selected.length > 1 && (
+                      <span className="flex items-center gap-0.5 text-[11px] text-green-600 dark:text-green-400 font-bold mt-0.5">
+                        <TrendingDown className="h-3 w-3" /> Best price
+                      </span>
+                    )}
+                    {pctDiff !== null && (
+                      <span className="block text-[11px] text-rose-500 font-semibold mt-0.5">
+                        +{pctDiff}% vs cheapest
+                      </span>
+                    )}
+                  </div>
+                );
+              },
             },
             {
               label: t("rating"),
-              render: (s: typeof selected[0]) => typeof s.rating === "number" ? (
-                <div className="flex items-center gap-1">
-                  {[1,2,3,4,5].map((n) => (
-                    <Star key={n} className={`h-3.5 w-3.5 ${n <= Math.round(s.rating!) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`} />
-                  ))}
-                  <span className="ml-0.5 text-sm font-semibold">{s.rating.toFixed(1)}</span>
-                </div>
-              ) : <span className="text-xs text-muted-foreground">No ratings</span>,
+              render: (s: typeof selected[0]) => {
+                const ratings   = selected.map(x => x.rating ?? 0);
+                const maxRating = Math.max(...ratings);
+                const isBest    = typeof s.rating === "number" && s.rating === maxRating && s.rating > 0;
+                return typeof s.rating === "number" ? (
+                  <div>
+                    <div className="flex items-center gap-1">
+                      {[1,2,3,4,5].map((n) => (
+                        <Star key={n} className={`h-3.5 w-3.5 ${n <= Math.round(s.rating!) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`} />
+                      ))}
+                      <span className="ml-0.5 text-sm font-semibold">{s.rating.toFixed(1)}</span>
+                    </div>
+                    {isBest && selected.length > 1 && (
+                      <span className="block text-[11px] text-amber-600 font-bold mt-0.5">Top rated ★</span>
+                    )}
+                  </div>
+                ) : <span className="text-xs text-muted-foreground">No ratings</span>;
+              },
             },
             {
               label: t("licensed"),
@@ -161,6 +196,9 @@ export default function ComparePage() {
             </div>
           ))}
         </div>
+
+        {/* Radar chart — visual comparison */}
+        {selected.length >= 2 && <CompareRadar services={selected} />}
       </div>
       <Footer />
     </div>

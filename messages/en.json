@@ -55,10 +55,12 @@
     "profile": "Profile",
     "settings": "Settings",
     "billing": "Billing",
-    "notifications": "No notifications",
+    "notifications": "Notifications",
+    "orderHistory": "Order History",
     "seeAll": "See all",
     "pressEnter": "Press Enter to search · Esc to close",
-    "remontGuide": "Remont Guide"
+    "remontGuide": "Remont Guide",
+    "cabinet": "Cabinet"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -148,7 +150,8 @@
     "allCategories": "All categories",
     "allCities": "All cities",
     "services": "{count} services",
-    "found": "Found"
+    "found": "Found",
+    "createRequest": "Create request"
   },
   "categories": {
     "AUTOMOBILES": "Automobiles",

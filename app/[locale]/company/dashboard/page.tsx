@@ -6,20 +6,19 @@ import { Link } from "@/i18n/routing";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
 import { RequestsManagement } from "@/components/company/RequestsManagement";
 import { ServicesManagement } from "@/components/company/ServicesManagement";
-import { CompanyStatistics } from "@/components/company/CompanyStatistics";
 import { CompanyOverview } from "@/components/company/CompanyOverview";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 import type { RequestRecord } from "@/lib/types";
 import {
-  LayoutDashboard, Briefcase, ClipboardList, BarChart3,
+  LayoutDashboard, Briefcase, ClipboardList,
   Menu, X, ArrowRight, User, MessageSquare, GalleryHorizontal,
 } from "lucide-react";
 import { PortfolioManager } from "@/components/company/PortfolioManager";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-type Tab = "overview" | "services" | "requests" | "statistics" | "portfolio" | "profile";
+type Tab = "overview" | "services" | "requests" | "portfolio" | "profile";
 
 export default function CompanyDashboardPage() {
   const t = useTranslations("company");
@@ -46,12 +45,11 @@ export default function CompanyDashboardPage() {
   const unreadMessages = requests.filter(r => r.companyId && (r.status === "accepted" || r.status === "in_progress")).length;
 
   const NAV: { id: Tab; label: string; icon: React.ElementType; badge?: number }[] = [
-    { id: "overview",    label: t("overview"),    icon: LayoutDashboard, badge: totalBadge > 0 ? totalBadge : undefined },
-    { id: "requests",    label: t("requests"),    icon: ClipboardList,   badge: totalBadge > 0 ? totalBadge : undefined },
-    { id: "services",    label: t("services"),    icon: Briefcase },
-    { id: "statistics",  label: t("statistics"),  icon: BarChart3 },
-    { id: "portfolio",   label: t("portfolio"),   icon: GalleryHorizontal },
-    { id: "profile",     label: tCommon("edit"),  icon: User },
+    { id: "overview",  label: t("overview"),   icon: LayoutDashboard, badge: totalBadge > 0 ? totalBadge : undefined },
+    { id: "requests",  label: t("requests"),   icon: ClipboardList,   badge: totalBadge > 0 ? totalBadge : undefined },
+    { id: "services",  label: t("services"),   icon: Briefcase },
+    { id: "portfolio", label: t("portfolio"),  icon: GalleryHorizontal },
+    { id: "profile",   label: tCommon("edit"), icon: User },
   ];
 
   const activeLabel = NAV.find(n => n.id === activeTab)?.label ?? "";
@@ -136,12 +134,6 @@ export default function CompanyDashboardPage() {
               </div>
             </nav>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-border/50">
-              <a href="/" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                ← {tCommon("back")}
-              </a>
-            </div>
           </aside>
 
           {/* ── Main content ── */}
@@ -164,7 +156,6 @@ export default function CompanyDashboardPage() {
               {activeTab === "overview"   && <CompanyOverview onNavigate={navigate} />}
               {activeTab === "services"   && <ServicesManagement />}
               {activeTab === "requests"   && <RequestsManagement />}
-              {activeTab === "statistics" && <CompanyStatistics />}
               {activeTab === "portfolio"  && user && (
                 <div>
                   <h2 className="text-xl font-bold mb-1">{t("portfolio")}</h2>

@@ -7,6 +7,7 @@ import { CompareProvider } from "@/components/CompareContext";
 import { CompareBar } from "@/components/CompareBar";
 import { MobileNav } from "@/components/MobileNav";
 import { OfflineToast } from "@/components/OfflineToast";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
             <CompareBar />
             <MobileNav />
             <OfflineToast />
+            <PWAInstallPrompt />
             <Toaster />
           </CompareProvider>
         </AuthProvider>

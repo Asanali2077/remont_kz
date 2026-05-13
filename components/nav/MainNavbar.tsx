@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import {
   LogOut, Menu, X, Moon, Sun, ChevronDown, ClipboardList,
   Bell, BookOpen, User, Settings, CreditCard, LayoutDashboard,
-  Heart, MessageSquare, Search, ShieldCheck,
+  Heart, MessageSquare, Search, ShieldCheck, History,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -51,7 +51,7 @@ function NotificationBell({ role }: { role: "client" | "company" }) {
         <div className="absolute right-0 top-full mt-2 w-80 bg-popover border border-border rounded-xl shadow-lg z-50 overflow-hidden">
           <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
             <span className="text-sm font-semibold">Notifications</span>
-            <Link href="/notifications" onClick={() => setOpen(false)} className="text-xs text-primary hover:underline">See all</Link>
+            <Link href="/my-requests?tab=notifications" onClick={() => setOpen(false)} className="text-xs text-primary hover:underline">See all</Link>
           </div>
           {items.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">No new notifications</div>
@@ -105,7 +105,8 @@ export function MainNavbar() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-    router.push(`/repair?q=${encodeURIComponent(searchQuery.trim())}`);
+    const base = user?.role === "company" ? "/company/catalog" : "/repair";
+    router.push(`${base}?q=${encodeURIComponent(searchQuery.trim())}`);
     setSearchOpen(false);
     setSearchQuery("");
   }
@@ -135,10 +136,13 @@ export function MainNavbar() {
 
   /* ── client dropdown items ── */
   const clientMenuItems = [
-    { href: "/my-requests", icon: ClipboardList, label: t("myRequests") },
-    { href: "/chat", icon: MessageSquare, label: t("chat") },
-    { href: "/favorites", icon: Heart, label: t("favorites") },
-    { href: "/guide", icon: BookOpen, label: t("remontGuide") },
+    { href: "/my-requests",                    icon: ClipboardList, label: t("myRequests") },
+    { href: "/my-requests?tab=messages",       icon: MessageSquare, label: t("chat") },
+    { href: "/my-requests?tab=favorites",      icon: Heart,         label: t("favorites") },
+    { href: "/my-requests?tab=notifications",  icon: Bell,          label: t("notifications") },
+    { href: "/my-requests?tab=history",        icon: History,       label: t("orderHistory") },
+    { href: "/my-requests?tab=profile",        icon: User,          label: t("profile") },
+    { href: "/my-requests?tab=settings",       icon: Settings,      label: t("settings") },
   ];
 
   return (
@@ -160,9 +164,11 @@ export function MainNavbar() {
           <Link href={catalogHref} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t("catalog")}
           </Link>
-          <Link href="/companies" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            {t("companies")}
-          </Link>
+          {user?.role !== "company" && (
+            <Link href="/companies" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              {t("companies")}
+            </Link>
+          )}
           <Link href="/guide" className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             <BookOpen className="h-3.5 w-3.5" /> {t("guide")}
           </Link>
@@ -175,10 +181,9 @@ export function MainNavbar() {
         <div className="hidden md:flex items-center gap-1">
           {/* Global search button */}
           <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)}
-            className="h-9 gap-2 text-muted-foreground hover:text-foreground px-2.5 rounded-xl border border-border/50 hidden lg:flex">
-            <Search className="h-3.5 w-3.5" />
-            <span className="text-xs">Search…</span>
-            <kbd className="text-[10px] bg-muted rounded px-1 py-0.5 font-mono">⌘K</kbd>
+            className="h-10 gap-2.5 px-4 rounded-xl border border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/60 transition-colors hidden lg:flex">
+            <Search className="h-4 w-4" />
+            <span className="text-sm font-medium">Search…</span>
           </Button>
           <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} className="h-9 w-9 lg:hidden">
             <Search className="h-4 w-4" />
@@ -198,20 +203,26 @@ export function MainNavbar() {
               {/* Notification bell */}
               <NotificationBell role={user.role === "company" ? "company" : "client"} />
 
-              {/* Avatar dropdown */}
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted transition-colors ml-1"
+              {/* Avatar — click = cabinet, hover = dropdown */}
+              <div
+                className="relative ml-1"
+                ref={dropdownRef}
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
+                <Link
+                  href={user.role === "admin" ? "/admin/dashboard" : dashboardHref}
+                  className="flex items-center gap-2 rounded-xl border border-border/60 px-2.5 py-1.5 hover:bg-muted hover:border-border transition-all"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold select-none">
+                  <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold select-none shrink-0">
                     {initials}
                   </div>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
-                </button>
+                  <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+                </Link>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-popover border border-border rounded-xl shadow-lg overflow-hidden z-50">
+                  <div className="absolute right-0 top-full pt-1.5 w-56 z-50">
+                  <div className="bg-popover border border-border rounded-xl shadow-lg overflow-hidden">
                     {/* User info */}
                     <div className="px-4 py-3 border-b bg-muted/30">
                       <p className="text-sm font-semibold truncate">{user.name ?? user.email}</p>
@@ -257,13 +268,17 @@ export function MainNavbar() {
                       </>
                     )}
 
-                    {/* Profile for all users */}
-                    <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
-                      <User className="h-4 w-4 text-muted-foreground" /> {t("profile")}
-                    </Link>
-                    <Link href="/settings" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
-                      <Settings className="h-4 w-4 text-muted-foreground" /> {t("settings")}
-                    </Link>
+                    {/* Profile / Settings — only for non-client (clients have them in clientMenuItems) */}
+                    {user.role !== "client" && (
+                      <>
+                        <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
+                          <User className="h-4 w-4 text-muted-foreground" /> {t("profile")}
+                        </Link>
+                        <Link href="/settings" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
+                          <Settings className="h-4 w-4 text-muted-foreground" /> {t("settings")}
+                        </Link>
+                      </>
+                    )}
                     {user.role === "company" && (
                       <Link href="/billing" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
                         <CreditCard className="h-4 w-4 text-muted-foreground" /> {t("billing")}
@@ -278,6 +293,7 @@ export function MainNavbar() {
                         <LogOut className="h-4 w-4" /> {t("logout")}
                       </button>
                     </div>
+                  </div>
                   </div>
                 )}
               </div>
@@ -323,14 +339,9 @@ export function MainNavbar() {
                     <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
                   </div>
                 </div>
-                {user.role === "client" && (
-                  <Link href="/my-requests" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
-                    <ClipboardList className="h-4 w-4 text-muted-foreground" /> {t("myRequests")}
-                  </Link>
-                )}
-                {user.role === "company" && (
-                  <Link href={dashboardHref} className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
-                    <LayoutDashboard className="h-4 w-4 text-muted-foreground" /> {t("dashboard")}
+                {user.role !== "admin" && (
+                  <Link href={dashboardHref} className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted font-medium text-primary" onClick={() => setMobileOpen(false)}>
+                    <LayoutDashboard className="h-4 w-4" /> {t("cabinet")}
                   </Link>
                 )}
                 {user.role === "client" && (
@@ -390,7 +401,7 @@ export function MainNavbar() {
               { label: "🔧 Plumbing", q: "plumbing" },
             ].map(({ label, q }) => (
               <button key={q} type="button"
-                onClick={() => { router.push(`/repair?q=${q}`); setSearchOpen(false); setSearchQuery(""); }}
+                onClick={() => { const base = user?.role === "company" ? "/company/catalog" : "/repair"; router.push(`${base}?q=${q}`); setSearchOpen(false); setSearchQuery(""); }}
                 className="text-xs rounded-full border border-border/50 px-2.5 py-1 hover:bg-muted hover:border-primary/30 transition-colors">
                 {label}
               </button>

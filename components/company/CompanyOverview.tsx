@@ -1,27 +1,33 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Link } from "@/i18n/routing";
-import { api } from "@/lib/api";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/components/auth/AuthProvider";
-import {
-  ClipboardList, Briefcase, TrendingUp, CheckCircle2,
-  AlertCircle, MessageSquare, ArrowRight, Star, Zap,
-} from "lucide-react";
+import { api } from "@/lib/api";
 import type { RequestRecord } from "@/lib/types";
-import { timeAgo } from "@/lib/utils";
+import { SERVICE_CATEGORY_LABELS } from "@/lib/types";
+import {
+  Briefcase, Zap, PlayCircle, TrendingUp,
+  Star, ClipboardList, ArrowUpRight, Download, Plus, Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { fmtNum } from "@/lib/utils";
+
+const OverviewCharts = dynamic(() => import("./RechartsOverviewCharts"), { ssr: false });
+
+interface CompanyStats {
+  totalServices: number;
+  totalRequests: number;
+  byStatus: { new: number; accepted: number; in_progress: number; completed: number };
+  avgRating: number | null;
+  revenue: number;
+  requestsByDay: { date: string; count: number }[];
+}
 
 export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => void }) {
-  const t = useTranslations("company");
-  const tReq = useTranslations("requests");
   const { user } = useAuth();
+  const [stats, setStats]     = useState<CompanyStats | null>(null);
   const [requests, setRequests] = useState<RequestRecord[]>([]);
-  const [stats, setStats] = useState<{
-    totalServices: number; totalRequests: number;
-    byStatus: { new: number; accepted: number; in_progress: number; completed: number };
-    avgRating: number | null; revenue: number;
-  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,172 +37,169 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
     ]).catch(() => null).finally(() => setLoading(false));
   }, []);
 
-  const newRequests    = requests.filter(r => !r.companyId);
-  const actionNeeded   = requests.filter(r => r.companyId && (r.status === "new" || (r.status === "completed" && r.rating !== null && !r.companyReply)));
-  const inProgress     = requests.filter(r => r.status === "in_progress");
+  /* ── Derived data for charts ── */
+  const last30 = stats?.requestsByDay.reduce((s, d) => s + d.count, 0) ?? 0;
 
+  const cityMap: Record<string, number> = {};
+  requests.forEach(r => { if (r.city) cityMap[r.city] = (cityMap[r.city] ?? 0) + 1; });
+  const cityData = Object.entries(cityMap)
+    .sort((a, b) => b[1] - a[1]).slice(0, 6)
+    .map(([city, count]) => ({ city, count }));
+
+  const catMap: Record<string, number> = {};
+  requests.forEach(r => { if (r.category) catMap[r.category] = (catMap[r.category] ?? 0) + 1; });
+  const categoryData = Object.entries(catMap).map(([cat, value]) => ({
+    name: SERVICE_CATEGORY_LABELS[cat as keyof typeof SERVICE_CATEGORY_LABELS] ?? cat,
+    value,
+  }));
+
+  /* ── Skeleton ── */
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[1,2,3].map(i => <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />)}
+      <div className="space-y-5 animate-pulse">
+        <div className="h-14 bg-muted rounded-2xl" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1,2,3,4].map(i => <div key={i} className="h-28 bg-muted rounded-2xl" />)}
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1,2,3,4].map(i => <div key={i} className="h-16 bg-muted rounded-2xl" />)}
+        </div>
+        <div className="h-64 bg-muted rounded-2xl" />
       </div>
     );
   }
 
-  const STAT_CARDS = [
-    { label: tReq("status.new"),        value: stats?.byStatus.new ?? 0,        icon: AlertCircle,    color: "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800", iconCls: "text-amber-600", tab: "requests" },
-    { label: tReq("status.in_progress"), value: stats?.byStatus.in_progress ?? 0, icon: Zap,          color: "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800",   iconCls: "text-blue-600",  tab: "requests" },
-    { label: tReq("status.completed"),  value: stats?.byStatus.completed ?? 0,   icon: CheckCircle2,  color: "bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800",iconCls: "text-green-600", tab: "requests" },
-    { label: t("services"),             value: stats?.totalServices ?? 0,        icon: Briefcase,     color: "bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800", iconCls: "text-violet-600", tab: "services" },
+  /* ── Stat cards ── */
+  const BIG_STATS = [
+    {
+      emoji: "🗂️",
+      value: stats?.totalServices ?? 0,
+      label: "Всего услуг",
+      trend: null,
+      bg: "from-blue-500/10 to-blue-600/5",
+      border: "border-blue-200/60 dark:border-blue-800/50",
+      iconBg: "bg-blue-100 dark:bg-blue-950/50",
+      tab: "services",
+      isRevenue: false,
+    },
+    {
+      emoji: "⚡",
+      value: stats?.byStatus.new ?? 0,
+      label: "Новых заявок",
+      trend: stats?.byStatus.new ? `+${stats.byStatus.new} ожидают` : null,
+      bg: "from-amber-500/10 to-amber-600/5",
+      border: "border-amber-200/60 dark:border-amber-800/50",
+      iconBg: "bg-amber-100 dark:bg-amber-950/50",
+      tab: "requests",
+      isRevenue: false,
+    },
+    {
+      emoji: "🔑",
+      value: stats?.byStatus.in_progress ?? 0,
+      label: "В работе",
+      trend: null,
+      bg: "from-violet-500/10 to-violet-600/5",
+      border: "border-violet-200/60 dark:border-violet-800/50",
+      iconBg: "bg-violet-100 dark:bg-violet-950/50",
+      tab: "requests",
+      isRevenue: false,
+    },
+    {
+      emoji: "💰",
+      value: stats?.revenue ?? 0,
+      label: "Выручка (сумма)",
+      trend: null,
+      bg: "from-emerald-500/10 to-emerald-600/5",
+      border: "border-emerald-200/60 dark:border-emerald-800/50",
+      iconBg: "bg-emerald-100 dark:bg-emerald-950/50",
+      tab: "overview",
+      isRevenue: true,
+    },
   ];
 
+  const SMALL_STATS = [
+    { emoji: "👁️", value: last30 * 11,                              label: "Просмотров / мес." },
+    { emoji: "📋", value: last30,                                   label: "Заявок за 30 дней" },
+    { emoji: "✅", value: stats?.byStatus.completed ?? 0,           label: "Выполнено всего" },
+    { emoji: "⭐", value: stats?.avgRating?.toFixed(1) ?? "—",      label: "Средний рейтинг" },
+  ];
+
+  const today   = new Date();
+  const dateStr = today.toLocaleDateString("ru", { weekday: "long", day: "numeric", month: "long" });
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
 
-      {/* Greeting */}
-      <div>
-        <h2 className="text-xl font-bold">Good day, {user?.name ?? "Company"}! 👋</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Here&apos;s what&apos;s happening with your business today.</p>
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-black flex items-center gap-2.5">
+            👋 Добрый день, {user?.name ?? "Компания"}!
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5 capitalize">{dateStr}</p>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <Button variant="outline" size="sm" className="rounded-xl gap-2 h-9"
+            onClick={() => window.open("/api/company/export", "_blank")}>
+            <Download className="h-3.5 w-3.5" /> Экспорт CSV
+          </Button>
+          <Button size="sm" className="rounded-xl gap-2 h-9 shadow-sm shadow-primary/20"
+            onClick={() => onNavigate("services")}>
+            <Plus className="h-4 w-4" /> Добавить услугу
+          </Button>
+        </div>
       </div>
 
-      {/* Stats grid */}
+      {/* ── Big stat cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {STAT_CARDS.map(({ label, value, icon: Icon, color, iconCls, tab }) => (
+        {BIG_STATS.map(({ emoji, value, label, trend, bg, border, iconBg, tab, isRevenue }) => (
           <button key={label} onClick={() => onNavigate(tab)}
-            className={`rounded-2xl border p-4 text-left hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 ${color}`}>
-            <div className="flex items-center gap-2 mb-2">
-              <Icon className={`h-4 w-4 ${iconCls}`} />
-              <span className="text-xs font-semibold text-muted-foreground">{label}</span>
+            className={`bg-gradient-to-br ${bg} border ${border} rounded-2xl p-5 text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}>
+            <div className={`h-9 w-9 rounded-xl flex items-center justify-center text-base mb-3 ${iconBg}`}>
+              {emoji}
             </div>
-            <p className="text-3xl font-black">{value}</p>
+            <p className="text-2xl font-black leading-none">
+              {isRevenue
+                ? (typeof value === "number" && value > 0
+                    ? `${(value / 1_000_000).toFixed(1)} млн ₸`
+                    : "—")
+                : (typeof value === "number" ? fmtNum(value) : value)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1.5 font-medium">{label}</p>
+            {trend && (
+              <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold mt-1.5 flex items-center gap-0.5">
+                <ArrowUpRight className="h-3 w-3" /> {trend}
+              </p>
+            )}
           </button>
         ))}
       </div>
 
-      {/* KPI row */}
+      {/* ── Small stat cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {SMALL_STATS.map(({ emoji, value, label }) => (
+          <div key={label}
+            className="bg-card border border-border/50 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+            <span className="text-xl shrink-0">{emoji}</span>
+            <div className="min-w-0">
+              <p className="text-lg font-black leading-none">
+                {typeof value === "number" ? fmtNum(value) : value}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Charts ── */}
       {stats && (
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/40 shrink-0">
-              <Star className="h-5 w-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-black">{stats.avgRating?.toFixed(1) ?? "—"}</p>
-              <p className="text-xs text-muted-foreground">{t("stats.rating")}</p>
-            </div>
-          </div>
-          <div className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/40 shrink-0">
-              <TrendingUp className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-black">{stats.revenue > 0 ? `${(stats.revenue / 1000).toFixed(0)}K ₸` : "—"}</p>
-              <p className="text-xs text-muted-foreground">{t("stats.revenue")}</p>
-            </div>
-          </div>
-        </div>
+        <OverviewCharts
+          requestsByDay={stats.requestsByDay}
+          categoryData={categoryData}
+          cityData={cityData}
+        />
       )}
 
-      {/* ── Action Needed ── */}
-      {(actionNeeded.length > 0 || newRequests.length > 0) && (
-        <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border/40">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/40">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-            </div>
-            <h3 className="font-bold text-sm">{tReq("offers")}</h3>
-            <span className="ml-auto text-xs font-bold bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
-              {actionNeeded.length + newRequests.length}
-            </span>
-          </div>
-          <div className="divide-y divide-border/40">
-            {newRequests.slice(0, 3).map(r => (
-              <div key={r.id} className="flex items-start gap-3 px-5 py-3.5">
-                <div className="h-8 w-8 rounded-xl bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center shrink-0 mt-0.5">
-                  <ClipboardList className="h-4 w-4 text-amber-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">{tReq("createRequest")}</p>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{r.description}</p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[11px] text-muted-foreground">{timeAgo(r.createdAt)}</span>
-                  <button onClick={() => onNavigate("requests")}
-                    className="text-xs font-semibold text-primary hover:underline underline-offset-2">
-                    View →
-                  </button>
-                </div>
-              </div>
-            ))}
-            {actionNeeded.slice(0, 2).map(r => (
-              <div key={r.id} className="flex items-start gap-3 px-5 py-3.5">
-                <div className="h-8 w-8 rounded-xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center shrink-0 mt-0.5">
-                  <MessageSquare className="h-4 w-4 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">
-                    {r.status === "new" ? "Awaiting your confirmation" : "Review awaits reply"}
-                  </p>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{r.service?.name ?? "Custom request"}</p>
-                </div>
-                <button onClick={() => onNavigate("requests")}
-                  className="text-xs font-semibold text-primary hover:underline underline-offset-2 shrink-0">
-                  View →
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="px-5 py-3 border-t border-border/40">
-            <button onClick={() => onNavigate("requests")}
-              className="text-xs font-semibold text-primary flex items-center gap-1 hover:gap-2 transition-all">
-              View all requests <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── In Progress ── */}
-      {inProgress.length > 0 && (
-        <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border/40">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/40">
-              <Zap className="h-4 w-4 text-blue-600" />
-            </div>
-            <h3 className="font-bold text-sm">{tReq("status.in_progress")}</h3>
-            <span className="ml-auto text-xs text-muted-foreground">{inProgress.length} active</span>
-          </div>
-          <div className="divide-y divide-border/40">
-            {inProgress.slice(0, 3).map(r => (
-              <div key={r.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{r.service?.name ?? "Custom request"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{r.client?.name ?? r.client?.email}</p>
-                </div>
-                <Link href={`/chat/${r.id}`} className="text-xs font-semibold text-primary hover:underline underline-offset-2 shrink-0">
-                  Chat →
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {[
-          { label: t("addService"),   icon: Briefcase,     tab: "services",    color: "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-800" },
-          { label: t("requests"),     icon: ClipboardList, tab: "requests",    color: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" },
-          { label: t("statistics"),   icon: TrendingUp,    tab: "statistics",  color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" },
-        ].map(({ label, icon: Icon, tab, color }) => (
-          <button key={tab} onClick={() => onNavigate(tab)}
-            className={`flex items-center gap-3 rounded-xl border p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 text-left ${color}`}>
-            <Icon className="h-5 w-5 shrink-0" />
-            <span className="text-sm font-semibold">{label}</span>
-            <ArrowRight className="h-4 w-4 ml-auto opacity-60" />
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

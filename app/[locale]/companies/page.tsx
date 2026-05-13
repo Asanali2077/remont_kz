@@ -34,7 +34,7 @@ export default function CompaniesPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
