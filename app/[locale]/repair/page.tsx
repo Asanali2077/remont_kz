@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Search, Info, LayoutList, LayoutGrid, X, SlidersHorizontal,
-  Car, Home, Wrench, Star, Image, CheckCircle2, ChevronDown,
+  Car, Home, Wrench, Star, Image as ImageIcon, CheckCircle2, ChevronDown,
   Sparkles, MapPin, ArrowRight, LocateFixed, Map, Heart,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -99,7 +99,7 @@ function GridCard({ service }: { service: ServiceRecord }) {
             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="h-full w-full flex items-center justify-center">
-            <Image className="h-8 w-8 text-muted-foreground/30" aria-label="No photo" />
+            <ImageIcon className="h-8 w-8 text-muted-foreground/30" aria-hidden="true" />
           </div>
         )}
         {service.images.length > 1 && (
@@ -205,7 +205,7 @@ function ActiveChips(props: ActiveChipsProps) {
   if (props.minRating > 0)
     chips.push({ key: "rating", label: <><Star className="h-3 w-3 fill-current" />{props.minRating}+ stars</>, onRemove: props.onRemoveRating });
   if (props.hasPhotos)
-    chips.push({ key: "photos", label: <><Image className="h-3 w-3" />With photos</>, onRemove: props.onRemovePhotos });
+    chips.push({ key: "photos", label: <><ImageIcon className="h-3 w-3" />With photos</>, onRemove: props.onRemovePhotos });
   if (props.sortBy !== "relevance")
     chips.push({ key: "sort", label: ({ rating: "Top rated", price: "Cheapest first", "price-desc": "Most expensive", requests: "Most popular" } as Record<string,string>)[props.sortBy] ?? props.sortBy, onRemove: props.onRemoveSort });
   if (props.priceRange[0] > 0 || props.priceRange[1] < props.maxPrice)

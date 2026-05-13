@@ -125,9 +125,9 @@ export function KanbanBoard({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
   const [offerTarget, setOfferTarget] = useState<RequestRecord | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const COLUMNS = COLUMN_DEFS.map(col => ({
     ...col,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     label: col.labelKey === "unassigned" ? tCommon("all") : t(col.labelKey as any),
   }));
 

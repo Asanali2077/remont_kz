@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/routing";
 import {
-  ArrowLeft, MapPin, Star, CheckCircle2, Loader2,
+  ArrowLeft, MapPin, Star, CheckCircle2,
   Phone, Mail, X, ChevronLeft, ChevronRight, Building2, MessageSquare, Camera, BadgeCheck,
   Share2,
 } from "lucide-react";
@@ -359,7 +359,6 @@ export default function ServiceDetailPage() {
                     void navigator.share({ title: service.name, text: service.description.slice(0, 100), url: window.location.href });
                   } else {
                     void navigator.clipboard.writeText(window.location.href).then(() => {
-                      const { toast } = require("sonner") as typeof import("sonner");
                       toast.success("Link copied!");
                     });
                   }

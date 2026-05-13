@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
          AlertCircle, Sparkles, Building2, X, Heart, MessageSquare,
-         BookOpen, Loader2, Eye, EyeOff, Bell, MapPin, User as UserIcon,
+         Loader2, Eye, EyeOff, Bell, MapPin, User as UserIcon,
          History, CalendarDays, BadgeCheck, CircleDashed, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -313,53 +313,6 @@ function NotificationsPanel() {
           </Link>
         );
       })}
-    </div>
-  );
-}
-
-/* ─── Guide Panel ─── */
-function GuidePanel() {
-  const STEPS_GUIDE = [
-    { n: "1", title: "Create a request", desc: "Describe your task, set budget and deadline. It takes less than 2 minutes.", color: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400" },
-    { n: "2", title: "Receive offers", desc: "Licensed companies from your city respond with their prices and terms.", color: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400" },
-    { n: "3", title: "Compare & choose", desc: "View company profiles, ratings and reviews. Accept the best offer.", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
-    { n: "4", title: "Work gets done", desc: "Communicate in chat, track progress, confirm job completion.", color: "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" },
-    { n: "5", title: "Leave a review", desc: "Rate the company to help other clients find the best contractors.", color: "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400" },
-  ];
-  const FAQ = [
-    { q: "Is the service free?", a: "Yes, creating requests and finding contractors is completely free for clients." },
-    { q: "How long does a request stay active?", a: "Requests are active for 14 days and expire automatically after that." },
-    { q: "Can I cancel a request?", a: "Yes, you can cancel any request before accepting an offer." },
-    { q: "How are companies verified?", a: "Companies register with business details and are reviewed by our team before being listed." },
-  ];
-
-  return (
-    <div className="space-y-5">
-      <div className="bg-card border border-border/50 rounded-2xl p-6">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-5">How it works</p>
-        <div className="space-y-4">
-          {STEPS_GUIDE.map(({ n, title, desc, color }) => (
-            <div key={n} className="flex items-start gap-4">
-              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm font-black ${color}`}>{n}</span>
-              <div>
-                <p className="font-semibold text-sm">{title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="bg-card border border-border/50 rounded-2xl p-6">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-5">FAQ</p>
-        <div className="space-y-4 divide-y divide-border/40">
-          {FAQ.map(({ q, a }) => (
-            <div key={q} className="pt-4 first:pt-0">
-              <p className="font-semibold text-sm">{q}</p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{a}</p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

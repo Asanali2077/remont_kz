@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import type { ServiceRecord } from "@/lib/types";
-import { CATEGORY_COLORS } from "@/lib/utils";
 import { fmtNum } from "@/lib/utils";
 
 /* City coordinates for Kazakhstan cities */
