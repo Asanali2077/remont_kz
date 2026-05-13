@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
-         AlertCircle, Sparkles, Building2, X, CreditCard } from "lucide-react";
+         AlertCircle, Sparkles, Building2, X } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, SERVICE_CATEGORY_LABELS } from "@/lib/types";
