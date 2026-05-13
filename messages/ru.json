@@ -33,7 +33,14 @@
     "currency": "₸",
     "reviews": "{count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}}",
     "noData": "Нет данных",
-    "tryAgain": "Попробовать снова"
+    "tryAgain": "Попробовать снова",
+    "client": "Клиент",
+    "company": "Компания",
+    "security": "Безопасность",
+    "budget": "Бюджет",
+    "total": "Всего",
+    "active": "Активные",
+    "new": "Новые"
   },
   "nav": {
     "catalog": "Каталог",
@@ -227,7 +234,39 @@
     "requestCreated": "Заявка создана",
     "offerAccepted": "Оффер принят",
     "workStarted": "Работа началась",
-    "workCompleted": "Работа завершена"
+    "workCompleted": "Работа завершена",
+    "customRequest": "Произвольная заявка",
+    "stepPosted": "Размещено",
+    "stepOffers": "Офферы",
+    "stepDone": "Готово",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "expiredLabel": "Просрочен",
+    "expiresInDays": "{count, plural, one {Истекает через # день} few {Истекает через # дня} many {Истекает через # дней} other {Истекает через # дня}}",
+    "assignedCompany": "Назначенная компания",
+    "offersReceived": "{count, plural, one {Получен # оффер} few {Получено # оффера} many {Получено # офферов} other {Получено # оффера}} — выберите",
+    "waitingForOffers": "Ожидание офферов от компаний…",
+    "openChat": "Открыть чат",
+    "cancelRequest": "Отменить заказ",
+    "document": "Документ",
+    "repeatRequest": "Повторить заявку",
+    "yourReview": "Ваш отзыв",
+    "companyReply": "Ответ компании",
+    "totalOrders": "Всего заказов",
+    "noHistory": "История заказов пуста",
+    "noHistoryDesc": "Завершённые заказы появятся здесь",
+    "noReviewLeft": "Отзыв не оставлен",
+    "describeTask": "Опишите задачу",
+    "receiveOffers": "Получайте офферы",
+    "chooseBest": "Выберите лучшего",
+    "tellUsWhat": "Расскажите, что нужно сделать",
+    "companiesRespond": "Компании отвечают с ценами",
+    "compareAndConfirm": "Сравните и подтвердите",
+    "statsTotal": "Всего",
+    "statsCompleted": "Завершено",
+    "statsActive": "Активные",
+    "statsNew": "Новые",
+    "ratingLabels": ["", "Плохо", "Ниже среднего", "Среднее", "Хорошо", "Отлично"]
   },
   "requestCreate": {
     "title": "Новая заявка",
@@ -280,7 +319,19 @@
       "addService": "Добавьте первую услугу",
       "verifyEmail": "Верифицируйте email",
       "completeProfile": "Заполните профиль"
-    }
+    },
+    "totalServices": "Всего услуг",
+    "inProgress": "В работе",
+    "viewsPerPeriod": "Просмотры / период",
+    "requestsPerPeriod": "Заявки / {period}",
+    "avgRating": "Средний рейтинг",
+    "goodDay": "Добрый день, {name}!",
+    "calendarTitle": "Календарь заказов",
+    "calendarNoOrders": "Нет заказов на эту дату",
+    "calendarMore": "+{count} ещё",
+    "calendarDays": ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+    "calendarMonths": ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+    "order": "Заказ"
   },
   "chat": {
     "title": "Сообщения",
@@ -297,7 +348,10 @@
     "unread": "Непрочитанных",
     "typing": "Печатает...",
     "delivered": "Доставлено",
-    "read": "Прочитано"
+    "read": "Прочитано",
+    "noMessages": "Сообщений пока нет",
+    "noMessagesDesc": "Сообщения появятся после принятия оффера",
+    "earlier": "Ранее"
   },
   "admin": {
     "title": "Панель администратора",
@@ -376,7 +430,13 @@
     "deleteAccount": "Удалить аккаунт",
     "deleteWarning": "Это действие нельзя отменить.",
     "emailVerified": "Email верифицирован",
-    "emailNotVerified": "Email не верифицирован"
+    "emailNotVerified": "Email не верифицирован",
+    "verified": "Верифицирован",
+    "cityAddress": "Город / Адрес",
+    "namePlaceholder": "Ваше имя",
+    "passwordHint": "Минимум 8 символов",
+    "confirmNewPassword": "Подтвердите новый пароль",
+    "changePasswordBtn": "Сменить пароль"
   },
   "favorites": {
     "title": "Избранное",
@@ -403,7 +463,9 @@
     "offerAccepted": "Оффер принят",
     "newMessage": "Новое сообщение",
     "requestCompleted": "Заявка завершена",
-    "markAllRead": "Отметить все прочитанными"
+    "markAllRead": "Отметить все прочитанными",
+    "allCaughtUp": "Всё прочитано",
+    "yourActivity": "Ваша активность и обновления"
   },
   "guide": {
     "title": "Руководство",

@@ -2,17 +2,18 @@
 
 import { ClipboardList, MessageSquare, Heart, Bell, History, User, Settings } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useTranslations } from "next-intl";
 
 export type CabinetTab = "requests" | "messages" | "favorites" | "notifications" | "history" | "profile" | "settings";
 
-const ITEMS: { label: string; icon: React.ElementType; tab: CabinetTab }[] = [
-  { label: "My Requests",   icon: ClipboardList, tab: "requests" },
-  { label: "Messages",      icon: MessageSquare, tab: "messages" },
-  { label: "Favorites",     icon: Heart,         tab: "favorites" },
-  { label: "Notifications", icon: Bell,          tab: "notifications" },
-  { label: "Order History", icon: History,       tab: "history" },
-  { label: "Profile",       icon: User,          tab: "profile" },
-  { label: "Settings",      icon: Settings,      tab: "settings" },
+const ITEMS: { labelKey: string; icon: React.ElementType; tab: CabinetTab }[] = [
+  { labelKey: "myRequests",    icon: ClipboardList, tab: "requests" },
+  { labelKey: "chat",          icon: MessageSquare, tab: "messages" },
+  { labelKey: "favorites",     icon: Heart,         tab: "favorites" },
+  { labelKey: "notifications", icon: Bell,          tab: "notifications" },
+  { labelKey: "orderHistory",  icon: History,       tab: "history" },
+  { labelKey: "profile",       icon: User,          tab: "profile" },
+  { labelKey: "settings",      icon: Settings,      tab: "settings" },
 ];
 
 interface ClientSidebarProps {
@@ -22,6 +23,8 @@ interface ClientSidebarProps {
 
 export function ClientSidebar({ activeTab, onTabChange }: ClientSidebarProps) {
   const { user } = useAuth();
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
   if (!user || user.role !== "client") return null;
 
   return (
@@ -33,13 +36,13 @@ export function ClientSidebar({ activeTab, onTabChange }: ClientSidebarProps) {
               {(user.name?.[0] ?? user.email[0]).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{user.name ?? "Client"}</p>
-              <p className="text-[11px] text-muted-foreground">Client</p>
+              <p className="text-sm font-semibold truncate">{user.name ?? tCommon("client")}</p>
+              <p className="text-[11px] text-muted-foreground">{tCommon("client")}</p>
             </div>
           </div>
         </div>
         <nav className="p-2">
-          {ITEMS.map(({ label, icon: Icon, tab }) => (
+          {ITEMS.map(({ labelKey, icon: Icon, tab }) => (
             <button
               key={tab}
               onClick={() => onTabChange(tab)}
@@ -50,7 +53,8 @@ export function ClientSidebar({ activeTab, onTabChange }: ClientSidebarProps) {
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {label}
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {tNav(labelKey as any)}
             </button>
           ))}
         </nav>

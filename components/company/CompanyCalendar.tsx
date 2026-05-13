@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import type { RequestRecord } from "@/lib/types";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 const STATUS_COLOR: Record<string, string> = {
   accepted:    "bg-blue-500",
@@ -15,28 +16,38 @@ const STATUS_COLOR: Record<string, string> = {
   new:         "bg-slate-400",
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  accepted: "Принята", in_progress: "В работе",
-  completed: "Завершена", cancelled: "Отменена", new: "Новая",
-};
-
 function daysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
 
 function firstWeekday(year: number, month: number) {
-  // Monday-based (0 = Mon … 6 = Sun)
   const d = new Date(year, month, 1).getDay();
   return (d + 6) % 7;
 }
 
 export function CompanyCalendar() {
+  const t = useTranslations("company");
+  const tReq = useTranslations("requests");
+
+  const STATUS_LABEL: Record<string, string> = {
+    accepted:    tReq("status.accepted"),
+    in_progress: tReq("status.in_progress"),
+    completed:   tReq("status.completed"),
+    cancelled:   tReq("status.cancelled"),
+    new:         tReq("status.new"),
+  };
+
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const DAYS: string[]   = t.raw("calendarDays") as any;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const MONTHS: string[] = t.raw("calendarMonths") as any;
+
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed
-  const [selected, setSelected] = useState<string | null>(null); // selected date string YYYY-MM-DD
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     api.getRequests({ scope: "assigned" })
@@ -55,7 +66,6 @@ export function CompanyCalendar() {
     else setViewMonth(m => m + 1);
   }
 
-  // Index requests by date (using deadline or updatedAt fallback)
   const byDate = new Map<string, RequestRecord[]>();
   for (const req of requests) {
     const dateStr = req.deadline
@@ -68,8 +78,6 @@ export function CompanyCalendar() {
   const totalDays = daysInMonth(viewYear, viewMonth);
   const startOffset = firstWeekday(viewYear, viewMonth);
   const todayStr = today.toISOString().slice(0, 10);
-  const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-  const MONTHS = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 
   const selectedReqs = selected ? (byDate.get(selected) ?? []) : [];
 
@@ -80,7 +88,7 @@ export function CompanyCalendar() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
-          Календарь заказов
+          {t("calendarTitle")}
         </h2>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" className="h-8 w-8 rounded-xl" onClick={prevMonth}>
@@ -99,8 +107,8 @@ export function CompanyCalendar() {
       <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
         {/* Weekday headers */}
         <div className="grid grid-cols-7 border-b border-border/50">
-          {DAYS.map(d => (
-            <div key={d} className={`py-2 text-center text-xs font-bold text-muted-foreground ${d === "Сб" || d === "Вс" ? "text-rose-400/70" : ""}`}>
+          {DAYS.map((d, i) => (
+            <div key={d} className={`py-2 text-center text-xs font-bold text-muted-foreground ${i >= 5 ? "text-rose-400/70" : ""}`}>
               {d}
             </div>
           ))}
@@ -108,19 +116,17 @@ export function CompanyCalendar() {
 
         {/* Day cells */}
         <div className="grid grid-cols-7">
-          {/* Leading empty cells */}
           {Array.from({ length: startOffset }).map((_, i) => (
             <div key={`e-${i}`} className="h-24 border-r border-b border-border/30 bg-muted/20" />
           ))}
 
-          {/* Day cells */}
           {Array.from({ length: totalDays }).map((_, i) => {
             const day = i + 1;
             const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const dayReqs = byDate.get(dateStr) ?? [];
             const isToday = dateStr === todayStr;
             const isSelected = dateStr === selected;
-            const weekday = (startOffset + i) % 7; // 0=Mon..6=Sun
+            const weekday = (startOffset + i) % 7;
             const isWeekend = weekday >= 5;
 
             return (
@@ -143,11 +149,13 @@ export function CompanyCalendar() {
                       key={req.id}
                       className={`text-[9px] leading-tight rounded px-1 py-0.5 text-white font-medium truncate ${STATUS_COLOR[req.status] ?? "bg-slate-400"}`}
                     >
-                      {req.service?.name ?? "Заказ"}
+                      {req.service?.name ?? t("order")}
                     </div>
                   ))}
                   {dayReqs.length > 3 && (
-                    <div className="text-[9px] text-muted-foreground font-medium pl-1">+{dayReqs.length - 3} ещё</div>
+                    <div className="text-[9px] text-muted-foreground font-medium pl-1">
+                      {t("calendarMore", { count: dayReqs.length - 3 })}
+                    </div>
                   )}
                 </div>
               </div>
@@ -161,10 +169,10 @@ export function CompanyCalendar() {
         <div className="bg-card border border-border/50 rounded-2xl p-5">
           <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />
-            {new Date(selected + "T12:00:00").toLocaleDateString("ru-KZ", { day: "numeric", month: "long", year: "numeric" })}
+            {new Date(selected + "T12:00:00").toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}
           </h3>
           {selectedReqs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Нет заказов на эту дату</p>
+            <p className="text-sm text-muted-foreground">{t("calendarNoOrders")}</p>
           ) : (
             <div className="space-y-3">
               {selectedReqs.map(req => (
@@ -173,7 +181,7 @@ export function CompanyCalendar() {
                     <div className={`mt-0.5 h-3 w-3 rounded-full shrink-0 ${STATUS_COLOR[req.status] ?? "bg-slate-400"}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm">{req.service?.name ?? "Заказ"}</span>
+                        <span className="font-semibold text-sm">{req.service?.name ?? t("order")}</span>
                         <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                           #{req.id.slice(0, 8).toUpperCase()}
                         </span>

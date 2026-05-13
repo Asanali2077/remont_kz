@@ -26,13 +26,6 @@ import { OrgCard } from "@/components/OrgCard";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 /* ── Timeline stepper ── */
-const STEPS: { status: RequestStatus | "offered"; label: string; icon: React.ElementType }[] = [
-  { status: "new",         label: "Posted",      icon: Clock },
-  { status: "offered",     label: "Offers",      icon: Zap },
-  { status: "accepted",    label: "Accepted",    icon: CheckCircle2 },
-  { status: "in_progress", label: "In Progress", icon: PlayCircle },
-  { status: "completed",   label: "Done",        icon: CheckCircle2 },
-];
 
 const STEP_STYLES = [
   { dot: "border-blue-500 bg-blue-500",   active: "border-blue-400 text-blue-600 bg-blue-50 dark:bg-blue-950/30",   ping: "bg-blue-400",   line: "bg-gradient-to-r from-blue-400 to-violet-400" },
@@ -56,6 +49,14 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
   offerCount: number;
   createdAt: string;
 }) {
+  const tR = useTranslations("requests");
+  const STEPS = [
+    { status: "new",         label: tR("stepPosted"),           icon: Clock },
+    { status: "offered",     label: offerCount > 0 ? `${offerCount} ${tR("stepOffers")}` : tR("stepOffers"), icon: Zap },
+    { status: "accepted",    label: tR("status.accepted"),      icon: CheckCircle2 },
+    { status: "in_progress", label: tR("status.in_progress"),   icon: PlayCircle },
+    { status: "completed",   label: tR("stepDone"),             icon: CheckCircle2 },
+  ];
   const active = getStepIndex(status, hasOffers);
   return (
     <div className="flex items-center gap-0 overflow-x-auto pb-1">
@@ -65,8 +66,7 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
         const current = i === active;
         const isLast  = i === STEPS.length - 1;
         const s = STEP_STYLES[i];
-        const label = step.status === "offered" && offerCount > 0
-          ? `${offerCount} Offer${offerCount !== 1 ? "s" : ""}` : step.label;
+        const label = step.label;
         return (
           <div key={step.status} className="flex items-center shrink-0">
             <div className="flex flex-col items-center">
@@ -109,7 +109,9 @@ function OfferCard({ offer, requestId, onAccept, onReject, accepting }: {
   onReject: (requestId: string) => void;
   accepting: boolean;
 }) {
-  const name = offer.company?.name ?? offer.company?.email ?? "Company";
+  const tR = useTranslations("requests");
+  const tC = useTranslations("common");
+  const name = offer.company?.name ?? offer.company?.email ?? tC("company");
   return (
     <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-background p-3.5 hover:border-primary/30 hover:shadow-sm transition-all">
       <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
@@ -126,11 +128,11 @@ function OfferCard({ offer, requestId, onAccept, onReject, accepting }: {
         <Button size="sm" className="h-8 rounded-xl text-xs gap-1 shadow-sm shadow-primary/20"
           disabled={accepting} onClick={() => void onAccept(requestId, offer.companyId)}>
           <CheckCircle2 className="h-3.5 w-3.5" />
-          {accepting ? "..." : "Accept"}
+          {accepting ? "..." : tR("acceptOffer")}
         </Button>
         <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs text-muted-foreground"
           onClick={() => onReject(requestId)}>
-          <X className="h-3 w-3 mr-1" /> Decline
+          <X className="h-3 w-3 mr-1" /> {tR("declineOffer")}
         </Button>
       </div>
     </div>
@@ -139,20 +141,21 @@ function OfferCard({ offer, requestId, onAccept, onReject, accepting }: {
 
 /* ── Deadline countdown ── */
 function DeadlineCountdown({ deadline }: { deadline: string }) {
+  const tR = useTranslations("requests");
   const days = Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000);
-  if (days < 0) return <span className="text-xs text-destructive font-medium">Просрочен</span>;
-  if (days === 0) return <span className="text-xs text-destructive font-medium">Сегодня</span>;
-  if (days === 1) return <span className="text-xs text-orange-500 font-medium">Завтра</span>;
-  return <span className="text-xs text-muted-foreground">Осталось {days} д.</span>;
+  if (days < 0) return <span className="text-xs text-destructive font-medium">{tR("expiredLabel")}</span>;
+  if (days === 0) return <span className="text-xs text-destructive font-medium">{tR("today")}</span>;
+  if (days === 1) return <span className="text-xs text-orange-500 font-medium">{tR("tomorrow")}</span>;
+  return <span className="text-xs text-muted-foreground">{tR("expiresInDays", { count: days })}</span>;
 }
 
-/* ── Expiry helper ── */
-function getExpiry(expiresAt: string | null | undefined): { label: string; expired: boolean } | null {
+/* ── Expiry helper (locale-agnostic) ── */
+function getExpiry(expiresAt: string | null | undefined): { days: number; expired: boolean } | null {
   if (!expiresAt) return null;
   const diff = new Date(expiresAt).getTime() - Date.now();
-  if (diff <= 0) return { label: "Expired", expired: true };
+  if (diff <= 0) return { days: 0, expired: true };
   const d = Math.ceil(diff / 86400000);
-  return { label: `Expires in ${d} day${d !== 1 ? "s" : ""}`, expired: false };
+  return { days: d, expired: false };
 }
 
 /* ════════════════════════════════
@@ -169,31 +172,33 @@ interface ChatItem {
 }
 
 function MessagesPanel() {
+  const tCh = useTranslations("chat");
+  const tC = useTranslations("common");
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void api.getChatInbox()
       .then(d => setChats(d as ChatItem[]))
-      .catch(() => toast.error("Failed to load messages"))
+      .catch(() => toast.error(tC("error")))
       .finally(() => setLoading(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-muted-foreground" /></div>;
 
   if (chats.length === 0) return (
     <div className="bg-card border border-border/50 rounded-2xl py-16 text-center">
       <MessageSquare className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-      <p className="font-medium">No messages yet</p>
-      <p className="text-sm text-muted-foreground mt-1">Messages appear after you accept an offer</p>
+      <p className="font-medium">{tCh("noMessages")}</p>
+      <p className="text-sm text-muted-foreground mt-1">{tCh("noMessagesDesc")}</p>
     </div>
   );
 
   return (
     <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
       {chats.map((chat, i) => {
-        const name = chat.otherParty?.name ?? chat.otherParty?.email ?? "Unknown";
-        const title = chat.service?.name ?? "Custom request";
+        const name = chat.otherParty?.name ?? chat.otherParty?.email ?? "—";
+        const title = chat.service?.name ?? tCh("title");
         return (
           <Link key={chat.requestId} href={`/chat/${chat.requestId}` as `/chat/${string}`}>
             <div className={`flex items-center gap-3.5 px-5 py-4 hover:bg-muted/40 transition-colors cursor-pointer ${i !== 0 ? "border-t border-border/40" : ""}`}>
@@ -227,25 +232,27 @@ function MessagesPanel() {
 
 /* ─── Favorites Panel ─── */
 function FavoritesPanel() {
+  const tFav = useTranslations("favorites");
+  const tC = useTranslations("common");
   const [services, setServices] = useState<ServiceRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void api.getFavorites()
       .then(setServices)
-      .catch(() => toast.error("Failed to load favorites"))
+      .catch(() => toast.error(tC("error")))
       .finally(() => setLoading(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-muted-foreground" /></div>;
 
   if (services.length === 0) return (
     <div className="bg-card border border-border/50 rounded-2xl py-16 text-center">
       <Heart className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-      <p className="font-medium">No saved services</p>
-      <p className="text-sm text-muted-foreground mt-1">Save services you like to find them quickly</p>
+      <p className="font-medium">{tFav("noFavorites")}</p>
+      <p className="text-sm text-muted-foreground mt-1">{tFav("noFavoritesDesc")}</p>
       <Link href="/repair">
-        <Button variant="outline" size="sm" className="mt-4 rounded-xl">Browse services</Button>
+        <Button variant="outline" size="sm" className="mt-4 rounded-xl">{tFav("browseCatalog")}</Button>
       </Link>
     </div>
   );
@@ -269,23 +276,25 @@ const NOTIF_ICONS = {
 } as const;
 
 function NotificationsPanel() {
+  const tN = useTranslations("notifications");
+  const tC = useTranslations("common");
   const [notifs, setNotifs] = useState<NotifItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void api.getRequests()
       .then(reqs => setNotifs(buildNotifications(reqs)))
-      .catch(() => toast.error("Failed to load notifications"))
+      .catch(() => toast.error(tC("error")))
       .finally(() => setLoading(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-muted-foreground" /></div>;
 
   if (notifs.length === 0) return (
     <div className="bg-card border border-border/50 rounded-2xl py-16 text-center">
       <Bell className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-      <p className="font-medium">No notifications</p>
-      <p className="text-sm text-muted-foreground mt-1">You&apos;re all caught up</p>
+      <p className="font-medium">{tN("noNotifications")}</p>
+      <p className="text-sm text-muted-foreground mt-1">{tN("allCaughtUp")}</p>
     </div>
   );
 
@@ -320,6 +329,8 @@ function NotificationsPanel() {
 /* ─── Profile Panel ─── */
 function ProfilePanel() {
   const { user, updateUser } = useAuth();
+  const tP = useTranslations("profile");
+  const tC = useTranslations("common");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -332,8 +343,8 @@ function ProfilePanel() {
       setName(p.name ?? "");
       setPhone(p.phone ?? "");
       setAddress(p.address ?? "");
-    }).catch(() => toast.error("Failed to load profile")).finally(() => setLoaded(true));
-  }, [user]);
+    }).catch(() => toast.error(tC("error"))).finally(() => setLoaded(true));
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSave() {
     setSaving(true);
@@ -344,8 +355,8 @@ function ProfilePanel() {
         address: address.trim() || undefined,
       });
       updateUser?.({ name: name.trim() || undefined });
-      toast.success("Profile saved");
-    } catch { toast.error("Failed to save"); }
+      toast.success(tP("saved"));
+    } catch { toast.error(tC("error")); }
     finally { setSaving(false); }
   }
 
@@ -369,7 +380,7 @@ function ProfilePanel() {
           <p className="text-lg font-bold truncate">{name || "—"}</p>
           <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
           <span className="mt-1.5 inline-block px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
-            Client
+            {tC("client")}
           </span>
         </div>
       </div>
@@ -381,11 +392,11 @@ function ProfilePanel() {
             <UserIcon className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground mb-1">Name</p>
+            <p className="text-xs text-muted-foreground mb-1">{tP("name")}</p>
             <Input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Your name"
+              placeholder={tP("namePlaceholder")}
               className="h-8 border-0 shadow-none p-0 text-sm font-medium focus-visible:ring-0 bg-transparent"
             />
           </div>
@@ -395,7 +406,7 @@ function ProfilePanel() {
             <Phone className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground mb-1">Phone</p>
+            <p className="text-xs text-muted-foreground mb-1">{tP("phone")}</p>
             <Input
               value={phone}
               onChange={e => setPhone(e.target.value)}
@@ -409,7 +420,7 @@ function ProfilePanel() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground mb-1">City / Address</p>
+            <p className="text-xs text-muted-foreground mb-1">{tP("cityAddress")}</p>
             <Input
               value={address}
               onChange={e => setAddress(e.target.value)}
@@ -423,11 +434,11 @@ function ProfilePanel() {
             <Mail className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground mb-1">Email</p>
+            <p className="text-xs text-muted-foreground mb-1">{tP("email")}</p>
             <p className="text-sm font-medium text-muted-foreground">{user?.email}</p>
           </div>
           <span className="text-[11px] font-bold text-green-600 bg-green-500/10 px-2.5 py-0.5 rounded-full shrink-0">
-            Verified
+            {tP("verified")}
           </span>
         </div>
         <div className="px-5 py-4">
@@ -437,7 +448,7 @@ function ProfilePanel() {
             className="w-full rounded-xl h-10 font-semibold"
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Save changes
+            {tP("saveChanges")}
           </Button>
         </div>
       </div>
@@ -448,6 +459,8 @@ function ProfilePanel() {
 
 /* ─── Settings Panel ─── */
 function SettingsPanel() {
+  const tP = useTranslations("profile");
+  const tC = useTranslations("common");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -462,19 +475,19 @@ function SettingsPanel() {
     setSaving(true);
     try {
       await api.changePassword({ currentPassword, newPassword });
-      toast.success("Password changed");
+      toast.success(tP("saved"));
       setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to change password");
+      toast.error(err instanceof Error ? err.message : tC("error"));
     } finally { setSaving(false); }
   }
 
   return (
     <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-6 max-w-md">
-      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Security</p>
+      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{tC("security")}</p>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Current password</label>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tP("currentPassword")}</label>
           <div className="relative">
             <Input type={showCurrent ? "text" : "password"} value={currentPassword}
               onChange={e => setCurrentPassword(e.target.value)} placeholder="••••••••" className="rounded-xl h-10 pr-10" />
@@ -485,10 +498,10 @@ function SettingsPanel() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">New password</label>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tP("newPassword")}</label>
           <div className="relative">
             <Input type={showNew ? "text" : "password"} value={newPassword}
-              onChange={e => setNewPassword(e.target.value)} placeholder="At least 8 characters" className="rounded-xl h-10 pr-10" />
+              onChange={e => setNewPassword(e.target.value)} placeholder={tP("passwordHint")} className="rounded-xl h-10 pr-10" />
             <button type="button" tabIndex={-1} onClick={() => setShowNew(!showNew)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
               {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -496,16 +509,16 @@ function SettingsPanel() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Confirm new password</label>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tP("confirmNewPassword")}</label>
           <Input type="password" value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="rounded-xl h-10" />
           {confirmPassword && newPassword !== confirmPassword && (
-            <p className="text-xs text-destructive">Passwords don&apos;t match</p>
+            <p className="text-xs text-destructive">{tP("confirmPassword")}</p>
           )}
         </div>
         <Button onClick={() => void handleChangePassword()} disabled={!isValid || saving} className="rounded-xl w-full">
           {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          Change password
+          {tP("changePasswordBtn")}
         </Button>
       </div>
     </div>
@@ -513,32 +526,34 @@ function SettingsPanel() {
 }
 
 /* ─── Order History Panel ─── */
-const STATUS_STYLE: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  completed:   { label: "Completed",   color: "text-green-600 bg-green-500/10",  icon: BadgeCheck },
-  in_progress: { label: "In Progress", color: "text-amber-600 bg-amber-500/10",  icon: CircleDashed },
-  accepted:    { label: "Accepted",    color: "text-blue-600 bg-blue-500/10",    icon: CheckCircle2 },
-  new:         { label: "New",         color: "text-muted-foreground bg-muted",  icon: Clock },
-  cancelled:   { label: "Cancelled",   color: "text-destructive bg-destructive/10", icon: X },
+const STATUS_STYLE_BASE: Record<string, { color: string; icon: React.ElementType }> = {
+  completed:   { color: "text-green-600 bg-green-500/10",     icon: BadgeCheck },
+  in_progress: { color: "text-amber-600 bg-amber-500/10",     icon: CircleDashed },
+  accepted:    { color: "text-blue-600 bg-blue-500/10",       icon: CheckCircle2 },
+  new:         { color: "text-muted-foreground bg-muted",     icon: Clock },
+  cancelled:   { color: "text-destructive bg-destructive/10", icon: X },
 };
 
 function HistoryPanel() {
+  const tR = useTranslations("requests");
+  const tC = useTranslations("common");
   const [orders, setOrders] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void api.getRequests()
       .then(reqs => setOrders(reqs.filter(r => ["completed", "in_progress", "accepted", "cancelled"].includes(r.status))))
-      .catch(() => toast.error("Failed to load history"))
+      .catch(() => toast.error(tC("error")))
       .finally(() => setLoading(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-muted-foreground" /></div>;
 
   if (orders.length === 0) return (
     <div className="bg-card border border-border/50 rounded-2xl py-16 text-center">
       <History className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-      <p className="font-medium">No order history yet</p>
-      <p className="text-sm text-muted-foreground mt-1">Completed orders will appear here</p>
+      <p className="font-medium">{tR("noHistory")}</p>
+      <p className="text-sm text-muted-foreground mt-1">{tR("noHistoryDesc")}</p>
     </div>
   );
 
@@ -550,9 +565,9 @@ function HistoryPanel() {
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total orders",    value: orders.length,    color: "text-foreground" },
-          { label: "Completed",       value: completed.length, color: "text-green-600" },
-          { label: "In progress",     value: inProgress.length,color: "text-amber-600" },
+          { label: tR("totalOrders"),         value: orders.length,     color: "text-foreground" },
+          { label: tR("status.completed"),    value: completed.length,  color: "text-green-600" },
+          { label: tR("status.in_progress"),  value: inProgress.length, color: "text-amber-600" },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-card border border-border/50 rounded-2xl p-4 text-center">
             <p className={`text-2xl font-black ${color}`}>{value}</p>
@@ -564,8 +579,9 @@ function HistoryPanel() {
       {/* Order list */}
       <div className="bg-card border border-border/50 rounded-2xl overflow-hidden divide-y divide-border/40">
         {orders.map((req) => {
-          const st = STATUS_STYLE[req.status] ?? STATUS_STYLE.new;
+          const st = STATUS_STYLE_BASE[req.status] ?? STATUS_STYLE_BASE.new;
           const StatusIcon = st.icon;
+          const statusLabel = tR(`status.${req.status as string}` as Parameters<typeof tR>[0]);
           const rated = req.status === "completed" && req.rating !== null && req.rating !== undefined;
           return (
             <div key={req.id} className="px-5 py-4 flex items-start gap-4 hover:bg-muted/30 transition-colors">
@@ -584,7 +600,7 @@ function HistoryPanel() {
                     <span className="font-mono text-[10px] text-muted-foreground/70">#{req.id.slice(0, 8).toUpperCase()}</span>
                   </div>
                   <span className={`shrink-0 inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${st.color}`}>
-                    {st.label}
+                    {statusLabel}
                   </span>
                 </div>
 
@@ -597,7 +613,7 @@ function HistoryPanel() {
                   {req.city && <span>📍 {req.city}</span>}
                   <span className="flex items-center gap-1">
                     <CalendarDays className="h-3 w-3" />
-                    {new Date(req.createdAt).toLocaleDateString("ru", { day: "numeric", month: "long", year: "numeric" })}
+                    {new Date(req.createdAt).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}
                   </span>
                 </div>
 
@@ -611,7 +627,7 @@ function HistoryPanel() {
                   </div>
                 )}
                 {req.status === "completed" && !rated && (
-                  <p className="text-xs text-muted-foreground/60 mt-1.5 italic">No review left</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1.5 italic">{tR("noReviewLeft")}</p>
                 )}
               </div>
             </div>
@@ -625,19 +641,20 @@ function HistoryPanel() {
 /* ════════════════════════════════
    MAIN PAGE
 ════════════════════════════════ */
-const TAB_TITLES: Record<CabinetTab, string> = {
-  requests:      "My Requests",
-  messages:      "Messages",
-  favorites:     "Favorites",
-  notifications: "Notifications",
-  history:       "Order History",
-  profile:       "Profile",
-  settings:      "Settings",
-};
-
 export default function MyRequestsPage() {
   const t = useTranslations("requests");
   const tCommon = useTranslations("common");
+  const tNav = useTranslations("nav");
+
+  const TAB_TITLES: Record<CabinetTab, string> = {
+    requests:      tNav("myRequests"),
+    messages:      tNav("chat"),
+    favorites:     tNav("favorites"),
+    notifications: tNav("notifications"),
+    history:       tNav("orderHistory"),
+    profile:       tNav("profile"),
+    settings:      tNav("settings"),
+  };
   const searchParams = useSearchParams();
   const VALID_TABS: CabinetTab[] = ["requests","messages","favorites","notifications","history","profile","settings"];
   const initialTab = (searchParams.get("tab") as CabinetTab | null) ?? "requests";
@@ -766,10 +783,10 @@ export default function MyRequestsPage() {
                   {!loading && requests.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {[
-                        { label: "Total",     value: stats.total,     color: "text-foreground",   icon: "📋" },
-                        { label: "Completed", value: stats.completed, color: "text-green-600",     icon: "✅" },
-                        { label: "Active",    value: stats.active,    color: "text-amber-600",     icon: "⚡" },
-                        { label: "New",       value: stats.newCount,  color: "text-primary",       icon: "🔔" },
+                        { label: t("statsTotal"),     value: stats.total,     color: "text-foreground",   icon: "📋" },
+                        { label: t("statsCompleted"), value: stats.completed, color: "text-green-600",     icon: "✅" },
+                        { label: t("statsActive"),    value: stats.active,    color: "text-amber-600",     icon: "⚡" },
+                        { label: t("statsNew"),       value: stats.newCount,  color: "text-primary",       icon: "🔔" },
                       ].map(({ label, value, color, icon }) => (
                         <div key={label} className="bg-card border border-border/50 rounded-2xl p-4">
                           <div className="flex items-center gap-2 mb-1">
@@ -809,9 +826,9 @@ export default function MyRequestsPage() {
                       <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">{t("noRequestsDesc")}</p>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left mb-8">
                         {[
-                          { n: "1", icon: "📝", title: "Describe your task", desc: "Tell us what needs to be done" },
-                          { n: "2", icon: "📬", title: "Receive offers",      desc: "Companies respond with prices" },
-                          { n: "3", icon: "✅", title: "Choose the best",     desc: "Compare and confirm" },
+                          { n: "1", icon: "📝", title: t("describeTask"),  desc: t("tellUsWhat") },
+                          { n: "2", icon: "📬", title: t("receiveOffers"), desc: t("companiesRespond") },
+                          { n: "3", icon: "✅", title: t("chooseBest"),    desc: t("compareAndConfirm") },
                         ].map(({ n, icon, title, desc }) => (
                           <div key={n} className="rounded-xl border border-border/50 bg-muted/30 p-4">
                             <div className="flex items-center gap-2 mb-2">
@@ -855,14 +872,14 @@ export default function MyRequestsPage() {
                               <div className="flex items-start justify-between gap-3 mb-3">
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <h3 className="font-bold text-base leading-snug">{req.service?.name || "Custom request"}</h3>
+                                    <h3 className="font-bold text-base leading-snug">{req.service?.name || t("customRequest")}</h3>
                                     <span className="font-mono text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">#{req.id.slice(0, 8).toUpperCase()}</span>
                                   </div>
                                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
                                     {req.category && <span>{SERVICE_CATEGORY_LABELS[req.category]}</span>}
                                     {req.city && <span>📍 {req.city}</span>}
                                     <span>{new Date(req.createdAt).toLocaleDateString("en", { day: "numeric", month: "short" })}</span>
-                                    {expiry && <span className={expiry.expired ? "text-destructive font-semibold" : "text-amber-600"}>{expiry.label}</span>}
+                                    {expiry && <span className={expiry.expired ? "text-destructive font-semibold" : "text-amber-600"}>{expiry.expired ? t("expiredLabel") : t("expiresInDays", { count: expiry.days })}</span>}
                                     {req.status === "new" && req.deadline && <DeadlineCountdown deadline={req.deadline} />}
                                   </div>
                                 </div>
@@ -876,7 +893,7 @@ export default function MyRequestsPage() {
 
                               {formatBudget(req.budgetFrom, req.budgetTo) && (
                                 <p className="text-sm">
-                                  <span className="text-muted-foreground">Budget: </span>
+                                  <span className="text-muted-foreground">{tCommon("budget")}: </span>
                                   <span className="font-semibold">{formatBudget(req.budgetFrom, req.budgetTo)}</span>
                                 </p>
                               )}
@@ -890,7 +907,7 @@ export default function MyRequestsPage() {
                                     <div>
                                       <p className="text-sm font-semibold">{req.company?.name ?? "Company"}</p>
                                       <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                        <Building2 className="h-3 w-3" /> Assigned company
+                                        <Building2 className="h-3 w-3" /> {t("assignedCompany")}
                                       </p>
                                     </div>
                                   </div>
@@ -912,7 +929,7 @@ export default function MyRequestsPage() {
                                       )}
                                       <Link href={`/chat/${req.id}`}>
                                         <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs">
-                                          💬 Open Chat
+                                          💬 {t("openChat")}
                                         </Button>
                                       </Link>
                                     </div>
@@ -925,7 +942,7 @@ export default function MyRequestsPage() {
                                   <div className="flex items-center gap-2">
                                     <AlertCircle className="h-4 w-4 text-amber-500" />
                                     <p className="text-sm font-semibold">
-                                      {req.offers?.length ?? 0} offer{(req.offers?.length ?? 0) !== 1 ? "s" : ""} received — choose one
+                                      {t("offersReceived", { count: req.offers?.length ?? 0 })}
                                     </p>
                                   </div>
                                   <div className="space-y-2">
@@ -948,7 +965,7 @@ export default function MyRequestsPage() {
                                   <div className="flex gap-0.5">
                                     {[1,2,3].map(i => <div key={i} className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />)}
                                   </div>
-                                  Waiting for company offers…
+                                  {t("waitingForOffers")}
                                 </div>
                               )}
 
@@ -963,7 +980,7 @@ export default function MyRequestsPage() {
                                   {(req.status === "accepted" || req.status === "in_progress") && (
                                     <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
                                       onClick={() => setCancelId(req.id)}>
-                                      ✕ Отменить заказ
+                                      ✕ {t("cancelRequest")}
                                     </Button>
                                   )}
                                   {req.status === "completed" && (
@@ -971,12 +988,12 @@ export default function MyRequestsPage() {
                                       <Link href={`/order-summary/${req.id}`}>
                                         <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/5">
                                           <FileText className="h-3.5 w-3.5" />
-                                          Документ
+                                          {t("document")}
                                         </Button>
                                       </Link>
                                       <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs"
                                         onClick={() => setRepeatData({ description: req.description, city: req.city ?? undefined, budgetFrom: req.budgetFrom ?? undefined, budgetTo: req.budgetTo ?? undefined })}>
-                                        Повторить заявку
+                                        {t("repeatRequest")}
                                       </Button>
                                     </>
                                   )}
@@ -995,12 +1012,12 @@ export default function MyRequestsPage() {
                                     {[1,2,3,4,5].map(s => (
                                       <Star key={s} className={`h-4 w-4 ${s <= req.rating! ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`} />
                                     ))}
-                                    <span className="ml-1 text-xs text-muted-foreground">Your review</span>
+                                    <span className="ml-1 text-xs text-muted-foreground">{t("yourReview")}</span>
                                   </div>
                                   {req.review && <p className="text-sm text-muted-foreground italic">&ldquo;{req.review}&rdquo;</p>}
                                   {req.companyReply && (
                                     <div className="pl-3 border-l-2 border-primary/30 mt-2">
-                                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5">Company reply</p>
+                                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5">{t("companyReply")}</p>
                                       <p className="text-sm text-muted-foreground italic">&ldquo;{req.companyReply}&rdquo;</p>
                                     </div>
                                   )}
@@ -1054,7 +1071,7 @@ export default function MyRequestsPage() {
                 ))}
               </div>
               {reviewStars > 0 && (
-                <p className="text-xs text-muted-foreground mt-1.5">{["","Poor","Below avg","Average","Good","Excellent"][reviewStars]}</p>
+                <p className="text-xs text-muted-foreground mt-1.5">{(t.raw("ratingLabels") as string[])[reviewStars]}</p>
               )}
             </div>
             <div className="space-y-1.5">

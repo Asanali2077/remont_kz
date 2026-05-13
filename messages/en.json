@@ -33,7 +33,14 @@
     "currency": "₸",
     "reviews": "{count, plural, one {# review} other {# reviews}}",
     "noData": "No data",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "client": "Client",
+    "company": "Company",
+    "security": "Security",
+    "budget": "Budget",
+    "total": "Total",
+    "active": "Active",
+    "new": "New"
   },
   "nav": {
     "catalog": "Catalog",
@@ -228,7 +235,39 @@
     "requestCreated": "Request created",
     "offerAccepted": "Offer accepted",
     "workStarted": "Work started",
-    "workCompleted": "Work completed"
+    "workCompleted": "Work completed",
+    "customRequest": "Custom request",
+    "stepPosted": "Posted",
+    "stepOffers": "Offers",
+    "stepDone": "Done",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "expiredLabel": "Expired",
+    "expiresInDays": "{count, plural, one {Expires in # day} other {Expires in # days}}",
+    "assignedCompany": "Assigned company",
+    "offersReceived": "{count, plural, one {# offer received} other {# offers received}} — choose one",
+    "waitingForOffers": "Waiting for company offers…",
+    "openChat": "Open Chat",
+    "cancelRequest": "Cancel request",
+    "document": "Document",
+    "repeatRequest": "Repeat request",
+    "yourReview": "Your review",
+    "companyReply": "Company reply",
+    "totalOrders": "Total orders",
+    "noHistory": "No order history yet",
+    "noHistoryDesc": "Completed orders will appear here",
+    "noReviewLeft": "No review left",
+    "describeTask": "Describe your task",
+    "receiveOffers": "Receive offers",
+    "chooseBest": "Choose the best",
+    "tellUsWhat": "Tell us what needs to be done",
+    "companiesRespond": "Companies respond with prices",
+    "compareAndConfirm": "Compare and confirm",
+    "statsTotal": "Total",
+    "statsCompleted": "Completed",
+    "statsActive": "Active",
+    "statsNew": "New",
+    "ratingLabels": ["", "Poor", "Below avg", "Average", "Good", "Excellent"]
   },
   "requestCreate": {
     "title": "New Request",
@@ -281,7 +320,19 @@
       "addService": "Add your first service",
       "verifyEmail": "Verify your email",
       "completeProfile": "Complete your profile"
-    }
+    },
+    "totalServices": "Total services",
+    "inProgress": "In progress",
+    "viewsPerPeriod": "Views / period",
+    "requestsPerPeriod": "Requests / {period}",
+    "avgRating": "Avg. rating",
+    "goodDay": "Good day, {name}!",
+    "calendarTitle": "Order Calendar",
+    "calendarNoOrders": "No orders for this date",
+    "calendarMore": "+{count} more",
+    "calendarDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "calendarMonths": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "order": "Order"
   },
   "chat": {
     "title": "Messages",
@@ -298,7 +349,10 @@
     "unread": "Unread",
     "typing": "Typing...",
     "delivered": "Delivered",
-    "read": "Read"
+    "read": "Read",
+    "noMessages": "No messages yet",
+    "noMessagesDesc": "Messages appear after you accept an offer",
+    "earlier": "Earlier"
   },
   "admin": {
     "title": "Admin Panel",
@@ -377,7 +431,13 @@
     "deleteAccount": "Delete account",
     "deleteWarning": "This action cannot be undone.",
     "emailVerified": "Email verified",
-    "emailNotVerified": "Email not verified"
+    "emailNotVerified": "Email not verified",
+    "verified": "Verified",
+    "cityAddress": "City / Address",
+    "namePlaceholder": "Your name",
+    "passwordHint": "At least 8 characters",
+    "confirmNewPassword": "Confirm new password",
+    "changePasswordBtn": "Change password"
   },
   "favorites": {
     "title": "Favorites",
@@ -404,7 +464,9 @@
     "offerAccepted": "Offer accepted",
     "newMessage": "New message",
     "requestCompleted": "Request completed",
-    "markAllRead": "Mark all as read"
+    "markAllRead": "Mark all as read",
+    "allCaughtUp": "You're all caught up",
+    "yourActivity": "Your activity and updates"
   },
   "guide": {
     "title": "Guide",

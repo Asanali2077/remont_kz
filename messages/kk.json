@@ -33,7 +33,14 @@
     "currency": "₸",
     "reviews": "{count} пікір",
     "noData": "Деректер жоқ",
-    "tryAgain": "Қайталап көру"
+    "tryAgain": "Қайталап көру",
+    "client": "Клиент",
+    "company": "Компания",
+    "security": "Қауіпсіздік",
+    "budget": "Бюджет",
+    "total": "Барлығы",
+    "active": "Белсенді",
+    "new": "Жаңа"
   },
   "nav": {
     "catalog": "Каталог",
@@ -228,7 +235,39 @@
     "requestCreated": "Өтінім жасалды",
     "offerAccepted": "Ұсыныс қабылданды",
     "workStarted": "Жұмыс басталды",
-    "workCompleted": "Жұмыс аяқталды"
+    "workCompleted": "Жұмыс аяқталды",
+    "customRequest": "Еркін өтінім",
+    "stepPosted": "Жарияланды",
+    "stepOffers": "Ұсыныстар",
+    "stepDone": "Дайын",
+    "today": "Бүгін",
+    "tomorrow": "Ертең",
+    "expiredLabel": "Мерзімі өтті",
+    "expiresInDays": "Мерзімі {count} күнде өтеді",
+    "assignedCompany": "Тағайындалған компания",
+    "offersReceived": "{count} ұсыныс алынды — таңдаңыз",
+    "waitingForOffers": "Компаниялардан ұсыныс күтілуде…",
+    "openChat": "Чатты ашу",
+    "cancelRequest": "Өтінімді болдырмау",
+    "document": "Құжат",
+    "repeatRequest": "Өтінімді қайталау",
+    "yourReview": "Сіздің пікіріңіз",
+    "companyReply": "Компания жауабы",
+    "totalOrders": "Барлық тапсырыстар",
+    "noHistory": "Тапсырыстар тарихы жоқ",
+    "noHistoryDesc": "Аяқталған тапсырыстар осында пайда болады",
+    "noReviewLeft": "Пікір қалдырылмаған",
+    "describeTask": "Тапсырманы сипаттаңыз",
+    "receiveOffers": "Ұсыныстар алыңыз",
+    "chooseBest": "Үздікті таңдаңыз",
+    "tellUsWhat": "Не істеу керектігін айтыңыз",
+    "companiesRespond": "Компаниялар бағамен жауап береді",
+    "compareAndConfirm": "Салыстырып растаңыз",
+    "statsTotal": "Барлығы",
+    "statsCompleted": "Аяқталған",
+    "statsActive": "Белсенді",
+    "statsNew": "Жаңа",
+    "ratingLabels": ["", "Нашар", "Ортадан төмен", "Орташа", "Жақсы", "Өте жақсы"]
   },
   "requestCreate": {
     "title": "Жаңа өтінім",
@@ -281,7 +320,19 @@
       "addService": "Алғашқы қызметті қосыңыз",
       "verifyEmail": "Email-ды растаңыз",
       "completeProfile": "Профильді толтырыңыз"
-    }
+    },
+    "totalServices": "Барлық қызметтер",
+    "inProgress": "Жұмыста",
+    "viewsPerPeriod": "Қараулар / кезең",
+    "requestsPerPeriod": "Өтінімдер / {period}",
+    "avgRating": "Орташа рейтинг",
+    "goodDay": "Қайырлы күн, {name}!",
+    "calendarTitle": "Тапсырыстар күнтізбесі",
+    "calendarNoOrders": "Бұл күні тапсырыстар жоқ",
+    "calendarMore": "+{count} тағы",
+    "calendarDays": ["Дс", "Сс", "Ср", "Бс", "Жм", "Сб", "Жс"],
+    "calendarMonths": ["Қаңтар", "Ақпан", "Наурыз", "Сәуір", "Мамыр", "Маусым", "Шілде", "Тамыз", "Қыркүйек", "Қазан", "Қараша", "Желтоқсан"],
+    "order": "Тапсырыс"
   },
   "chat": {
     "title": "Хабарламалар",
@@ -298,7 +349,10 @@
     "unread": "Оқылмаған",
     "typing": "Жазуда...",
     "delivered": "Жеткізілді",
-    "read": "Оқылды"
+    "read": "Оқылды",
+    "noMessages": "Хабарламалар жоқ",
+    "noMessagesDesc": "Ұсынысты қабылдағаннан кейін хабарламалар пайда болады",
+    "earlier": "Бұрын"
   },
   "admin": {
     "title": "Әкімші панелі",
@@ -377,7 +431,13 @@
     "deleteAccount": "Аккаунтты жою",
     "deleteWarning": "Бұл әрекетті болдырмау мүмкін емес.",
     "emailVerified": "Email расталған",
-    "emailNotVerified": "Email расталмаған"
+    "emailNotVerified": "Email расталмаған",
+    "verified": "Расталған",
+    "cityAddress": "Қала / Мекенжай",
+    "namePlaceholder": "Аты-жөніңіз",
+    "passwordHint": "Кемінде 8 таңба",
+    "confirmNewPassword": "Жаңа құпия сөзді растаңыз",
+    "changePasswordBtn": "Құпия сөзді өзгерту"
   },
   "favorites": {
     "title": "Таңдаулылар",
@@ -404,7 +464,9 @@
     "offerAccepted": "Ұсыныс қабылданды",
     "newMessage": "Жаңа хабарлама",
     "requestCompleted": "Өтінім аяқталды",
-    "markAllRead": "Барлығын оқылған деп белгілеу"
+    "markAllRead": "Барлығын оқылған деп белгілеу",
+    "allCaughtUp": "Барлығы оқылды",
+    "yourActivity": "Белсенділік пен жаңартулар"
   },
   "guide": {
     "title": "Нұсқаулық",

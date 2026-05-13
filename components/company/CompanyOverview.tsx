@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 import type { RequestRecord } from "@/lib/types";
 import { SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -29,6 +30,8 @@ interface CompanyStats {
 
 export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const { user } = useAuth();
+  const tCo = useTranslations("company");
+  const tR = useTranslations("requests");
   const [stats, setStats]       = useState<CompanyStats | null>(null);
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -125,29 +128,29 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
 
   const BIG_STATS = [
     { icon: Briefcase, iconColor: "text-blue-500",   iconBg: "bg-blue-100 dark:bg-blue-950/50",
-      value: stats?.totalServices ?? 0, label: "Total services",
+      value: stats?.totalServices ?? 0, label: tCo("totalServices"),
       bg: "from-blue-500/10 to-blue-600/5", border: "border-blue-200/60 dark:border-blue-800/50",
       tab: "services", isRevenue: false, trend: null, spark: [] },
     { icon: Zap,       iconColor: "text-amber-500",  iconBg: "bg-amber-100 dark:bg-amber-950/50",
-      value: totalReqs, label: "Requests",
+      value: totalReqs, label: tCo("requests"),
       bg: "from-amber-500/10 to-amber-600/5", border: "border-amber-200/60 dark:border-amber-800/50",
       tab: "requests", isRevenue: false,
       trend: reqs_pct, spark: sparkline },
     { icon: Wrench,    iconColor: "text-violet-500", iconBg: "bg-violet-100 dark:bg-violet-950/50",
-      value: stats?.byStatus.in_progress ?? 0, label: "In progress",
+      value: stats?.byStatus.in_progress ?? 0, label: tCo("inProgress"),
       bg: "from-violet-500/10 to-violet-600/5", border: "border-violet-200/60 dark:border-violet-800/50",
       tab: "requests", isRevenue: false, trend: null, spark: sparkline },
     { icon: Banknote,  iconColor: "text-emerald-500",iconBg: "bg-emerald-100 dark:bg-emerald-950/50",
-      value: stats?.revenue ?? 0, label: "Revenue",
+      value: stats?.revenue ?? 0, label: tCo("stats.revenue"),
       bg: "from-emerald-500/10 to-emerald-600/5", border: "border-emerald-200/60 dark:border-emerald-800/50",
       tab: "overview", isRevenue: true, trend: null, spark: sparkline },
   ];
 
   const SMALL_STATS = [
-    { icon: Eye,          iconColor: "text-blue-500",    value: fmtNum(totalReqs * 11), label: "Views / period" },
-    { icon: ClipboardList,iconColor: "text-violet-500",  value: fmtNum(totalReqs),      label: `Requests / ${period}` },
-    { icon: CheckCircle2, iconColor: "text-emerald-500", value: fmtNum(completed),      label: "Completed" },
-    { icon: Star,         iconColor: "text-amber-500",   value: stats?.avgRating?.toFixed(1) ?? "—", label: "Avg. rating" },
+    { icon: Eye,          iconColor: "text-blue-500",    value: fmtNum(totalReqs * 11), label: tCo("viewsPerPeriod") },
+    { icon: ClipboardList,iconColor: "text-violet-500",  value: fmtNum(totalReqs),      label: tCo("requestsPerPeriod", { period }) },
+    { icon: CheckCircle2, iconColor: "text-emerald-500", value: fmtNum(completed),      label: tR("status.completed") },
+    { icon: Star,         iconColor: "text-amber-500",   value: stats?.avgRating?.toFixed(1) ?? "—", label: tCo("avgRating") },
   ];
 
   return (
@@ -156,7 +159,7 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-black">Good day, {user?.name ?? "Company"}!</h2>
+          <h2 className="text-2xl font-black">{tCo("goodDay", { name: user?.name ?? tCo("overview") })}</h2>
           <p className="text-sm text-muted-foreground mt-0.5 capitalize">{dateStr}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -173,11 +176,11 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
           </div>
           <Button variant="outline" size="sm" className="rounded-xl gap-2 h-9"
             onClick={() => window.open("/api/company/export", "_blank")}>
-            <Download className="h-3.5 w-3.5" /> Export CSV
+            <Download className="h-3.5 w-3.5" /> {tCo("export")}
           </Button>
           <Button size="sm" className="rounded-xl gap-2 h-9 shadow-sm shadow-primary/20"
             onClick={() => onNavigate("services")}>
-            <Plus className="h-4 w-4" /> Add service
+            <Plus className="h-4 w-4" /> {tCo("addService")}
           </Button>
         </div>
       </div>
