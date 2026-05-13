@@ -750,7 +750,7 @@ export default function HomePage() {
             <div className="flex flex-col gap-4">
               {featuredServices.map((service, i) => (
                 <FadeUp key={service.id} delay={i * 0.1}>
-                  <OrgCard service={service} />
+                  <OrgCard service={service} disableNavigation={isCompany} />
                 </FadeUp>
               ))}
             </div>

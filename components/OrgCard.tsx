@@ -19,9 +19,10 @@ interface OrgCardProps {
   service: ServiceRecord;
   initialFavorited?: boolean;
   onUnfavorited?: (serviceId: string) => void;
+  disableNavigation?: boolean;
 }
 
-export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardProps) {
+export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavigation = false }: OrgCardProps) {
   const t = useTranslations("service");
   const tc = useTranslations("common");
   const { user } = useAuth();
@@ -70,56 +71,58 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
     <article className="group flex bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-border dark:hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
 
       {/* ── Photo column ── */}
-      <Link
-        href={`/repair/${service.id}`}
-        className="relative shrink-0 w-48 md:w-60 bg-muted overflow-hidden"
-      >
-        {primaryImage ? (
-          <img
-            src={primaryImage}
-            alt={service.name}
-            onError={() => setImgError(true)}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
-            <Camera className="h-8 w-8" />
-            <span className="text-xs">No photo</span>
-          </div>
-        )}
-
-        {/* Photo count pill */}
-        {(service.images?.length ?? 0) > 1 && (
-          <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2 py-0.5 text-white text-[11px] font-medium">
-            <Camera className="h-2.5 w-2.5" />
-            {service.images?.length}
-          </div>
-        )}
-
-        {/* Favorite overlay button */}
-        <div className="absolute top-2.5 right-2.5">
-          {isClient ? (
-            <button
-              onClick={(e) => void toggleFavorite(e)}
-              disabled={favLoading}
-              className={`flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 ${
-                isFav
-                  ? "bg-rose-500 text-white shadow-sm"
-                  : "bg-black/30 text-white hover:bg-black/50"
-              }`}
-              title={isFav ? t("removeFavorite") : t("addFavorite")}
-            >
-              <Heart className={`h-3.5 w-3.5 ${isFav ? "fill-white" : ""}`} />
-            </button>
-          ) : !user ? (
-            <AuthModal trigger={
-              <button className="flex h-7 w-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors">
-                <Heart className="h-3.5 w-3.5" />
-              </button>
-            } />
-          ) : null}
+      {disableNavigation ? (
+        <div className="relative shrink-0 w-48 md:w-60 bg-muted overflow-hidden opacity-50">
+          {primaryImage ? (
+            <img src={primaryImage} alt={service.name} onError={() => setImgError(true)}
+              className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
+              <Camera className="h-8 w-8" />
+              <span className="text-xs">No photo</span>
+            </div>
+          )}
+          {(service.images?.length ?? 0) > 1 && (
+            <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2 py-0.5 text-white text-[11px] font-medium">
+              <Camera className="h-2.5 w-2.5" />
+              {service.images?.length}
+            </div>
+          )}
         </div>
-      </Link>
+      ) : (
+        <Link href={`/repair/${service.id}`} className="relative shrink-0 w-48 md:w-60 bg-muted overflow-hidden">
+          {primaryImage ? (
+            <img src={primaryImage} alt={service.name} onError={() => setImgError(true)}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
+              <Camera className="h-8 w-8" />
+              <span className="text-xs">No photo</span>
+            </div>
+          )}
+          {(service.images?.length ?? 0) > 1 && (
+            <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2 py-0.5 text-white text-[11px] font-medium">
+              <Camera className="h-2.5 w-2.5" />
+              {service.images?.length}
+            </div>
+          )}
+          <div className="absolute top-2.5 right-2.5">
+            {isClient ? (
+              <button onClick={(e) => void toggleFavorite(e)} disabled={favLoading}
+                className={`flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 ${isFav ? "bg-rose-500 text-white shadow-sm" : "bg-black/30 text-white hover:bg-black/50"}`}
+                title={isFav ? t("removeFavorite") : t("addFavorite")}>
+                <Heart className={`h-3.5 w-3.5 ${isFav ? "fill-white" : ""}`} />
+              </button>
+            ) : !user ? (
+              <AuthModal trigger={
+                <button className="flex h-7 w-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors">
+                  <Heart className="h-3.5 w-3.5" />
+                </button>
+              } />
+            ) : null}
+          </div>
+        </Link>
+      )}
 
       {/* ── Content column ── */}
       <div className="flex flex-1 min-w-0 flex-col p-4 md:p-5">
@@ -145,11 +148,17 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
         </div>
 
         {/* Row 2: Title */}
-        <Link href={`/repair/${service.id}`} className="block mb-1 group/title">
-          <h3 className="text-[15px] md:text-base font-semibold leading-snug line-clamp-2 group-hover/title:text-primary transition-colors">
+        {disableNavigation ? (
+          <h3 className="text-[15px] md:text-base font-semibold leading-snug line-clamp-2 mb-1 opacity-50">
             {service.name}
           </h3>
-        </Link>
+        ) : (
+          <Link href={`/repair/${service.id}`} className="block mb-1 group/title">
+            <h3 className="text-[15px] md:text-base font-semibold leading-snug line-clamp-2 group-hover/title:text-primary transition-colors">
+              {service.name}
+            </h3>
+          </Link>
+        )}
 
         {/* Row 3: Company */}
         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
@@ -213,11 +222,13 @@ export function OrgCard({ service, initialFavorited, onUnfavorited }: OrgCardPro
             </button>
 
             {/* Details */}
-            <Link href={`/repair/${service.id}`}>
-              <Button variant="outline" size="sm" className="h-8 gap-1 text-xs font-medium">
-                Details <ArrowRight className="h-3 w-3" />
-              </Button>
-            </Link>
+            {!disableNavigation && (
+              <Link href={`/repair/${service.id}`}>
+                <Button variant="outline" size="sm" className="h-8 gap-1 text-xs font-medium">
+                  Details <ArrowRight className="h-3 w-3" />
+                </Button>
+              </Link>
+            )}
 
             {/* Request */}
             {!user ? (
