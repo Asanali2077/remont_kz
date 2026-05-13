@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { RequestRecord } from "@/lib/types";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { formatBudget } from "@/lib/utils";
 import { toast } from "sonner";
@@ -49,9 +50,11 @@ function StarRow({ rating }: { rating: number }) {
 
 export default function OrderSummaryPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [req, setReq] = useState<RequestRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
+  const backHref = user?.role === "company" ? "/company/dashboard?tab=requests" : "/my-requests";
 
   useEffect(() => {
     api.getRequest(id)
@@ -75,8 +78,8 @@ export default function OrderSummaryPage() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <FileText className="h-16 w-16 text-muted-foreground/30" />
         <p className="text-muted-foreground">Заказ не найден</p>
-        <Link href="/my-requests">
-          <Button variant="outline">← Мои заказы</Button>
+        <Link href={backHref}>
+          <Button variant="outline">← Назад</Button>
         </Link>
       </div>
     );
@@ -94,10 +97,10 @@ export default function OrderSummaryPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 print:bg-white">
       {/* Toolbar — hidden on print */}
       <div className="print:hidden sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-border/40 px-4 py-3 flex items-center justify-between">
-        <Link href="/my-requests">
+        <Link href={backHref}>
           <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
             <ArrowLeft className="h-4 w-4" />
-            Мои заказы
+            {user?.role === "company" ? "Заказы" : "Мои заказы"}
           </Button>
         </Link>
         <Button onClick={handlePrint} size="sm" className="gap-2">

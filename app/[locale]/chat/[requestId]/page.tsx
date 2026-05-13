@@ -46,7 +46,7 @@ export default function ChatPage() {
         await api.markMessagesRead(requestId).catch(() => null);
       } catch {
         toast.error("Chat not found or no access");
-        router.push("/my-requests");
+        router.push("/chat");
       } finally {
         setLoading(false);
       }

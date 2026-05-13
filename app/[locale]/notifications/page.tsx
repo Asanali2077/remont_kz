@@ -12,6 +12,26 @@ import type { RequestRecord } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 import { buildNotifications, type NotifItem } from "@/lib/use-notifications";
 
+function buildCompanyNotifications(requests: RequestRecord[]): NotifItem[] {
+  return requests.map((r) => ({
+    id: r.id,
+    type: r.status === "completed" ? "completed" : r.status === "accepted" ? "accepted" : "offer" as NotifItem["type"],
+    title: r.status === "new"
+      ? `New request: ${r.service?.name ?? "Custom"}`
+      : r.status === "accepted"
+      ? `Request accepted: ${r.service?.name ?? "Custom"}`
+      : r.status === "in_progress"
+      ? `In progress: ${r.service?.name ?? "Custom"}`
+      : r.status === "completed"
+      ? `Completed: ${r.service?.name ?? "Custom"}`
+      : `Request cancelled`,
+    desc: r.client?.name ? `Client: ${r.client.name}` : r.description?.slice(0, 80) ?? "",
+    time: r.updatedAt,
+    href: r.status === "accepted" || r.status === "in_progress" ? `/chat/${r.id}` : "/company/dashboard?tab=requests",
+    read: r.status === "completed" || r.status === "cancelled",
+  })).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+}
+
 const ICONS = {
   offer:     { icon: Zap,            bg: "bg-amber-100 dark:bg-amber-950/40",  text: "text-amber-600" },
   accepted:  { icon: CheckCircle2,   bg: "bg-blue-100 dark:bg-blue-950/40",   text: "text-blue-600" },
@@ -32,10 +52,16 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (!user) return;
-    void api.getRequests().then(setRequests).catch(() => null).finally(() => setLoading(false));
+    const fetch = user.role === "company"
+      ? api.getRequests({ scope: "assigned" })
+      : api.getRequests();
+    void fetch.then(setRequests).catch(() => null).finally(() => setLoading(false));
   }, [user]);
 
-  const notifs = useMemo(() => buildNotifications(requests), [requests]);
+  const notifs = useMemo(
+    () => user?.role === "company" ? buildCompanyNotifications(requests) : buildNotifications(requests),
+    [requests, user]
+  );
   const unread = notifs.filter(n => !n.read).length;
 
   function markAllRead() {
