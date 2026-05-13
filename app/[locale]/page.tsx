@@ -363,11 +363,21 @@ function SectionNav() {
   );
 }
 
+/* ─── Wrapper that disables navigation for company users ─── */
+function ClientLink({ href, children, className = "" }: { href: string; children: React.ReactNode; className?: string }) {
+  const { user } = useAuth();
+  if (user?.role === "company") {
+    return <span className={`opacity-40 cursor-not-allowed pointer-events-none select-none ${className}`}>{children}</span>;
+  }
+  return <Link href={href} className={className}>{children}</Link>;
+}
+
 /* ══════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════ */
 export default function HomePage() {
   const { user } = useAuth();
+  const isCompany = user?.role === "company";
   const heroRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("home");
 
@@ -454,16 +464,16 @@ export default function HomePage() {
             {/* CTA buttons */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-wrap justify-center gap-3 mb-10">
-              <Link href="/repair">
+              <ClientLink href="/repair">
                 <Button size="lg" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base shadow-lg shadow-primary/20">
                   <Search className="h-4 w-4" /> Browse Services
                 </Button>
-              </Link>
-              <Link href="/companies">
+              </ClientLink>
+              <ClientLink href="/companies">
                 <Button size="lg" variant="outline" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base">
                   <Users className="h-4 w-4" /> View Companies
                 </Button>
-              </Link>
+              </ClientLink>
             </motion.div>
 
             {/* Trust row */}
@@ -497,12 +507,12 @@ export default function HomePage() {
                   { label: "Roofing",      href: "/repair?category=roofing",      icon: TrendingUp },
                   { label: "All services", href: "/repair",                       icon: ArrowRight },
                 ].map(({ label, href, icon: Icon }) => (
-                  <Link key={label} href={href}>
+                  <ClientLink key={label} href={href}>
                     <div className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-border/60 bg-card/60 hover:bg-card hover:border-primary/40 hover:text-primary transition-all duration-200 text-sm text-muted-foreground cursor-pointer">
                       <Icon className="h-3.5 w-3.5 shrink-0" />
                       {label}
                     </div>
-                  </Link>
+                  </ClientLink>
                 ))}
               </div>
             </motion.div>
@@ -684,7 +694,7 @@ export default function HomePage() {
               },
             ].map(({ icon: Icon, label, href, gradient, bg, border, desc, items, count }, i) => (
               <ScaleIn key={label} delay={i * 0.15}>
-                <Link href={href}>
+                <ClientLink href={href}>
                   <div className={`group relative rounded-3xl border p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer h-full flex flex-col ${bg} ${border} overflow-hidden`}>
                     {/* Glow */}
                     <div className={`absolute -top-12 -right-12 h-40 w-40 rounded-full bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-25 transition-opacity blur-2xl`} />
@@ -713,7 +723,7 @@ export default function HomePage() {
                       Browse all <ChevronRight className="h-4 w-4" />
                     </span>
                   </div>
-                </Link>
+                </ClientLink>
               </ScaleIn>
             ))}
           </div>
@@ -730,9 +740,11 @@ export default function HomePage() {
                   <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Top rated</p>
                   <h2 className="text-3xl md:text-4xl font-black tracking-tight">{t("featuredServices")}</h2>
                 </div>
-                <Link href="/repair" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-3 transition-all duration-200">
-                  {t("viewAll")} <ArrowRight className="h-4 w-4" />
-                </Link>
+                {!isCompany && (
+                  <Link href="/repair" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-3 transition-all duration-200">
+                    {t("viewAll")} <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
               </div>
             </FadeUp>
             <div className="flex flex-col gap-4">
@@ -742,23 +754,27 @@ export default function HomePage() {
                 </FadeUp>
               ))}
             </div>
-            <div className="mt-6 text-center sm:hidden">
-              <Link href="/repair">
-                <Button variant="outline" className="rounded-xl gap-2">
-                  {t("viewAll")} <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+            {!isCompany && (
+              <div className="mt-6 text-center sm:hidden">
+                <Link href="/repair">
+                  <Button variant="outline" className="rounded-xl gap-2">
+                    {t("viewAll")} <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mx-auto max-w-6xl w-full text-center">
             <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Top rated</p>
             <h2 className="text-4xl font-black tracking-tight mb-4">{t("featuredServices")}</h2>
-            <Link href="/repair">
-              <Button size="lg" className="rounded-xl gap-2 mt-4">
-                <Search className="h-4 w-4" /> Browse all services
-              </Button>
-            </Link>
+            {!isCompany && (
+              <Link href="/repair">
+                <Button size="lg" className="rounded-xl gap-2 mt-4">
+                  <Search className="h-4 w-4" /> Browse all services
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </section>
@@ -994,24 +1010,24 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center mb-10">
-              <Link href="/repair">
+              <ClientLink href="/repair">
                 <Button size="lg" variant="secondary" className="h-14 px-10 font-bold rounded-xl text-base shadow-xl">
                   {t("viewAll")}
                 </Button>
-              </Link>
+              </ClientLink>
               {!user ? (
                 <AuthModal defaultMode="register" trigger={
                   <Button size="lg" className="h-14 px-10 font-bold rounded-xl text-base bg-white text-primary hover:bg-white/95 shadow-xl">
                     {t("ctaButton")}
                   </Button>
                 } />
-              ) : (
+              ) : !isCompany ? (
                 <Link href="/repair">
                   <Button size="lg" className="h-14 px-10 font-bold rounded-xl text-base bg-white text-primary hover:bg-white/95 shadow-xl">
                     {t("ctaButton")}
                   </Button>
                 </Link>
-              )}
+              ) : null}
             </div>
 
             <div className="flex flex-wrap justify-center gap-6">
