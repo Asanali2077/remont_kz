@@ -4,6 +4,7 @@
   "description": "Remont.kz Repair Service - Next.js + TypeScript + Tailwind + shadcn/ui",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
