@@ -24,6 +24,8 @@ const CLIENT_EMAILS = [
   "dmitry@remont.kz",
   "zarina@remont.kz",
   "arman@remont.kz",
+  "aibek@remont.kz",
+  "nurgul@remont.kz",
 ];
 
 async function main() {
@@ -69,10 +71,12 @@ async function main() {
     prisma.user.create({ data: { email: "dmitry@remont.kz", password: pw, role: UserRole.CLIENT, name: "Dmitry K.", phone: "+7 705 200 0002", emailVerified: true } }),
     prisma.user.create({ data: { email: "zarina@remont.kz", password: pw, role: UserRole.CLIENT, name: "Zarina T.", phone: "+7 705 200 0003", emailVerified: true } }),
     prisma.user.create({ data: { email: "arman@remont.kz",  password: pw, role: UserRole.CLIENT, name: "Arman S.",  phone: "+7 705 200 0004", emailVerified: true } }),
+    prisma.user.create({ data: { email: "aibek@remont.kz",  password: pw, role: UserRole.CLIENT, name: "Aibek N.",  phone: "+7 705 200 0005", emailVerified: true } }),
+    prisma.user.create({ data: { email: "nurgul@remont.kz", password: pw, role: UserRole.CLIENT, name: "Nurgul B.", phone: "+7 705 200 0006", emailVerified: true } }),
   ]);
 
   const [stroymast, autocity, electroserv, plumbing, cleanpro, kazweld, roofpro, paintmaster, renovkz, techmaster] = companies;
-  const [asel, dmitry, zarina, arman] = clients;
+  const [asel, dmitry, zarina, arman, aibek, nurgul] = clients;
 
   /* ── Services ── */
   const services = await Promise.all([
@@ -328,9 +332,16 @@ async function main() {
     }}),
   ]);
 
-  const [svcRenovation, svcBathroom, svcBody, svcEngine, svcElectric, , svcPlumbing, , svcCleaning] = services;
+  const [svcRenovation, svcBathroom, svcBody, svcEngine, svcElectric, svcSmartHome,
+         svcPlumbing, svcPipes, svcCleaning, svcRegularClean,
+         svcGates, svcRailings, svcRoof, svcWaterproof,
+         svcPainting, svcFacade, svcKitchen, svcOffice,
+         svcAppliance, svcFurniture] = services;
 
-  /* ── Requests (completed with reviews) ── */
+  /* ════════════════════════════════════════════
+     COMPLETED requests — with reviews
+  ════════════════════════════════════════════ */
+
   await prisma.request.create({ data: {
     clientId: asel.id, serviceId: svcRenovation.id, companyId: stroymast.id,
     description: "Need full renovation of 2-bedroom apartment, ~60 sqm. Demolition + rough work + finish. Budget is flexible for quality work.",
@@ -364,50 +375,277 @@ async function main() {
     companyReply: "Thank you Arman! Emergency calls are our specialty. We're glad we could help quickly!",
   }});
 
-  /* ── Active requests ── */
-  const req5 = await prisma.request.create({ data: {
+  await prisma.request.create({ data: {
+    clientId: arman.id, serviceId: svcCleaning.id, companyId: cleanpro.id,
+    description: "Need post-renovation cleaning for 2-bedroom apartment 65 sqm. Renovation just finished.",
+    category: ServiceCategory.CLEANING, city: "Almaty", status: RequestStatus.COMPLETED,
+    budgetFrom: 25000, budgetTo: 50000,
+    rating: 5, review: "CleanPro did an incredible job. Apartment was spotless after 4 hours. Worth every penny!",
+    companyReply: "Thank you, Arman! It was a pleasure. Don't hesitate to call us after your next renovation!",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: aibek.id, serviceId: svcGates.id, companyId: kazweld.id,
+    description: "Need a sliding metal gate for private house entrance, width 4 meters. Prefer dark grey powder coating.",
+    category: ServiceCategory.WELDING, city: "Almaty", status: RequestStatus.COMPLETED,
+    budgetFrom: 120000, budgetTo: 250000,
+    rating: 5, review: "KazWeld made an excellent gate — sturdy, smooth, looks great. Delivered and installed in 10 days as promised. Very satisfied.",
+    companyReply: "Thank you Aibek! Enjoy your new gate. We offer a 2-year warranty on all metal structures.",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: nurgul.id, serviceId: svcRoof.id, companyId: roofpro.id,
+    description: "Roof repair on private house. Metal tile started leaking near the chimney area after heavy rains. Need inspection and repair.",
+    category: ServiceCategory.ROOFING, city: "Astana", status: RequestStatus.COMPLETED,
+    budgetFrom: 40000, budgetTo: 100000,
+    rating: 4, review: "RoofPro found and fixed two leak points. No more leaks after the last rain. Reasonable price. Slightly difficult to reach initially but work quality is good.",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: asel.id, serviceId: svcPainting.id, companyId: paintmaster.id,
+    description: "Paint 3 bedrooms and hallway. Total ~90 sqm of walls and ceilings. Walls — warm white, ceiling — white. Surface prep needed.",
+    category: ServiceCategory.PAINTING, city: "Almaty", status: RequestStatus.COMPLETED,
+    budgetFrom: 60000, budgetTo: 120000,
+    rating: 5, review: "PaintMaster team worked quickly and very cleanly. They covered all furniture and floors. The result is perfect — smooth, even coat. Will call again.",
+    companyReply: "Thank you Asel! We're happy you liked the result. Call us for your facade next time!",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: dmitry.id, serviceId: svcKitchen.id, companyId: renovkz.id,
+    description: "Full kitchen renovation in new apartment. ~12 sqm, need to tile, install cabinets, connect all appliances. Modern minimalist style.",
+    category: ServiceCategory.RENOVATION, city: "Shymkent", status: RequestStatus.COMPLETED,
+    budgetFrom: 200000, budgetTo: 400000,
+    rating: 5, review: "RenovKZ did a brilliant kitchen renovation. Design advice was free, materials quality is excellent. The kitchen looks like something from a magazine.",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: zarina.id, serviceId: svcAppliance.id, companyId: techmaster.id,
+    description: "Refrigerator Samsung not cooling. Makes noise at night. Model RT38K5400S8.",
+    category: ServiceCategory.OTHER, city: "Almaty", status: RequestStatus.COMPLETED,
+    budgetFrom: 10000, budgetTo: 30000,
+    rating: 4, review: "Technician arrived next day, diagnosed and fixed in 2 hours. Fair price. Only minus — had to wait for spare part 2 days.",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: aibek.id, serviceId: svcEngine.id, companyId: autocity.id,
+    description: "Kia Sportage 2019 — check engine light on, car vibrates at idle. Need full diagnostics.",
+    category: ServiceCategory.AUTOMOBILES, city: "Astana", status: RequestStatus.COMPLETED,
+    budgetFrom: 20000, budgetTo: 60000,
+    rating: 5, review: "Quick diagnosis, found the issue immediately — ignition coil on cylinder 3. Replaced on the spot. Car runs perfectly now. Great team!",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: nurgul.id, serviceId: svcSmartHome.id, companyId: electroserv.id,
+    description: "Install security cameras (4 outdoor) and smart doorbell for private home. Need remote monitoring on phone.",
+    category: ServiceCategory.ELECTRICAL, city: "Almaty", status: RequestStatus.COMPLETED,
+    budgetFrom: 80000, budgetTo: 150000,
+    rating: 5, review: "ElectroServ installed everything perfectly. App works great, picture is clear even at night. They also set up motion alerts. Highly recommend!",
+  }});
+
+  await prisma.request.create({ data: {
+    clientId: arman.id, serviceId: svcPipes.id, companyId: plumbing.id,
+    description: "Replace all hot and cold water pipes in 2-bedroom apartment. Old metal pipes, need to switch to polypropylene.",
+    category: ServiceCategory.PLUMBING, city: "Astana", status: RequestStatus.COMPLETED,
+    budgetFrom: 80000, budgetTo: 180000,
+    rating: 5, review: "PlumbingKZ replaced all pipes in 2 days with no mess. Hid everything in the walls nicely. Pressure is great, no leaks. Excellent work!",
+  }});
+
+  /* ════════════════════════════════════════════
+     IN_PROGRESS requests
+  ════════════════════════════════════════════ */
+
+  const reqInProgress1 = await prisma.request.create({ data: {
     clientId: asel.id, serviceId: svcBathroom.id, companyId: stroymast.id,
     description: "Bathroom renovation: replace all tiles, new shower, toilet and sink. Approximately 5 sqm.",
     category: ServiceCategory.REAL_ESTATE, city: "Almaty",
     status: RequestStatus.IN_PROGRESS, budgetFrom: 120000, budgetTo: 250000,
   }});
 
-  await prisma.request.create({ data: {
+  const reqInProgress2 = await prisma.request.create({ data: {
+    clientId: nurgul.id, serviceId: svcWaterproof.id, companyId: roofpro.id,
+    description: "Waterproofing of flat roof on our 3-storey building. About 400 sqm. Started leaking in 3 spots last winter.",
+    category: ServiceCategory.ROOFING, city: "Astana",
+    status: RequestStatus.IN_PROGRESS, budgetFrom: 300000, budgetTo: 600000,
+  }});
+
+  const reqInProgress3 = await prisma.request.create({ data: {
+    clientId: aibek.id, serviceId: svcFacade.id, companyId: paintmaster.id,
+    description: "Paint facade of private house, 2 floors, approximately 200 sqm. Current paint is peeling. Need surface prep and 2 coats.",
+    category: ServiceCategory.PAINTING, city: "Almaty",
+    status: RequestStatus.IN_PROGRESS, budgetFrom: 80000, budgetTo: 200000,
+  }});
+
+  const reqInProgress4 = await prisma.request.create({ data: {
+    clientId: dmitry.id, serviceId: svcOffice.id, companyId: renovkz.id,
+    description: "Office renovation, 120 sqm open space. Need stretch ceiling, new flooring (laminate), partition wall for meeting room, full repaint.",
+    category: ServiceCategory.RENOVATION, city: "Shymkent",
+    status: RequestStatus.IN_PROGRESS, budgetFrom: 500000, budgetTo: 900000,
+  }});
+
+  /* ════════════════════════════════════════════
+     ACCEPTED requests
+  ════════════════════════════════════════════ */
+
+  const reqAccepted1 = await prisma.request.create({ data: {
+    clientId: zarina.id, serviceId: svcRailings.id, companyId: kazweld.id,
+    description: "Need metal railings for staircase in private house. 2 flights, total ~14 meters. Want minimalist black design.",
+    category: ServiceCategory.WELDING, city: "Almaty",
+    status: RequestStatus.ACCEPTED, budgetFrom: 60000, budgetTo: 150000,
+  }});
+
+  const reqAccepted2 = await prisma.request.create({ data: {
+    clientId: arman.id, serviceId: svcRegularClean.id, companyId: cleanpro.id,
+    description: "Office cleaning 2 times per week. Office 80 sqm, 6 workstations, kitchen, bathroom. Need morning service before 9:00.",
+    category: ServiceCategory.CLEANING, city: "Almaty",
+    status: RequestStatus.ACCEPTED, budgetFrom: 15000, budgetTo: 25000,
+  }});
+
+  const reqAccepted3 = await prisma.request.create({ data: {
+    clientId: aibek.id, serviceId: svcFurniture.id, companyId: techmaster.id,
+    description: "Assemble large wardrobe from IKEA PAX system (3 sections, 2.4m tall) and mount 5 shelves in hallway.",
+    category: ServiceCategory.OTHER, city: "Almaty",
+    status: RequestStatus.ACCEPTED, budgetFrom: 12000, budgetTo: 25000,
+  }});
+
+  /* ════════════════════════════════════════════
+     NEW requests — open for offers
+  ════════════════════════════════════════════ */
+
+  const reqNew1 = await prisma.request.create({ data: {
     clientId: dmitry.id,
-    description: "Need appliance repair — washing machine Bosch Serie 4 doesn't spin, error E18.",
+    description: "Need appliance repair — washing machine Bosch Serie 4 doesn't spin, error E18. Urgent, have kids at home.",
     category: ServiceCategory.OTHER, city: "Almaty",
     status: RequestStatus.NEW, budgetFrom: 15000, budgetTo: 40000,
     expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
   }});
 
-  await prisma.request.create({ data: {
+  const reqNew2 = await prisma.request.create({ data: {
     clientId: zarina.id,
-    description: "Need to paint 3 rooms in new apartment. Walls only, ~80 sqm total. Light colors preferred.",
+    description: "Need to paint 3 rooms in new apartment. Walls only, ~80 sqm total. Light warm colors preferred. Can start next week.",
     category: ServiceCategory.PAINTING, city: "Almaty",
+    status: RequestStatus.NEW, budgetFrom: 30000, budgetTo: 80000,
+    expiresAt: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew3 = await prisma.request.create({ data: {
+    clientId: nurgul.id,
+    description: "Leaking tap in kitchen and one in bathroom. Also need to replace toilet flush mechanism. Astana, Esil district.",
+    category: ServiceCategory.PLUMBING, city: "Astana",
+    status: RequestStatus.NEW, budgetFrom: 8000, budgetTo: 25000,
+    expiresAt: new Date(Date.now() + 13 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew4 = await prisma.request.create({ data: {
+    clientId: asel.id,
+    description: "Install 5 chandeliers, 10 LED spots, and connect 2 new outlets in living room. Wiring is already pulled.",
+    category: ServiceCategory.ELECTRICAL, city: "Almaty",
+    status: RequestStatus.NEW, budgetFrom: 20000, budgetTo: 50000,
+    expiresAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew5 = await prisma.request.create({ data: {
+    clientId: arman.id,
+    description: "Looking for a team to do full renovation of 1-bedroom apartment 42 sqm. Blank slate after demolition. Need rough + finish work.",
+    category: ServiceCategory.REAL_ESTATE, city: "Almaty",
+    status: RequestStatus.NEW, budgetFrom: 200000, budgetTo: 400000,
+    expiresAt: new Date(Date.now() + 11 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew6 = await prisma.request.create({ data: {
+    clientId: aibek.id,
+    description: "Deep cleaning of 3-room apartment 85 sqm after tenants moved out. Includes windows, oven, bathroom tiles.",
+    category: ServiceCategory.CLEANING, city: "Almaty",
+    status: RequestStatus.NEW, budgetFrom: 15000, budgetTo: 35000,
+    expiresAt: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew7 = await prisma.request.create({ data: {
+    clientId: dmitry.id,
+    description: "Need metal stairs fabricated and installed for second floor of private house. Width 90 cm, height 3 m. Open riser style preferred.",
+    category: ServiceCategory.WELDING, city: "Almaty",
+    status: RequestStatus.NEW, budgetFrom: 150000, budgetTo: 350000,
+    expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew8 = await prisma.request.create({ data: {
+    clientId: nurgul.id,
+    description: "Need kitchen renovation in our Shymkent apartment. 10 sqm, want a new layout with island if possible. All materials flexible.",
+    category: ServiceCategory.RENOVATION, city: "Shymkent",
+    status: RequestStatus.NEW, budgetFrom: 250000, budgetTo: 600000,
+    expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew9 = await prisma.request.create({ data: {
+    clientId: zarina.id,
+    description: "Auto repair — Toyota RAV4 2020 suspension noise at front left wheel. Also need oil and filter change.",
+    category: ServiceCategory.AUTOMOBILES, city: "Astana",
+    status: RequestStatus.NEW, budgetFrom: 25000, budgetTo: 70000,
+    expiresAt: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
+  }});
+
+  const reqNew10 = await prisma.request.create({ data: {
+    clientId: arman.id,
+    description: "Roof inspection and minor repairs for private house in Astana. After last winter some tiles shifted, worried about spring melt.",
+    category: ServiceCategory.ROOFING, city: "Astana",
     status: RequestStatus.NEW, budgetFrom: 30000, budgetTo: 80000,
     expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
   }});
 
-  await prisma.request.create({ data: {
-    clientId: arman.id, serviceId: svcCleaning.id, companyId: cleanpro.id,
-    description: "Need post-renovation cleaning for 2-bedroom apartment 65 sqm. Renovation just finished.",
-    category: ServiceCategory.CLEANING, city: "Almaty",
-    status: RequestStatus.COMPLETED, budgetFrom: 25000, budgetTo: 50000,
-    rating: 5, review: "CleanPro did an incredible job. Apartment was spotless after 4 hours. Worth every penny!",
-  }});
+  /* ── Offers on NEW requests ── */
+  await prisma.requestOffer.createMany({ data: [
+    { requestId: reqNew1.id, companyId: techmaster.id, price: 18000, comment: "We can come tomorrow morning. Bosch E18 is usually a pump filter blockage — quick fix. Price includes parts if needed." },
+    { requestId: reqNew2.id, companyId: paintmaster.id, price: 55000, comment: "Ready to start next Monday. Price includes primer, 2 coats of paint, all materials. Surface prep included." },
+    { requestId: reqNew3.id, companyId: plumbing.id, price: 12000, comment: "We do all three jobs in one visit. Parts included. Can come tomorrow or day after." },
+    { requestId: reqNew3.id, companyId: stroymast.id, price: 15000, comment: "Our plumber is available this week. We'll check all connections while we're there at no extra charge." },
+    { requestId: reqNew4.id, companyId: electroserv.id, price: 28000, comment: "Straightforward job. We'll bring all fittings needed. Can do it on Saturday if convenient." },
+    { requestId: reqNew5.id, companyId: stroymast.id, price: 280000, comment: "We specialize in exactly this type of work. Free on-site estimate this week. Price may adjust slightly after inspection." },
+    { requestId: reqNew6.id, companyId: cleanpro.id, price: 22000, comment: "Post-tenancy specialist team. 4-5 hours, eco products. Oven and fridge deep clean included." },
+    { requestId: reqNew7.id, companyId: kazweld.id, price: 220000, comment: "We'll draw up a design sketch for you first. Open riser stairs with metal handrails is our signature work." },
+    { requestId: reqNew8.id, companyId: renovkz.id, price: 380000, comment: "We have a great island kitchen project we just finished — can show photos. Free design consultation included." },
+    { requestId: reqNew9.id, companyId: autocity.id, price: 35000, comment: "Likely wheel bearing or stabilizer bar link — we'll know after lifting the car. Oil change included in price." },
+    { requestId: reqNew10.id, companyId: roofpro.id, price: 45000, comment: "We'll do full inspection and fix all problem areas. Any shifted tiles reseated and sealed. Photo report provided." },
+  ]});
 
   /* ── Update service ratings ── */
-  await prisma.service.update({ where: { id: svcRenovation.id }, data: { rating: 4.8 } });
-  await prisma.service.update({ where: { id: svcBody.id },       data: { rating: 4.9 } });
-  await prisma.service.update({ where: { id: svcElectric.id },   data: { rating: 4.7 } });
-  await prisma.service.update({ where: { id: svcPlumbing.id },   data: { rating: 4.9 } });
-  await prisma.service.update({ where: { id: svcCleaning.id },   data: { rating: 4.8 } });
+  await Promise.all([
+    prisma.service.update({ where: { id: svcRenovation.id }, data: { rating: 4.8 } }),
+    prisma.service.update({ where: { id: svcBathroom.id },   data: { rating: 4.9 } }),
+    prisma.service.update({ where: { id: svcBody.id },       data: { rating: 4.9 } }),
+    prisma.service.update({ where: { id: svcEngine.id },     data: { rating: 4.8 } }),
+    prisma.service.update({ where: { id: svcElectric.id },   data: { rating: 4.7 } }),
+    prisma.service.update({ where: { id: svcSmartHome.id },  data: { rating: 4.9 } }),
+    prisma.service.update({ where: { id: svcPlumbing.id },   data: { rating: 4.9 } }),
+    prisma.service.update({ where: { id: svcPipes.id },      data: { rating: 4.8 } }),
+    prisma.service.update({ where: { id: svcCleaning.id },   data: { rating: 4.8 } }),
+    prisma.service.update({ where: { id: svcRegularClean.id },data: { rating: 4.7 } }),
+    prisma.service.update({ where: { id: svcGates.id },      data: { rating: 4.8 } }),
+    prisma.service.update({ where: { id: svcRailings.id },   data: { rating: 4.6 } }),
+    prisma.service.update({ where: { id: svcKitchen.id },    data: { rating: 4.8 } }),
+    prisma.service.update({ where: { id: svcPainting.id },   data: { rating: 4.8 } }),
+    prisma.service.update({ where: { id: svcAppliance.id },  data: { rating: 4.5 } }),
+  ]);
 
-  /* ── Chat messages ── */
+  /* ── Chat messages for in-progress requests ── */
   await prisma.message.createMany({ data: [
-    { requestId: req5.id, senderId: stroymast.id, receiverId: asel.id,     content: "Hello Asel! We've started work on your bathroom. Tiles have been removed, starting waterproofing tomorrow." },
-    { requestId: req5.id, senderId: asel.id,      receiverId: stroymast.id, content: "Great, thank you! Can we choose the new tiles this week?" },
-    { requestId: req5.id, senderId: stroymast.id, receiverId: asel.id,     content: "Of course! We can visit the showroom on Thursday at 11:00. Does that work?" },
+    { requestId: reqInProgress1.id, senderId: stroymast.id, receiverId: asel.id,     content: "Hello Asel! We've started work on your bathroom. Tiles have been removed, starting waterproofing tomorrow." },
+    { requestId: reqInProgress1.id, senderId: asel.id,      receiverId: stroymast.id, content: "Great, thank you! Can we choose the new tiles this week?" },
+    { requestId: reqInProgress1.id, senderId: stroymast.id, receiverId: asel.id,     content: "Of course! We can visit the showroom on Thursday at 11:00. Does that work?" },
+    { requestId: reqInProgress2.id, senderId: roofpro.id,   receiverId: nurgul.id,   content: "Nurgul, we've applied the first layer of waterproofing membrane. Will continue tomorrow after it cures." },
+    { requestId: reqInProgress2.id, senderId: nurgul.id,    receiverId: roofpro.id,  content: "How many more days do you estimate?" },
+    { requestId: reqInProgress2.id, senderId: roofpro.id,   receiverId: nurgul.id,   content: "3 more working days. We're also adding an extra layer near the drainage points as a precaution." },
+    { requestId: reqInProgress3.id, senderId: paintmaster.id, receiverId: aibek.id,  content: "Aibek, we've finished sanding and priming the facade. Starting the first color coat tomorrow." },
+    { requestId: reqInProgress4.id, senderId: renovkz.id,   receiverId: dmitry.id,   content: "Dmitry, stretch ceiling installed. Starting flooring tomorrow. The partition wall frame is also done." },
+    { requestId: reqInProgress4.id, senderId: dmitry.id,    receiverId: renovkz.id,  content: "Looks great on the photos! When do you expect to finish?" },
+    { requestId: reqInProgress4.id, senderId: renovkz.id,   receiverId: dmitry.id,   content: "5 more working days for flooring and painting, then 2 days for final touches. On schedule!" },
+  ]});
+
+  /* ── Chat for accepted requests ── */
+  await prisma.message.createMany({ data: [
+    { requestId: reqAccepted1.id, senderId: kazweld.id,  receiverId: zarina.id,  content: "Hi Zarina! We've confirmed your order. Our measurer will come Thursday 10:00-12:00 to take exact measurements. Please be home." },
+    { requestId: reqAccepted1.id, senderId: zarina.id,   receiverId: kazweld.id, content: "Perfect, I'll be home Thursday morning. Should I prepare anything?" },
+    { requestId: reqAccepted1.id, senderId: kazweld.id,  receiverId: zarina.id,  content: "Just make sure the staircase area is accessible. Bring any inspiration photos if you have them!" },
+    { requestId: reqAccepted2.id, senderId: cleanpro.id, receiverId: arman.id,   content: "Arman, first cleaning session confirmed for Monday 8:00. Our team of 2 will arrive. Please leave access with reception." },
+    { requestId: reqAccepted3.id, senderId: techmaster.id, receiverId: aibek.id, content: "Hi Aibek! We're scheduled for Saturday 10:00. Please have the IKEA boxes unpacked and parts sorted if possible — saves time." },
   ]});
 
   /* ── Admin ── */
@@ -421,11 +659,13 @@ async function main() {
     },
   });
 
+  const totalRequests = 13 + 4 + 3 + 10; // completed + in_progress + accepted + new
   console.log("✅ Seed complete!");
   console.log(`   Companies: ${companies.length} (all 10 categories covered)`);
   console.log(`   Clients:   ${clients.length}`);
   console.log(`   Services:  ${services.length}`);
-  console.log(`   Requests:  8`);
+  console.log(`   Requests:  ${totalRequests} (13 completed, 4 in-progress, 3 accepted, 10 new)`);
+  console.log(`   Offers:    11 offers on open requests`);
   console.log("\nDemo accounts (password: password123):");
   console.log("  stroymast@remont.kz   — StroiMaster    (REAL_ESTATE)");
   console.log("  autocity@remont.kz    — AutoCity KZ    (AUTOMOBILES)");
@@ -438,8 +678,7 @@ async function main() {
   console.log("  renovkz@remont.kz     — RenovKZ        (RENOVATION)");
   console.log("  techmaster@remont.kz  — TechMaster KZ  (OTHER)");
   console.log("  admin@remont.kz       — Admin          (password: Admin123!)");
-  console.log("  asel@remont.kz        — Client");
-  console.log("  dmitry@remont.kz      — Client");
+  console.log("  asel@remont.kz / dmitry@remont.kz / zarina@remont.kz / arman@remont.kz / aibek@remont.kz / nurgul@remont.kz — Clients");
 }
 
 main()
