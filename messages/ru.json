@@ -72,7 +72,9 @@
     "cabinet": "Кабинет",
     "overview": "Обзор",
     "calendar": "Календарь",
-    "security": "Безопасность"
+    "security": "Безопасность",
+    "noNewNotifications": "Нет новых уведомлений",
+    "searchBtn": "Поиск…"
   },
   "auth": {
     "welcomeBack": "С возвращением",

@@ -72,7 +72,9 @@
     "cabinet": "Cabinet",
     "overview": "Overview",
     "calendar": "Calendar",
-    "security": "Security"
+    "security": "Security",
+    "noNewNotifications": "No new notifications",
+    "searchBtn": "Search…"
   },
   "auth": {
     "welcomeBack": "Welcome back",

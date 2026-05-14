@@ -19,6 +19,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 /* ── Notification bell ── */
 function NotificationBell({ role }: { role: "client" | "company" }) {
+  const t = useTranslations("nav");
   const { items, unreadCount, markRead } = useNotifications(role);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -50,11 +51,11 @@ function NotificationBell({ role }: { role: "client" | "company" }) {
       {open && (
         <div className="absolute right-0 top-full mt-2 w-80 bg-popover border border-border rounded-xl shadow-lg z-50 overflow-hidden">
           <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
-            <span className="text-sm font-semibold">Notifications</span>
-            <Link href={role === "company" ? "/company/dashboard?tab=notifications" : "/my-requests?tab=notifications"} onClick={() => setOpen(false)} className="text-xs text-primary hover:underline">See all</Link>
+            <span className="text-sm font-semibold">{t("notifications")}</span>
+            <Link href={role === "company" ? "/company/dashboard?tab=notifications" : "/my-requests?tab=notifications"} onClick={() => setOpen(false)} className="text-xs text-primary hover:underline">{t("seeAll")}</Link>
           </div>
           {items.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground">No new notifications</div>
+            <div className="p-6 text-center text-sm text-muted-foreground">{t("noNewNotifications")}</div>
           ) : (
             <div className="divide-y max-h-72 overflow-y-auto">
               {items.slice(0, 6).map((item) => (
@@ -195,7 +196,7 @@ export function MainNavbar() {
           <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)}
             className="h-10 gap-2.5 px-4 rounded-xl border border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/60 transition-colors hidden lg:flex">
             <Search className="h-4 w-4" />
-            <span className="text-sm font-medium">Search…</span>
+            <span className="text-sm font-medium">{t("searchBtn")}</span>
           </Button>
           <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} className="h-9 w-9 lg:hidden">
             <Search className="h-4 w-4" />

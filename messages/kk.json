@@ -72,7 +72,9 @@
     "cabinet": "Кабинет",
     "overview": "Шолу",
     "calendar": "Күнтізбе",
-    "security": "Қауіпсіздік"
+    "security": "Қауіпсіздік",
+    "noNewNotifications": "Жаңа хабарландыру жоқ",
+    "searchBtn": "Іздеу…"
   },
   "auth": {
     "welcomeBack": "Қош келдіңіз",
