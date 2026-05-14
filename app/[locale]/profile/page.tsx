@@ -9,14 +9,16 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Camera, MapPin } from "lucide-react";
+import { Loader2, Camera, MapPin, Trash2 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { SettingsSidebar } from "@/components/SettingsSidebar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function ProfilePage() {
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
-  const { user, loading: authLoading, updateUser } = useAuth();
+  const tNav = useTranslations("nav");
+  const { user, loading: authLoading, updateUser, logout } = useAuth();
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -29,6 +31,9 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => { if (!authLoading && !user) router.push("/"); }, [user, authLoading, router]);
 
@@ -54,6 +59,20 @@ export default function ProfilePage() {
       setAvatarUrl(url); toast.success(t("photoUpdated"));
     } catch { toast.error(t("photoFormats")); setAvatarPreview(null); }
     finally { setUploading(false); }
+  }
+
+  async function handleDeleteAccount() {
+    if (!deletePassword) return;
+    setDeleteLoading(true);
+    try {
+      await api.deleteAccount(deletePassword);
+      logout();
+      router.push("/");
+    } catch {
+      toast.error(tNav("deleteAccountPasswordLabel"));
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   async function handleSave() {
@@ -143,6 +162,15 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* Danger zone */}
+            <div className="bg-card border border-red-200 dark:border-red-900/50 rounded-2xl p-6">
+              <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide mb-1">{tNav("deleteAccount")}</h2>
+              <p className="text-sm text-muted-foreground mb-4">{tNav("deleteAccountConfirmDesc")}</p>
+              <Button variant="destructive" size="sm" className="gap-2 rounded-xl" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="h-4 w-4" /> {tNav("deleteAccount")}
+              </Button>
+            </div>
+
             {/* Footer row */}
             <div className="flex items-center justify-between">
               {createdAt && (
@@ -158,6 +186,34 @@ export default function ProfilePage() {
         </div>
       </div>
       <Footer />
+
+      <Dialog open={deleteOpen} onOpenChange={(o) => { setDeleteOpen(o); if (!o) setDeletePassword(""); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 dark:text-red-400">{tNav("deleteAccountConfirmTitle")}</DialogTitle>
+            <DialogDescription>{tNav("deleteAccountConfirmDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <label className="text-sm font-medium">{tNav("deleteAccountPasswordLabel")}</label>
+            <Input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && void handleDeleteAccount()}
+              className="border-red-200 focus-visible:ring-red-400"
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setDeleteOpen(false); setDeletePassword(""); }}>
+              {tNav("deleteAccountCancel")}
+            </Button>
+            <Button variant="destructive" onClick={() => void handleDeleteAccount()} disabled={!deletePassword || deleteLoading}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : tNav("deleteAccountConfirmBtn")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
