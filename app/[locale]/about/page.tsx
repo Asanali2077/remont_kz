@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { motion, useInView } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
@@ -226,6 +227,8 @@ function ArchDiagram() {
 
 export default function AboutPage() {
   const t = useTranslations("about");
+  const { user } = useAuth();
+  const isCompany = user?.role === "company";
 
   const stats = t.raw("stats") as { value: string; label: string }[];
   const tech = t.raw("tech") as { label: string; desc: string }[];
@@ -273,19 +276,21 @@ export default function AboutPage() {
           {t("heroDesc")}
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.35 }}
-          className="flex flex-wrap justify-center gap-3">
-          <Link href="/repair">
-            <Button size="lg" className="rounded-xl gap-2 h-12 px-7 font-semibold">
-              <Globe className="h-4 w-4" /> {t("browseServices")}
-            </Button>
-          </Link>
-          <Link href="/companies">
-            <Button size="lg" variant="outline" className="rounded-xl gap-2 h-12 px-7 font-semibold">
-              <Users className="h-4 w-4" /> {t("viewCompanies")}
-            </Button>
-          </Link>
-        </motion.div>
+        {!isCompany && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.35 }}
+            className="flex flex-wrap justify-center gap-3">
+            <Link href="/repair">
+              <Button size="lg" className="rounded-xl gap-2 h-12 px-7 font-semibold">
+                <Globe className="h-4 w-4" /> {t("browseServices")}
+              </Button>
+            </Link>
+            <Link href="/companies">
+              <Button size="lg" variant="outline" className="rounded-xl gap-2 h-12 px-7 font-semibold">
+                <Users className="h-4 w-4" /> {t("viewCompanies")}
+              </Button>
+            </Link>
+          </motion.div>
+        )}
       </section>
 
       {/* ── Stats bar ── */}
@@ -463,18 +468,20 @@ export default function AboutPage() {
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">{t("ctaTitle")}</h2>
             <p className="text-muted-foreground text-lg mb-8">{t("ctaDesc")}</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/repair">
-                <Button size="lg" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base shadow-lg shadow-primary/20">
-                  {t("browseServices")} <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/guide">
-                <Button size="lg" variant="outline" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base">
-                  {t("howItWorks")}
-                </Button>
-              </Link>
-            </div>
+            {!isCompany && (
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link href="/repair">
+                  <Button size="lg" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base shadow-lg shadow-primary/20">
+                    {t("browseServices")} <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/guide">
+                  <Button size="lg" variant="outline" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base">
+                    {t("howItWorks")}
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </FadeUp>
       </section>

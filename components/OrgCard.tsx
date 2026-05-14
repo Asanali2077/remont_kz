@@ -208,18 +208,20 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Compare */}
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(service); }}
-              title={inCompare ? t("compare") : t("compare")}
-              className={`h-8 w-8 flex items-center justify-center rounded-xl border transition-all duration-150 ${
-                inCompare
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5"
-              }`}
-            >
-              <GitCompare className="h-3.5 w-3.5" />
-            </button>
+            {/* Compare — hidden for company accounts */}
+            {user?.role !== "company" && (
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(service); }}
+                title={inCompare ? t("compare") : t("compare")}
+                className={`h-8 w-8 flex items-center justify-center rounded-xl border transition-all duration-150 ${
+                  inCompare
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5"
+                }`}
+              >
+                <GitCompare className="h-3.5 w-3.5" />
+              </button>
+            )}
 
             {/* Details */}
             {!disableNavigation && (
