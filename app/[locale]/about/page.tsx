@@ -107,15 +107,15 @@ const TECH_COLORS = [
 
 const FEATURE_ICONS = [Users, MessageSquare, Star, CheckCircle2, Shield, MapPin, Zap, Globe, Database, Code2, Lock, Mail];
 
-/* Animated flow dot on a path */
+/* Animated flow dot — extends beyond connector bounds to dive under adjacent cards */
 function FlowDot({ delay = 0, duration = 2, color = "bg-primary" }: { delay?: number; duration?: number; color?: string }) {
   return (
     <motion.div
       className={`absolute h-2 w-2 rounded-full ${color} shadow-lg`}
-      initial={{ top: "0%", opacity: 0 }}
-      animate={{ top: ["0%", "100%", "100%", "0%"], opacity: [0, 1, 1, 0] }}
+      initial={{ top: "-50%", opacity: 0 }}
+      animate={{ top: ["-50%", "150%", "150%", "-50%"], opacity: [0, 1, 1, 0] }}
       transition={{ duration, delay, repeat: Infinity, ease: "linear" }}
-      style={{ left: "calc(50% - 4px)" }}
+      style={{ left: "calc(50% - 4px)", zIndex: 1 }}
     />
   );
 }
@@ -137,7 +137,7 @@ function ArchDiagram() {
       initial={{ opacity: 0, scale: 0.85 }}
       animate={inView ? { opacity: 1, scale: 1 } : {}}
       transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative rounded-2xl border-2 ${color} p-5 text-center hover:shadow-xl transition-shadow duration-300 bg-card`}
+      className={`relative z-10 rounded-2xl border-2 ${color} p-5 text-center hover:shadow-xl transition-shadow duration-300 bg-card`}
     >
       <div className="flex justify-center mb-2">{icon}</div>
       <p className="font-bold text-sm">{title}</p>
@@ -152,7 +152,7 @@ function ArchDiagram() {
         initial={{ opacity: 0, y: -20 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
-        className="rounded-2xl border-2 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 p-5 mb-0 text-center"
+        className="relative z-10 rounded-2xl border-2 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 p-5 mb-0 text-center"
       >
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ function ArchDiagram() {
       </motion.div>
 
       {/* Connector: Browser → Next.js */}
-      <div className="relative h-10 flex items-center justify-center mx-auto w-0.5 bg-border/60">
+      <div className="relative z-0 overflow-visible h-10 flex items-center justify-center mx-auto w-0.5 bg-border/60">
         {inView && <FlowDot delay={0.2} duration={1.5} color="bg-blue-500" />}
         {inView && <FlowDot delay={0.9} duration={1.5} color="bg-blue-400" />}
         <span className="absolute right-3 text-[10px] text-muted-foreground whitespace-nowrap">{t("httpFetch")}</span>
@@ -184,7 +184,7 @@ function ArchDiagram() {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={inView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 mb-0"
+        className="relative z-10 rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 mb-0"
       >
         <p className="text-xs font-bold text-primary uppercase tracking-widest text-center mb-4">Next.js 14 App Router</p>
         <div className="grid grid-cols-2 gap-3">
@@ -202,7 +202,7 @@ function ArchDiagram() {
       </motion.div>
 
       {/* Connector: Next.js → services */}
-      <div className="relative h-10 flex items-center justify-center mx-auto w-0.5 bg-border/60">
+      <div className="relative z-0 overflow-visible h-10 flex items-center justify-center mx-auto w-0.5 bg-border/60">
         {inView && <FlowDot delay={0.5} duration={1.8} color="bg-primary" />}
         {inView && <FlowDot delay={1.3} duration={1.8} color="bg-primary/60" />}
       </div>
