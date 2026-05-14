@@ -1,4 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="80" fill="#3b82f6"/>
-  <text x="256" y="340" font-family="Arial,sans-serif" font-size="280" font-weight="900" text-anchor="middle" fill="white">R</text>
+  <!-- Outer dark navy ring -->
+  <circle cx="256" cy="256" r="256" fill="#0d2a4e"/>
+  <!-- Blue ring -->
+  <circle cx="256" cy="256" r="220" fill="#1565c0"/>
+  <!-- White inner circle -->
+  <circle cx="256" cy="256" r="185" fill="white"/>
+  <!-- R vertical stroke -->
+  <rect x="148" y="130" width="52" height="252" rx="4" fill="#0d2a4e"/>
+  <!-- R top bowl -->
+  <path d="M148 130 h110 q70 0 70 75 q0 70 -70 70 H200" fill="none" stroke="#0d2a4e" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- R diagonal leg -->
+  <path d="M200 275 L340 382" stroke="#0d2a4e" stroke-width="52" stroke-linecap="round"/>
 </svg>
