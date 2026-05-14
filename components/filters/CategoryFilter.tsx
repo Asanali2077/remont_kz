@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/select";
 import {
   type TopCategory,
-  TOP_CATEGORY_LABELS,
   getCategoryGroups,
   getSubcategories,
 } from "@/lib/categories";
+import { useTranslations } from "next-intl";
 
 export interface CategoryFilterValue {
   category?: TopCategory;
@@ -23,14 +23,24 @@ export interface CategoryFilterValue {
 interface CategoryFilterProps {
   value: CategoryFilterValue;
   onChange: (value: CategoryFilterValue) => void;
-  /** Показывать ли плейсхолдер «Все категории» (по умолчанию true) */
+  /** Show "All categories" placeholder (default true) */
   showAll?: boolean;
 }
 
 export function CategoryFilter({ value, onChange, showAll = true }: CategoryFilterProps) {
+  const t = useTranslations("categoryFilter");
+
   const groups = value.category ? getCategoryGroups(value.category) : [];
   const subcategories =
     value.category && value.group ? getSubcategories(value.category, value.group) : [];
+
+  function tGroup(g: string): string {
+    try { return t(`groups.${g}`); } catch { return g; }
+  }
+
+  function tSub(s: string): string {
+    try { return t(`subcategories.${s}`); } catch { return s; }
+  }
 
   function handleCategoryChange(cat: string) {
     if (cat === "__all__") {
@@ -56,60 +66,62 @@ export function CategoryFilter({ value, onChange, showAll = true }: CategoryFilt
     }
   }
 
+  const topCategories: TopCategory[] = ["AUTOMOBILES", "REAL_ESTATE", "OTHER"];
+
   return (
     <div className="flex flex-col gap-2">
-      {/* Уровень 1: Категория */}
+      {/* Level 1: Top category */}
       <Select
         value={value.category ?? "__all__"}
         onValueChange={handleCategoryChange}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Category" />
+          <SelectValue placeholder={t("allCategories")} />
         </SelectTrigger>
         <SelectContent>
-          {showAll && <SelectItem value="__all__">All categories</SelectItem>}
-          {(Object.keys(TOP_CATEGORY_LABELS) as TopCategory[]).map((cat) => (
+          {showAll && <SelectItem value="__all__">{t("allCategories")}</SelectItem>}
+          {topCategories.map((cat) => (
             <SelectItem key={cat} value={cat}>
-              {TOP_CATEGORY_LABELS[cat]}
+              {t(`topLabels.${cat}`)}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      {/* Уровень 2: Группа (появляется после выбора категории) */}
+      {/* Level 2: Group (appears after category selected) */}
       {value.category && groups.length > 0 && (
         <Select
           value={value.group ?? "__all__"}
           onValueChange={handleGroupChange}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Section" />
+            <SelectValue placeholder={t("allSections")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All sections</SelectItem>
+            <SelectItem value="__all__">{t("allSections")}</SelectItem>
             {groups.map((g) => (
               <SelectItem key={g} value={g}>
-                {g}
+                {tGroup(g)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       )}
 
-      {/* Уровень 3: Подкатегория (появляется после выбора группы) */}
+      {/* Level 3: Subcategory (appears after group selected) */}
       {value.category && value.group && subcategories.length > 0 && (
         <Select
           value={value.subcategory ?? "__all__"}
           onValueChange={handleSubcategoryChange}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Service type" />
+            <SelectValue placeholder={t("allTypes")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All types</SelectItem>
+            <SelectItem value="__all__">{t("allTypes")}</SelectItem>
             {subcategories.map((s) => (
               <SelectItem key={s} value={s}>
-                {s}
+                {tSub(s)}
               </SelectItem>
             ))}
           </SelectContent>
