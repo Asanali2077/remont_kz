@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 import { X, Plus, Loader2 } from "lucide-react";
 import type { TopCategory } from "@/lib/categories";
@@ -44,6 +45,8 @@ interface ServiceEditModalProps {
 }
 
 export function ServiceEditModal({ service, open, onOpenChange, onSave }: ServiceEditModalProps) {
+  const t = useTranslations("company");
+  const tCommon = useTranslations("common");
   const [name, setName] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>({});
   const [description, setDescription] = useState("");
@@ -186,7 +189,7 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[580px]">
         <DialogHeader>
-          <DialogTitle>{service ? "Edit Service" : "Add Service"}</DialogTitle>
+          <DialogTitle>{service ? t("editService") : t("addService")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -194,7 +197,7 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
           {/* ── Photos (first field) ── */}
           <div className="space-y-2">
             <Label>
-              Photos <span className="text-muted-foreground font-normal text-xs">({totalCount}/{MAX_PHOTOS})</span>
+              {t("photos")} <span className="text-muted-foreground font-normal text-xs">({totalCount}/{MAX_PHOTOS})</span>
             </Label>
             <div className="flex flex-wrap gap-2">
               {/* Existing photos */}
@@ -223,7 +226,7 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
                     <X className="h-3 w-3" />
                   </button>
                   {/* "new" indicator */}
-                  <div className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[9px] px-1 rounded">new</div>
+                  <div className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-[9px] px-1 rounded">{t("newBadge")}</div>
                 </div>
               ))}
 
@@ -235,7 +238,7 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
                   className="w-20 h-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 hover:border-primary/60 hover:bg-muted/30 transition-colors"
                 >
                   <Plus className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground">Add</span>
+                  <span className="text-[10px] text-muted-foreground">{t("addPhoto")}</span>
                 </button>
               )}
             </div>
@@ -248,52 +251,52 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
               onChange={handleAddPhotos}
             />
             {totalCount === 0 && (
-              <p className="text-xs text-muted-foreground">Add up to {MAX_PHOTOS} photos. Hover over a photo to remove it.</p>
+              <p className="text-xs text-muted-foreground">{t("photosHint", { max: String(MAX_PHOTOS) })}</p>
             )}
           </div>
 
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">{t("serviceName")} *</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <Label>Service Category *</Label>
+            <Label>{t("serviceCategory")} *</Label>
             <CategoryFilter value={categoryFilter} onChange={setCategoryFilter} showAll={false} />
           </div>
 
           {/* City */}
           <div className="space-y-2">
-            <Label>City</Label>
+            <Label>{t("city")}</Label>
             <CitySelect value={city} onChange={setCity} />
           </div>
 
           {/* Address */}
           <div className="space-y-2">
             <Label htmlFor="address">
-              Address <span className="text-muted-foreground font-normal text-xs">(optional — shows map on card)</span>
+              {t("address")} <span className="text-muted-foreground font-normal text-xs">({t("addressOptional")})</span>
             </Label>
-            <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g. Almaty, Abay Ave 52" />
+            <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder={t("addressPlaceholder")} />
           </div>
 
           {/* Tags */}
           <div className="space-y-2">
             <Label>
-              Tags <span className="text-muted-foreground font-normal text-xs">(helps clients find you — max 10)</span>
+              {t("tags")} <span className="text-muted-foreground font-normal text-xs">({t("tagsHint")})</span>
             </Label>
             <div className="flex gap-2">
               <Input
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
-                placeholder="e.g. plumbing, renovation, emergency"
+                placeholder={t("tagsPlaceholder")}
                 className="rounded-xl h-9 text-sm flex-1"
                 maxLength={30}
               />
               <Button type="button" variant="outline" size="sm" className="rounded-xl h-9 shrink-0" onClick={addTag}>
-                + Add
+                + {t("addTag")}
               </Button>
             </div>
             {tags.length > 0 && (
@@ -311,18 +314,18 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start date</Label>
+              <Label htmlFor="startDate">{t("startDate")}</Label>
               <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate">End date</Label>
+              <Label htmlFor="endDate">{t("endDate")}</Label>
               <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={startDate || undefined} />
             </div>
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description *</Label>
+            <Label htmlFor="description">{t("description")} *</Label>
             <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} />
           </div>
 
@@ -330,21 +333,21 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Checkbox id="fixedPrice" checked={fixedPrice} onCheckedChange={(c) => setFixedPrice(Boolean(c))} />
-              <Label htmlFor="fixedPrice" className="cursor-pointer font-normal">Fixed price (single rate)</Label>
+              <Label htmlFor="fixedPrice" className="cursor-pointer font-normal">{t("fixedPrice")}</Label>
             </div>
             {fixedPrice ? (
               <div className="space-y-2">
-                <Label htmlFor="priceFixed">Price (₸) *</Label>
+                <Label htmlFor="priceFixed">{t("price")} (₸) *</Label>
                 <Input id="priceFixed" type="number" value={priceFrom} onChange={(e) => setPriceFrom(e.target.value)} placeholder="e.g. 5000" />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="priceFrom">Price From (₸) *</Label>
+                  <Label htmlFor="priceFrom">{t("priceFrom")} (₸) *</Label>
                   <Input id="priceFrom" type="number" value={priceFrom} onChange={(e) => setPriceFrom(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="priceTo">Price To (₸) *</Label>
+                  <Label htmlFor="priceTo">{t("priceTo")} (₸) *</Label>
                   <Input id="priceTo" type="number" value={priceTo} onChange={(e) => setPriceTo(e.target.value)} />
                 </div>
               </div>
@@ -352,9 +355,13 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
           </div>
 
           <div className="flex justify-end gap-2 border-t pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>{tCommon("cancel")}</Button>
             <Button onClick={() => void handleSubmit()} disabled={!isValid || submitting}>
-              {uploading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Uploading...</> : submitting ? "Saving..." : service ? "Save" : "Create"}
+              {uploading
+                ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{t("uploading")}</>
+                : submitting
+                ? t("saving")
+                : service ? tCommon("save") : t("createBtn")}
             </Button>
           </div>
         </div>

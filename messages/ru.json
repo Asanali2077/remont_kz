@@ -501,7 +501,8 @@
     "replyPlaceholder": "Ответить на отзыв...",
     "chatBtn": "Чат",
     "cancelledMsg": "Заявка отменена",
-    "reviewSubmitted": "Отзыв отправлен!"
+    "reviewSubmitted": "Отзыв отправлен!",
+    "offerMessagePlaceholder": "Сроки, подход, гарантии…"
   },
   "requestCreate": {
     "title": "Новая заявка",
@@ -625,7 +626,30 @@
     "updated": "Обновлено",
     "created": "Создано",
     "offerSent": "Предложение отправлено",
-    "replySent": "Ответ отправлен"
+    "replySent": "Ответ отправлен",
+    "photos": "Фотографии",
+    "photosHint": "До {max} фото. Наведите курсор для удаления.",
+    "addPhoto": "Добавить",
+    "serviceName": "Название услуги",
+    "serviceCategory": "Категория услуги",
+    "addressOptional": "необязательно — показывает карту на карточке",
+    "tags": "Теги",
+    "tagsHint": "помогают клиентам найти вас · макс. 10",
+    "tagsPlaceholder": "напр. сантехника, ремонт, аварийный",
+    "addTag": "Добавить",
+    "startDate": "Дата начала",
+    "endDate": "Дата окончания",
+    "fixedPrice": "Фиксированная цена (единый тариф)",
+    "price": "Цена",
+    "priceFrom": "Цена от",
+    "priceTo": "Цена до",
+    "uploading": "Загрузка…",
+    "createBtn": "Создать",
+    "addressPlaceholder": "напр. Алматы, пр. Абая 52",
+    "newBadge": "новое",
+    "address": "Адрес",
+    "description": "Описание",
+    "city": "Город"
   },
   "chat": {
     "title": "Сообщения",

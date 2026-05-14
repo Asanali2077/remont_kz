@@ -502,7 +502,8 @@
     "replyPlaceholder": "Пікірге жауап беру...",
     "chatBtn": "Чат",
     "cancelledMsg": "Өтінім болдырылмады",
-    "reviewSubmitted": "Пікір жіберілді!"
+    "reviewSubmitted": "Пікір жіберілді!",
+    "offerMessagePlaceholder": "Мерзімдер, тәсіл, кепілдіктер…"
   },
   "requestCreate": {
     "title": "Жаңа өтінім",
@@ -626,7 +627,30 @@
     "updated": "Жаңартылды",
     "created": "Жасалды",
     "offerSent": "Ұсыныс жіберілді",
-    "replySent": "Жауап жіберілді"
+    "replySent": "Жауап жіберілді",
+    "photos": "Фотолар",
+    "photosHint": "{max} фотоға дейін. Жою үшін үстіне апарыңыз.",
+    "addPhoto": "Қосу",
+    "serviceName": "Қызмет атауы",
+    "serviceCategory": "Қызмет санаты",
+    "addressOptional": "міндетті емес — картада карта көрсетеді",
+    "tags": "Тегтер",
+    "tagsHint": "клиенттерге табуға көмектеседі · макс. 10",
+    "tagsPlaceholder": "мысалы сантехника, жөндеу, шұғыл",
+    "addTag": "Қосу",
+    "startDate": "Басталу күні",
+    "endDate": "Аяқталу күні",
+    "fixedPrice": "Тіркелген баға (бір тариф)",
+    "price": "Баға",
+    "priceFrom": "Баға (бастап)",
+    "priceTo": "Баға (дейін)",
+    "uploading": "Жүктелуде…",
+    "createBtn": "Жасау",
+    "addressPlaceholder": "мысалы Алматы, Абай д-лы 52",
+    "newBadge": "жаңа",
+    "address": "Мекенжай",
+    "description": "Сипаттама",
+    "city": "Қала"
   },
   "chat": {
     "title": "Хабарламалар",

@@ -502,7 +502,8 @@
     "replyPlaceholder": "Reply to review...",
     "chatBtn": "Chat",
     "cancelledMsg": "Request cancelled",
-    "reviewSubmitted": "Review submitted!"
+    "reviewSubmitted": "Review submitted!",
+    "offerMessagePlaceholder": "Timeline, approach, guarantees…"
   },
   "requestCreate": {
     "title": "New Request",
@@ -626,7 +627,30 @@
     "updated": "Updated",
     "created": "Created",
     "offerSent": "Offer sent",
-    "replySent": "Reply sent"
+    "replySent": "Reply sent",
+    "photos": "Photos",
+    "photosHint": "Add up to {max} photos. Hover to remove.",
+    "addPhoto": "Add",
+    "serviceName": "Service name",
+    "serviceCategory": "Service category",
+    "addressOptional": "optional — shows map on card",
+    "tags": "Tags",
+    "tagsHint": "helps clients find you · max 10",
+    "tagsPlaceholder": "e.g. plumbing, renovation, emergency",
+    "addTag": "Add",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "fixedPrice": "Fixed price (single rate)",
+    "price": "Price",
+    "priceFrom": "Price from",
+    "priceTo": "Price to",
+    "uploading": "Uploading…",
+    "createBtn": "Create",
+    "addressPlaceholder": "e.g. Almaty, Abay Ave 52",
+    "newBadge": "new",
+    "address": "Address",
+    "description": "Description",
+    "city": "City"
   },
   "chat": {
     "title": "Messages",

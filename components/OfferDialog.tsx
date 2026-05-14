@@ -65,7 +65,7 @@ export function OfferDialog({ request, open, onOpenChange, onSubmit, submitting 
               </Label>
               <Textarea
                 rows={3}
-                placeholder="Timeline, approach, guarantees…"
+                placeholder={t("offerMessagePlaceholder")}
                 value={message} onChange={e => setMessage(e.target.value)}
                 maxLength={500} className="rounded-xl"
               />
