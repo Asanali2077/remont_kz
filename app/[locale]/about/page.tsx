@@ -191,7 +191,7 @@ function ArchDiagram() {
           <div className="h-10 w-10 rounded-xl bg-pink-100 dark:bg-pink-900/40 flex items-center justify-center mx-auto">
             <Mail className="h-5 w-5 text-pink-600" />
           </div>,
-          "Nodemailer", t("emailSubtitle"),
+          "Resend", t("emailSubtitle"),
           "border-pink-200 dark:border-pink-800", 0.5
         )}
         {node(
@@ -439,14 +439,17 @@ export default function AboutPage() {
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { name: "User",          color: "bg-blue-500" },
-                  { name: "Service",       color: "bg-emerald-500" },
-                  { name: "ServiceImage",  color: "bg-teal-500" },
-                  { name: "Request",       color: "bg-violet-500" },
-                  { name: "RequestOffer",  color: "bg-purple-500" },
-                  { name: "Message",       color: "bg-amber-500" },
-                  { name: "Favorite",      color: "bg-pink-500" },
-                  { name: "Payment",       color: "bg-orange-500" },
+                  { name: "User",           color: "bg-blue-500" },
+                  { name: "Service",        color: "bg-emerald-500" },
+                  { name: "ServiceImage",   color: "bg-teal-500" },
+                  { name: "Request",        color: "bg-violet-500" },
+                  { name: "RequestOffer",   color: "bg-purple-500" },
+                  { name: "Message",        color: "bg-amber-500" },
+                  { name: "Favorite",       color: "bg-pink-500" },
+                  { name: "Payment",        color: "bg-orange-500" },
+                  { name: "PortfolioPhoto", color: "bg-cyan-500" },
+                  { name: "AuditLog",       color: "bg-red-500" },
+                  { name: "PromoCode",      color: "bg-lime-500" },
                 ].map(({ name, color }, i) => (
                   <motion.div key={name}
                     initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}

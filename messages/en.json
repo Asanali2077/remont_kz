@@ -1128,7 +1128,7 @@
     "archHowItWorks": "How it works",
     "archTitle": "Architecture overview",
     "archDesc": "Animated flow showing how data moves through the system in real time.",
-    "dbSchema": "Database schema — 8 models",
+    "dbSchema": "Database schema — 11 models",
     "ctaTitle": "Ready to try it?",
     "ctaDesc": "Browse real services, create a request and get offers from verified contractors.",
     "howItWorks": "How it works",
@@ -1142,8 +1142,8 @@
     "httpRequest": "HTTP request/response",
     "apiCall": "API call",
     "dbQuery": "DB query",
-    "dbSubtitle": "Prisma v7 · 8 models · 30+ indexes",
-    "emailSubtitle": "Mailtrap · Gmail · 6 templates",
+    "dbSubtitle": "Prisma v7 · 11 models · 30+ indexes",
+    "emailSubtitle": "Resend · Mailtrap sandbox · 6 templates",
     "sseSubtitle": "Real-time chat · 3s polling · Auto cleanup",
     "stats": [
       {
@@ -1181,7 +1181,7 @@
         "desc": "Real-time via Server-Sent Events"
       },
       {
-        "label": "Nodemailer",
+        "label": "Resend",
         "desc": "Email verification, notifications"
       },
       {

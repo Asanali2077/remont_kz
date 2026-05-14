@@ -1128,7 +1128,7 @@
     "archHowItWorks": "Қалай жұмыс істейді",
     "archTitle": "Архитектура шолу",
     "archDesc": "Деректердің жүйе арқылы нақты уақытта қалай қозғалатынын көрсететін анимацияланған ағын.",
-    "dbSchema": "Дерекқор схемасы — 8 модель",
+    "dbSchema": "Дерекқор схемасы — 11 модель",
     "ctaTitle": "Сынап көруге дайынсыз ба?",
     "ctaDesc": "Нақты қызметтерді қараңыз, өтінім жасаңыз және тексерілген мердігерлерден ұсыныстар алыңыз.",
     "howItWorks": "Қалай жұмыс істейді",
@@ -1142,8 +1142,8 @@
     "httpRequest": "HTTP сұраныс/жауап",
     "apiCall": "API шақыру",
     "dbQuery": "ДҚ сұраныс",
-    "dbSubtitle": "Prisma v7 · 8 модель · 30+ индекс",
-    "emailSubtitle": "Mailtrap · Gmail · 6 үлгі",
+    "dbSubtitle": "Prisma v7 · 11 модель · 30+ индекс",
+    "emailSubtitle": "Resend · Mailtrap sandbox · 6 үлгі",
     "sseSubtitle": "Нақты уақыт чат · 3с сұрау · автотазарту",
     "stats": [
       {
@@ -1181,7 +1181,7 @@
         "desc": "Server-Sent Events арқылы нақты уақыт"
       },
       {
-        "label": "Nodemailer",
+        "label": "Resend",
         "desc": "Email тексеру, хабарландырулар"
       },
       {
