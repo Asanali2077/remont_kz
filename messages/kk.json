@@ -74,7 +74,12 @@
     "calendar": "Күнтізбе",
     "security": "Қауіпсіздік",
     "noNewNotifications": "Жаңа хабарландыру жоқ",
-    "searchBtn": "Іздеу…"
+    "searchBtn": "Іздеу…",
+    "requests": "Өтінімдер",
+    "services": "Қызметтер",
+    "roleCompany": "Компания",
+    "roleClient": "Клиент",
+    "roleAdmin": "Әкімші"
   },
   "auth": {
     "welcomeBack": "Қош келдіңіз",

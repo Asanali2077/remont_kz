@@ -74,7 +74,12 @@
     "calendar": "Календарь",
     "security": "Безопасность",
     "noNewNotifications": "Нет новых уведомлений",
-    "searchBtn": "Поиск…"
+    "searchBtn": "Поиск…",
+    "requests": "Заявки",
+    "services": "Услуги",
+    "roleCompany": "Компания",
+    "roleClient": "Клиент",
+    "roleAdmin": "Администратор"
   },
   "auth": {
     "welcomeBack": "С возвращением",

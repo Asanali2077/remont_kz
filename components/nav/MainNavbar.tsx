@@ -137,14 +137,14 @@ export function MainNavbar() {
 
   /* ── company dropdown items ── */
   const companyMenuItems = [
-    { href: "/company/dashboard",                    icon: LayoutDashboard, label: "Overview" },
-    { href: "/company/dashboard?tab=requests",       icon: ClipboardList,   label: "Requests" },
-    { href: "/company/dashboard?tab=services",       icon: Briefcase,       label: "Services" },
-    { href: "/company/dashboard?tab=notifications",  icon: Bell,            label: "Notifications" },
-    { href: "/company/dashboard?tab=messages",       icon: MessageSquare,   label: "Messages" },
-    { href: "/company/dashboard?tab=billing",        icon: CreditCard,      label: "Billing" },
-    { href: "/company/dashboard?tab=profile",        icon: User,            label: "Profile" },
-    { href: "/company/dashboard?tab=security",       icon: Shield,          label: "Security" },
+    { href: "/company/dashboard",                    icon: LayoutDashboard, label: t("overview") },
+    { href: "/company/dashboard?tab=requests",       icon: ClipboardList,   label: t("requests") },
+    { href: "/company/dashboard?tab=services",       icon: Briefcase,       label: t("services") },
+    { href: "/company/dashboard?tab=notifications",  icon: Bell,            label: t("notifications") },
+    { href: "/company/dashboard?tab=messages",       icon: MessageSquare,   label: t("chat") },
+    { href: "/company/dashboard?tab=billing",        icon: CreditCard,      label: t("billing") },
+    { href: "/company/dashboard?tab=profile",        icon: User,            label: t("profile") },
+    { href: "/company/dashboard?tab=security",       icon: Shield,          label: t("security") },
   ];
 
   /* ── client dropdown items ── */
@@ -239,7 +239,7 @@ export function MainNavbar() {
                     {/* User info */}
                     <div className="px-4 py-3 border-b bg-muted/30">
                       <p className="text-sm font-semibold truncate">{user.name ?? user.email}</p>
-                      <p className="text-xs text-muted-foreground truncate capitalize">{user.role}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.role === "company" ? t("roleCompany") : user.role === "admin" ? t("roleAdmin") : t("roleClient")}</p>
                     </div>
 
                     {/* Client items */}

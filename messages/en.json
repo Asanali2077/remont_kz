@@ -74,7 +74,12 @@
     "calendar": "Calendar",
     "security": "Security",
     "noNewNotifications": "No new notifications",
-    "searchBtn": "Search…"
+    "searchBtn": "Search…",
+    "requests": "Requests",
+    "services": "Services",
+    "roleCompany": "Company",
+    "roleClient": "Client",
+    "roleAdmin": "Admin"
   },
   "auth": {
     "welcomeBack": "Welcome back",
