@@ -1,25 +1,23 @@
-﻿import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { fmtNum } from "./utils";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const FROM = process.env.SMTP_FROM ?? "Remont.kz <noreply@remont.kz>";
+const FROM = process.env.SMTP_FROM ?? "Remont.kz <onboarding@resend.dev>";
 
-function createTransport() {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT ?? "587", 10);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!host || !user || !pass) return null;
-  return nodemailer.createTransport({ host, port, secure: port === 465, auth: { user, pass } });
+function getResend() {
+  const apiKey = process.env.SMTP_PASS;
+  if (!apiKey) return null;
+  return new Resend(apiKey);
 }
 
 async function send(to: string, subject: string, html: string, text: string): Promise<void> {
-  const t = createTransport();
-  if (!t) {
+  const resend = getResend();
+  if (!resend) {
     console.log(`\n[EMAIL] ${subject}\nTo: ${to}\n${text}\n`);
     return;
   }
-  await t.sendMail({ from: FROM, to, subject, html, text });
+  const { error } = await resend.emails.send({ from: FROM, to, subject, html, text });
+  if (error) console.error("[EMAIL ERROR]", error);
 }
 
 function btn(href: string, label: string) {
@@ -35,7 +33,6 @@ function layout(title: string, body: string) {
   </div>`;
 }
 
-/* ── Verify email ── */
 export async function sendVerificationEmail(to: string, verifyUrl: string): Promise<void> {
   const html = layout("Verify your email", `
     <p style="color:#475569">Thanks for signing up! Click the button below to verify your email address.</p>
@@ -45,7 +42,6 @@ export async function sendVerificationEmail(to: string, verifyUrl: string): Prom
   await send(to, "Verify your Remont.kz email", html, `Verify your email: ${verifyUrl}`);
 }
 
-/* ── Password reset ── */
 export async function sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
   const html = layout("Reset your password", `
     <p style="color:#475569">You requested a password reset for your Remont.kz account.</p>
@@ -55,7 +51,6 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string): Prom
   await send(to, "Reset your Remont.kz password", html, `Reset link: ${resetUrl}`);
 }
 
-/* ── Welcome ── */
 export async function sendWelcomeEmail(to: string, name: string): Promise<void> {
   const html = layout(`Welcome to Remont.kz, ${name || "there"}!`, `
     <p style="color:#475569">Your account is ready. Browse services, submit requests, and connect with verified contractors across Kazakhstan.</p>
@@ -64,7 +59,6 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
   await send(to, "Welcome to Remont.kz!", html, `Welcome! Start at ${BASE}/repair`);
 }
 
-/* ── New offer received (client) ── */
 export async function sendNewOfferEmail(to: string, clientName: string, companyName: string, price: number, requestHref: string): Promise<void> {
   const html = layout("You received a new offer!", `
     <p style="color:#475569">Hi ${clientName || "there"}, <strong>${companyName}</strong> has sent you an offer for <strong>${fmtNum(price)} ₸</strong>.</p>
@@ -73,7 +67,6 @@ export async function sendNewOfferEmail(to: string, clientName: string, companyN
   await send(to, `New offer from ${companyName}`, html, `${companyName} offered ${fmtNum(price)} ₸. View: ${BASE}${requestHref}`);
 }
 
-/* ── Request accepted (client) ── */
 export async function sendRequestAcceptedEmail(to: string, clientName: string, companyName: string, chatHref: string): Promise<void> {
   const html = layout("Your request was accepted!", `
     <p style="color:#475569">Hi ${clientName || "there"}, <strong>${companyName}</strong> has accepted your request and is ready to start.</p>
@@ -82,7 +75,6 @@ export async function sendRequestAcceptedEmail(to: string, clientName: string, c
   await send(to, `${companyName} accepted your request`, html, `${companyName} accepted. Chat: ${BASE}${chatHref}`);
 }
 
-/* ── New request available (company) ── */
 export async function sendNewRequestEmail(to: string, companyName: string, category: string, city: string, dashboardHref: string): Promise<void> {
   const html = layout("New request matching your services!", `
     <p style="color:#475569">Hi ${companyName || "there"}, a new client request in <strong>${category}</strong> near <strong>${city}</strong> is waiting for offers.</p>
@@ -91,7 +83,6 @@ export async function sendNewRequestEmail(to: string, companyName: string, categ
   await send(to, "New request — make an offer", html, `New request in ${category}, ${city}. View: ${BASE}${dashboardHref}`);
 }
 
-/* ── Job completed — leave review (client) ── */
 export async function sendJobCompletedEmail(to: string, clientName: string, companyName: string, requestHref: string): Promise<void> {
   const html = layout("Job completed — share your experience!", `
     <p style="color:#475569">Hi ${clientName || "there"}, the job with <strong>${companyName}</strong> has been completed. Take a moment to leave a review.</p>
@@ -99,4 +90,3 @@ export async function sendJobCompletedEmail(to: string, clientName: string, comp
   `);
   await send(to, "How was the job? Leave a review", html, `Leave a review for ${companyName}: ${BASE}${requestHref}`);
 }
-
