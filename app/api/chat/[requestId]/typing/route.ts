@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/middleware";
-
-// Module-level store: requestId → Map<userId, expiresAt>
-// Typing state is ephemeral — cleared after 4 seconds of no update
-export const typingStore = new Map<string, Map<string, number>>();
+import { typingStore } from "@/lib/typing-store";
 
 export async function POST(
   request: NextRequest,

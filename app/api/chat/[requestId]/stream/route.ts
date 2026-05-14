@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { authenticateRequest } from "@/lib/middleware";
-import { typingStore } from "@/app/api/chat/[requestId]/typing/route";
+import { typingStore } from "@/lib/typing-store";
 
 export const dynamic = "force-dynamic";
 
