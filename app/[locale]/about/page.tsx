@@ -583,7 +583,6 @@ export default function AboutPage() {
                   { name: "Message",        color: "bg-amber-500" },
                   { name: "Favorite",       color: "bg-pink-500" },
                   { name: "Payment",        color: "bg-orange-500" },
-                  { name: "PortfolioPhoto", color: "bg-cyan-500" },
                   { name: "AuditLog",       color: "bg-red-500" },
                   { name: "PromoCode",      color: "bg-lime-500" },
                 ].map(({ name, color }, i) => (

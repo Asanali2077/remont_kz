@@ -1128,7 +1128,7 @@
     "archHowItWorks": "How it works",
     "archTitle": "Architecture overview",
     "archDesc": "Animated flow showing how data moves through the system in real time.",
-    "dbSchema": "Database schema — 11 models",
+    "dbSchema": "Database schema — 10 models",
     "lifecycleBadge": "Request Flow",
     "lifecycleTitle": "How a request works",
     "lifecycleDesc": "5 steps from problem to completed job — fully tracked in the platform",
@@ -1149,7 +1149,7 @@
     "httpRequest": "HTTP request/response",
     "apiCall": "API call",
     "dbQuery": "DB query",
-    "dbSubtitle": "Prisma v7 · 11 models · 30+ indexes",
+    "dbSubtitle": "Prisma v7 · 10 models · 30+ indexes",
     "emailSubtitle": "Resend · Mailtrap sandbox · 6 templates",
     "sseSubtitle": "Real-time chat · 3s polling · Auto cleanup",
     "stats": [
