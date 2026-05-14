@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
 
     const userId = auth.user.userId;
 
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
     const [unreadMessages, newOffers] = await Promise.all([
       prisma.message.count({
         where: { receiverId: userId, read: false },
@@ -20,10 +22,16 @@ export async function GET(request: NextRequest) {
             where: {
               request: { clientId: userId },
               status: "PENDING",
-              createdAt: { gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+              createdAt: { gt: since },
             },
           })
-        : Promise.resolve(0),
+        : prisma.requestOffer.count({
+            where: {
+              companyId: userId,
+              status: "ACCEPTED",
+              createdAt: { gt: since },
+            },
+          }),
     ]);
 
     return NextResponse.json({ unreadMessages, newOffers, total: unreadMessages + newOffers });
