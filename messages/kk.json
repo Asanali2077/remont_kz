@@ -80,7 +80,13 @@
     "roleCompany": "Компания",
     "roleClient": "Клиент",
     "roleAdmin": "Әкімші",
-    "home": "Басты"
+    "home": "Басты",
+    "deleteAccount": "Аккаунтты жою",
+    "deleteAccountConfirmTitle": "Аккаунтты жою керек пе?",
+    "deleteAccountConfirmDesc": "Бұл әрекетті кері қайтару мүмкін емес. Барлық деректеріңіз біржола жойылады.",
+    "deleteAccountPasswordLabel": "Растау үшін құпия сөзді енгізіңіз",
+    "deleteAccountConfirmBtn": "Аккаунтты жою",
+    "deleteAccountCancel": "Бас тарту"
   },
   "auth": {
     "welcomeBack": "Қош келдіңіз",

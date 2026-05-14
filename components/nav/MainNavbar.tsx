@@ -5,17 +5,20 @@ import { useTheme } from "next-themes";
 import {
   LogOut, Menu, X, Moon, Sun, ChevronDown, ClipboardList,
   Bell, BookOpen, User, CreditCard, LayoutDashboard,
-  Heart, MessageSquare, Search, ShieldCheck, History, Briefcase, Shield, Lock,
+  Heart, MessageSquare, Search, ShieldCheck, History, Briefcase, Shield, Lock, Trash2,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useNotifications } from "@/lib/use-notifications";
 import { timeAgo } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 /* ── Notification bell ── */
 function NotificationBell({ role }: { role: "client" | "company" }) {
@@ -84,11 +87,28 @@ export function MainNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  async function handleDeleteAccount() {
+    if (!deletePassword) return;
+    setDeleteLoading(true);
+    try {
+      await api.deleteAccount(deletePassword);
+      logout();
+      router.push("/");
+    } catch {
+      toast.error(t("deleteAccountPasswordLabel"));
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -276,6 +296,14 @@ export function MainNavbar() {
                       >
                         <LogOut className="h-4 w-4" /> {t("logout")}
                       </button>
+                      {user.role !== "admin" && (
+                        <button
+                          onClick={() => { setDeleteOpen(true); setDropdownOpen(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-red-600 dark:text-red-400 border-t border-border/50"
+                        >
+                          <Trash2 className="h-4 w-4" /> {t("deleteAccount")}
+                        </button>
+                      )}
                     </div>
                   </div>
                   </div>
@@ -342,6 +370,11 @@ export function MainNavbar() {
                 <button onClick={() => { logout(); setMobileOpen(false); }} className="flex items-center gap-3 px-2 py-2.5 text-sm text-destructive rounded-lg hover:bg-muted w-full text-left">
                   <LogOut className="h-4 w-4" /> {t("logout")}
                 </button>
+                {user.role !== "admin" && (
+                  <button onClick={() => { setDeleteOpen(true); setMobileOpen(false); }} className="flex items-center gap-3 px-2 py-2.5 text-sm text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 w-full text-left">
+                    <Trash2 className="h-4 w-4" /> {t("deleteAccount")}
+                  </button>
+                )}
               </>
             ) : (
               <div className="flex gap-2 pt-1">
@@ -400,6 +433,35 @@ export function MainNavbar() {
         </form>
       </div>
     )}
+
+    {/* Delete Account Dialog */}
+    <Dialog open={deleteOpen} onOpenChange={(o) => { setDeleteOpen(o); if (!o) setDeletePassword(""); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-red-600 dark:text-red-400">{t("deleteAccountConfirmTitle")}</DialogTitle>
+          <DialogDescription>{t("deleteAccountConfirmDesc")}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 py-2">
+          <label className="text-sm font-medium">{t("deleteAccountPasswordLabel")}</label>
+          <Input
+            type="password"
+            value={deletePassword}
+            onChange={(e) => setDeletePassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleDeleteAccount()}
+            className="border-red-200 focus-visible:ring-red-400"
+          />
+        </div>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => { setDeleteOpen(false); setDeletePassword(""); }}>
+            {t("deleteAccountCancel")}
+          </Button>
+          <Button variant="destructive" onClick={handleDeleteAccount} disabled={!deletePassword || deleteLoading}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            {deleteLoading ? "..." : t("deleteAccountConfirmBtn")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </>
   );
 }

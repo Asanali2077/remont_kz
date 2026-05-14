@@ -80,7 +80,13 @@
     "roleCompany": "Компания",
     "roleClient": "Клиент",
     "roleAdmin": "Администратор",
-    "home": "Главная"
+    "home": "Главная",
+    "deleteAccount": "Удалить аккаунт",
+    "deleteAccountConfirmTitle": "Удалить аккаунт?",
+    "deleteAccountConfirmDesc": "Это действие необратимо. Все ваши данные будут удалены навсегда.",
+    "deleteAccountPasswordLabel": "Введите пароль для подтверждения",
+    "deleteAccountConfirmBtn": "Удалить аккаунт",
+    "deleteAccountCancel": "Отмена"
   },
   "auth": {
     "welcomeBack": "С возвращением",

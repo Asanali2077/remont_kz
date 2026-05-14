@@ -80,7 +80,13 @@
     "roleCompany": "Company",
     "roleClient": "Client",
     "roleAdmin": "Admin",
-    "home": "Home"
+    "home": "Home",
+    "deleteAccount": "Delete Account",
+    "deleteAccountConfirmTitle": "Delete your account?",
+    "deleteAccountConfirmDesc": "This action is irreversible. All your data will be permanently deleted.",
+    "deleteAccountPasswordLabel": "Enter your password to confirm",
+    "deleteAccountConfirmBtn": "Delete Account",
+    "deleteAccountCancel": "Cancel"
   },
   "auth": {
     "welcomeBack": "Welcome back",
