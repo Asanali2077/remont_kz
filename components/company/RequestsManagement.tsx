@@ -62,7 +62,7 @@ export function RequestsManagement() {
   async function updateStatus(requestId: string, status: RequestStatus) {
     setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
     try { await api.updateRequest(requestId, { status }); toast.success(t("updated")); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); setRequests(await fetchRequests(statusFilter)); }
+    catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); setRequests(await fetchRequests(statusFilter)); }
   }
 
   async function handleSubmitOffer(price: number, message: string): Promise<void> {

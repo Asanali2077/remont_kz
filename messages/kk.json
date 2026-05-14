@@ -657,7 +657,11 @@
     "newBadge": "жаңа",
     "address": "Мекенжай",
     "description": "Сипаттама",
-    "city": "Қала"
+    "city": "Қала",
+    "selectAll": "Барлығын таңдау",
+    "nSelected": "Таңдалды: {n}",
+    "deleteN": "{n} жою",
+    "totalActive": "{total} барлығы · {active} белсенді"
   },
   "chat": {
     "title": "Хабарламалар",

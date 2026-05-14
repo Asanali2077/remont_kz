@@ -656,7 +656,11 @@
     "newBadge": "новое",
     "address": "Адрес",
     "description": "Описание",
-    "city": "Город"
+    "city": "Город",
+    "selectAll": "Выбрать все",
+    "nSelected": "Выбрано: {n}",
+    "deleteN": "Удалить {n}",
+    "totalActive": "{total} всего · {active} активных"
   },
   "chat": {
     "title": "Сообщения",

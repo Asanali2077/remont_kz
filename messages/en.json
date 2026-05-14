@@ -657,7 +657,11 @@
     "newBadge": "new",
     "address": "Address",
     "description": "Description",
-    "city": "City"
+    "city": "City",
+    "selectAll": "Select all",
+    "nSelected": "{n} selected",
+    "deleteN": "Delete {n}",
+    "totalActive": "{total} total · {active} active"
   },
   "chat": {
     "title": "Messages",

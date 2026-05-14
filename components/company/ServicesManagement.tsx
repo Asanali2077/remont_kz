@@ -105,19 +105,19 @@ export function ServicesManagement() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-xl font-bold">{t("services")}</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">{services.length} total · {services.filter(s => s.active).length} active</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("totalActive", { total: services.length, active: services.filter(s => s.active).length })}</p>
         </div>
         <div className="flex items-center gap-2">
           {services.length > 0 && (
             <div className="flex items-center gap-2">
               <Checkbox checked={selected.size === services.length && services.length > 0} onCheckedChange={toggleSelectAll} id="sel-all" />
               <label htmlFor="sel-all" className="text-sm cursor-pointer select-none text-muted-foreground">
-                {selected.size > 0 ? `${selected.size} selected` : "Select all"}
+                {selected.size > 0 ? t("nSelected", { n: selected.size }) : t("selectAll")}
               </label>
               {selected.size > 0 && (
                 <Button variant="destructive" size="sm" className="rounded-xl gap-1.5" onClick={() => void handleBulkDelete()} disabled={deleting}>
                   {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-                  Delete {selected.size}
+                  {t("deleteN", { n: selected.size })}
                 </Button>
               )}
             </div>
