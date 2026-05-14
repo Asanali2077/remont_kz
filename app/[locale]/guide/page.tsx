@@ -607,8 +607,8 @@ export default function GuidePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { icon: Mail, title: t("emailSupportTitle"), sub: "support@remont.kz", desc: t("emailReply"), action: "mailto:support@remont.kz", label: t("sendEmail"), color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400", border: "hover:border-blue-300 dark:hover:border-blue-700" },
-              { icon: MessageSquare, title: t("liveChatTitle"), sub: t("liveChatSub"), desc: t("liveChatDesc"), action: "mailto:support@remont.kz", label: t("startChat"), color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400", border: "hover:border-emerald-300 dark:hover:border-emerald-700", live: true },
+              { icon: Mail, title: t("emailSupportTitle"), sub: "remont_kz_505@mail.ru", desc: t("emailReply"), action: "mailto:remont_kz_505@mail.ru", label: t("sendEmail"), color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400", border: "hover:border-blue-300 dark:hover:border-blue-700" },
+              { icon: MessageSquare, title: t("liveChatTitle"), sub: t("liveChatSub"), desc: t("liveChatDesc"), action: "mailto:remont_kz_505@mail.ru", label: t("startChat"), color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400", border: "hover:border-emerald-300 dark:hover:border-emerald-700", live: true },
               { icon: Phone, title: t("phoneTitle"), sub: t("phoneSub"), desc: t("phoneDesc"), action: "tel:+77712885238", label: t("callUs"), color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400", border: "hover:border-violet-300 dark:hover:border-violet-700" },
             ].map(({ icon: Icon, title, sub, desc, action, label, color, border, live }) => (
               <a key={title} href={action}
