@@ -79,7 +79,8 @@
     "services": "Услуги",
     "roleCompany": "Компания",
     "roleClient": "Клиент",
-    "roleAdmin": "Администратор"
+    "roleAdmin": "Администратор",
+    "home": "Главная"
   },
   "auth": {
     "welcomeBack": "С возвращением",
@@ -680,7 +681,11 @@
     "read": "Прочитано",
     "noMessages": "Сообщений пока нет",
     "noMessagesDesc": "Сообщения появятся после принятия оффера",
-    "earlier": "Ранее"
+    "earlier": "Ранее",
+    "conversations": "{n} диалогов",
+    "customRequest": "Произвольная заявка",
+    "noMessagesYet": "Сообщений пока нет",
+    "unknownUser": "Неизвестный"
   },
   "admin": {
     "title": "Панель администратора",
@@ -732,7 +737,14 @@
     "cardNumber": "Номер карты",
     "cardHolder": "Имя держателя",
     "expiry": "Срок действия",
-    "cvv": "CVV"
+    "cvv": "CVV",
+    "promoCode": "Промокод",
+    "promoPlaceholder": "Введите промокод",
+    "applyPromo": "Применить",
+    "promoAppliedLabel": "{code} — скидка {discount}%",
+    "promoSuccessToast": "Промокод применён: скидка {discount}%",
+    "promoErrorToast": "Неверный промокод",
+    "mockNotice": "Тестовый платёж — деньги не списываются"
   },
   "portfolio": {
     "title": "Портфолио",
@@ -1533,5 +1545,26 @@
     "offerFailedToast": "Не удалось отправить предложение",
     "withdrawSuccessToast": "Предложение отозвано",
     "withdrawFailedToast": "Не удалось отозвать предложение"
+  },
+  "adminPromo": {
+    "title": "Промокоды",
+    "createSection": "Создать промокод",
+    "createBtn": "Создать",
+    "createdToast": "Промокод создан",
+    "errorToast": "Ошибка создания",
+    "deactivatedToast": "Промокод деактивирован",
+    "loading": "Загрузка...",
+    "codePlaceholder": "Код (напр. SAVE20)",
+    "discountPlaceholder": "Скидка %",
+    "maxUsesPlaceholder": "Макс. использований",
+    "colCode": "Код",
+    "colDiscount": "Скидка",
+    "colUses": "Использований",
+    "colExpires": "Истекает",
+    "colStatus": "Статус",
+    "statusActive": "Активен",
+    "statusInactive": "Деактивирован",
+    "deactivateBtn": "Деактивировать",
+    "noCodes": "Промокодов нет"
   }
 }

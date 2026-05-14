@@ -64,9 +64,9 @@ export default function PaymentPage() {
     const data = await res.json();
     if (res.ok) {
       setPromoApplied(data);
-      toast.success(`Промокод применён: скидка ${data.discount}%`);
+      toast.success(t("promoSuccessToast", { discount: data.discount }));
     } else {
-      toast.error(data.error ?? "Неверный промокод");
+      toast.error(data.error ?? t("promoErrorToast"));
     }
     setPromoLoading(false);
   }
@@ -137,7 +137,7 @@ export default function PaymentPage() {
       <div className="w-full max-w-md space-y-6">
         <div>
           <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Mock payment — no real money charged</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("mockNotice")}</p>
         </div>
 
         {payment && (
@@ -173,23 +173,23 @@ export default function PaymentPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Промокод</label>
+          <label className="text-sm font-medium">{t("promoCode")}</label>
           {promoApplied ? (
             <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-xl">
               <Tag className="h-4 w-4 text-green-600" />
-              <span className="text-green-700 dark:text-green-400 font-medium">{promoApplied.code} — скидка {promoApplied.discount}%</span>
+              <span className="text-green-700 dark:text-green-400 font-medium">{t("promoAppliedLabel", { code: promoApplied.code, discount: promoApplied.discount })}</span>
               <button onClick={() => setPromoApplied(null)} className="ml-auto text-muted-foreground hover:text-foreground">✕</button>
             </div>
           ) : (
             <div className="flex gap-2">
               <Input
-                placeholder="Введите промокод"
+                placeholder={t("promoPlaceholder")}
                 value={promoInput}
                 onChange={e => setPromoInput(e.target.value.toUpperCase())}
                 className="font-mono"
               />
               <Button variant="outline" onClick={applyPromo} disabled={promoLoading || !promoInput}>
-                {promoLoading ? "..." : "Применить"}
+                {promoLoading ? "..." : t("applyPromo")}
               </Button>
             </div>
           )}

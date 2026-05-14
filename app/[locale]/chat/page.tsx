@@ -60,7 +60,7 @@ export default function ChatInboxPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold">{t("title")}</h1>
-            {chats.length > 0 && <p className="text-xs text-muted-foreground">{chats.length} conversations</p>}
+            {chats.length > 0 && <p className="text-xs text-muted-foreground">{t("conversations", { n: chats.length })}</p>}
           </div>
         </div>
 
@@ -77,9 +77,9 @@ export default function ChatInboxPage() {
         ) : (
           <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
             {chats.map((chat, i) => {
-              const name = chat.otherParty?.name ?? chat.otherParty?.email ?? "Unknown";
-              const title = chat.service?.name ?? "Custom request";
-              const preview = chat.lastMessage?.content ?? "No messages yet";
+              const name = chat.otherParty?.name ?? chat.otherParty?.email ?? t("unknownUser");
+              const title = chat.service?.name ?? t("customRequest");
+              const preview = chat.lastMessage?.content ?? t("noMessagesYet");
               const time = chat.lastMessage?.createdAt ? timeAgo(chat.lastMessage.createdAt) : "";
               const hasUnread = chat.unreadCount > 0;
               const initial = name[0].toUpperCase();

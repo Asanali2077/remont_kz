@@ -79,7 +79,8 @@
     "services": "Қызметтер",
     "roleCompany": "Компания",
     "roleClient": "Клиент",
-    "roleAdmin": "Әкімші"
+    "roleAdmin": "Әкімші",
+    "home": "Басты"
   },
   "auth": {
     "welcomeBack": "Қош келдіңіз",
@@ -681,7 +682,11 @@
     "read": "Оқылды",
     "noMessages": "Хабарламалар жоқ",
     "noMessagesDesc": "Ұсынысты қабылдағаннан кейін хабарламалар пайда болады",
-    "earlier": "Бұрын"
+    "earlier": "Бұрын",
+    "conversations": "{n} диалог",
+    "customRequest": "Еркін өтінім",
+    "noMessagesYet": "Хабарлар әзірше жоқ",
+    "unknownUser": "Белгісіз"
   },
   "admin": {
     "title": "Әкімші панелі",
@@ -733,7 +738,14 @@
     "cardNumber": "Карта нөмірі",
     "cardHolder": "Карта иесінің аты",
     "expiry": "Жарамдылық мерзімі",
-    "cvv": "CVV"
+    "cvv": "CVV",
+    "promoCode": "Промокод",
+    "promoPlaceholder": "Промокод енгізіңіз",
+    "applyPromo": "Қолдану",
+    "promoAppliedLabel": "{code} — {discount}% жеңілдік",
+    "promoSuccessToast": "Промокод қолданылды: {discount}% жеңілдік",
+    "promoErrorToast": "Промокод дұрыс емес",
+    "mockNotice": "Тест төлемі — ақша алынбайды"
   },
   "portfolio": {
     "title": "Портфолио",
@@ -1534,5 +1546,26 @@
     "offerFailedToast": "Ұсынысты жіберу сәтсіз болды",
     "withdrawSuccessToast": "Ұсыныс кері алынды",
     "withdrawFailedToast": "Ұсынысты кері алу сәтсіз болды"
+  },
+  "adminPromo": {
+    "title": "Промокодтар",
+    "createSection": "Промокод жасау",
+    "createBtn": "Жасау",
+    "createdToast": "Промокод жасалды",
+    "errorToast": "Жасау қатесі",
+    "deactivatedToast": "Промокод өшірілді",
+    "loading": "Жүктелуде...",
+    "codePlaceholder": "Код (мыс. SAVE20)",
+    "discountPlaceholder": "Жеңілдік %",
+    "maxUsesPlaceholder": "Макс. қолдану",
+    "colCode": "Код",
+    "colDiscount": "Жеңілдік",
+    "colUses": "Қолданылды",
+    "colExpires": "Мерзімі",
+    "colStatus": "Күйі",
+    "statusActive": "Белсенді",
+    "statusInactive": "Өшірілген",
+    "deactivateBtn": "Өшіру",
+    "noCodes": "Промокодтар жоқ"
   }
 }

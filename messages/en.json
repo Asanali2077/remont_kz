@@ -79,7 +79,8 @@
     "services": "Services",
     "roleCompany": "Company",
     "roleClient": "Client",
-    "roleAdmin": "Admin"
+    "roleAdmin": "Admin",
+    "home": "Home"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -681,7 +682,11 @@
     "read": "Read",
     "noMessages": "No messages yet",
     "noMessagesDesc": "Messages appear after you accept an offer",
-    "earlier": "Earlier"
+    "earlier": "Earlier",
+    "conversations": "{n} conversations",
+    "customRequest": "Custom request",
+    "noMessagesYet": "No messages yet",
+    "unknownUser": "Unknown"
   },
   "admin": {
     "title": "Admin Panel",
@@ -733,7 +738,14 @@
     "cardNumber": "Card number",
     "cardHolder": "Card holder",
     "expiry": "Expiry date",
-    "cvv": "CVV"
+    "cvv": "CVV",
+    "promoCode": "Promo Code",
+    "promoPlaceholder": "Enter promo code",
+    "applyPromo": "Apply",
+    "promoAppliedLabel": "{code} — {discount}% off",
+    "promoSuccessToast": "Promo applied: {discount}% off",
+    "promoErrorToast": "Invalid promo code",
+    "mockNotice": "Mock payment — no real money charged"
   },
   "portfolio": {
     "title": "Portfolio",
@@ -1534,5 +1546,26 @@
     "offerFailedToast": "Failed to send offer",
     "withdrawSuccessToast": "Offer withdrawn",
     "withdrawFailedToast": "Failed to withdraw offer"
+  },
+  "adminPromo": {
+    "title": "Promo Codes",
+    "createSection": "Create Promo Code",
+    "createBtn": "Create",
+    "createdToast": "Promo code created",
+    "errorToast": "Error creating promo code",
+    "deactivatedToast": "Promo code deactivated",
+    "loading": "Loading...",
+    "codePlaceholder": "Code (e.g. SAVE20)",
+    "discountPlaceholder": "Discount %",
+    "maxUsesPlaceholder": "Max uses",
+    "colCode": "Code",
+    "colDiscount": "Discount",
+    "colUses": "Uses",
+    "colExpires": "Expires",
+    "colStatus": "Status",
+    "statusActive": "Active",
+    "statusInactive": "Deactivated",
+    "deactivateBtn": "Deactivate",
+    "noCodes": "No promo codes yet"
   }
 }

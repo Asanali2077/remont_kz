@@ -14,7 +14,7 @@ export function MobileNav() {
   if (!user) return null;
 
   const CLIENT_ITEMS = [
-    { href: "/",            icon: Home,           label: t("catalog") },
+    { href: "/",            icon: Home,           label: t("home") },
     { href: "/repair",      icon: Search,         label: t("catalog") },
     { href: "/my-requests", icon: ClipboardList,  label: t("myRequests") },
     { href: "/chat",        icon: MessageSquare,  label: t("chat") },
@@ -22,7 +22,7 @@ export function MobileNav() {
   ];
 
   const COMPANY_ITEMS = [
-    { href: "/",                    icon: Home,          label: t("catalog") },
+    { href: "/",                    icon: Home,          label: t("home") },
     { href: "/company/catalog",     icon: Search,        label: t("catalog") },
     { href: "/company/dashboard",   icon: ClipboardList, label: t("dashboard") },
     { href: "/chat",                icon: MessageSquare, label: t("chat") },

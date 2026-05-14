@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface PromoCode {
 }
 
 export default function AdminPromoPage() {
+  const t = useTranslations("adminPromo");
   const { user } = useAuth();
   const [codes, setCodes] = useState<PromoCode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,22 +58,24 @@ export default function AdminPromoPage() {
       }),
     });
     if (res.ok) {
-      toast.success("Промокод создан");
+      toast.success(t("createdToast"));
       setCode(""); setDiscount(""); setMaxUses(""); setExpiresAt("");
       void load();
     } else {
       const d = await res.json();
-      toast.error(d.error ?? "Ошибка создания");
+      toast.error(d.error ?? t("errorToast"));
     }
     setCreating(false);
   };
 
   const deactivate = async (id: string) => {
-    await fetch(`/api/admin/promo/${id}`, {
+    const res = await fetch(`/api/admin/promo/${id}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({ isActive: false }),
     });
+    if (res.ok) toast.success(t("deactivatedToast"));
+    else toast.error(t("errorToast"));
     void load();
   };
 
@@ -82,33 +86,33 @@ export default function AdminPromoPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Промокоды</h1>
+      <h1 className="text-2xl font-bold">{t("title")}</h1>
 
       <div className="bg-card border rounded-xl p-4 space-y-3">
-        <h2 className="font-semibold">Создать промокод</h2>
+        <h2 className="font-semibold">{t("createSection")}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Input placeholder="Код (напр. SAVE20)" value={code} onChange={e => setCode(e.target.value.toUpperCase())} />
-          <Input placeholder="Скидка %" type="number" min={1} max={100} value={discount} onChange={e => setDiscount(e.target.value)} />
-          <Input placeholder="Макс. использований" type="number" value={maxUses} onChange={e => setMaxUses(e.target.value)} />
+          <Input placeholder={t("codePlaceholder")} value={code} onChange={e => setCode(e.target.value.toUpperCase())} />
+          <Input placeholder={t("discountPlaceholder")} type="number" min={1} max={100} value={discount} onChange={e => setDiscount(e.target.value)} />
+          <Input placeholder={t("maxUsesPlaceholder")} type="number" value={maxUses} onChange={e => setMaxUses(e.target.value)} />
           <Input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} />
         </div>
         <Button onClick={create} disabled={creating || !code || !discount} className="gap-2">
-          <Plus className="h-4 w-4" />Создать
+          <Plus className="h-4 w-4" />{t("createBtn")}
         </Button>
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Загрузка...</p>
+        <p className="text-muted-foreground text-sm">{t("loading")}</p>
       ) : (
         <div className="bg-card border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="border-b bg-muted/30">
               <tr>
-                <th className="text-left p-3 font-medium">Код</th>
-                <th className="text-left p-3 font-medium">Скидка</th>
-                <th className="text-left p-3 font-medium">Использований</th>
-                <th className="text-left p-3 font-medium">Истекает</th>
-                <th className="text-left p-3 font-medium">Статус</th>
+                <th className="text-left p-3 font-medium">{t("colCode")}</th>
+                <th className="text-left p-3 font-medium">{t("colDiscount")}</th>
+                <th className="text-left p-3 font-medium">{t("colUses")}</th>
+                <th className="text-left p-3 font-medium">{t("colExpires")}</th>
+                <th className="text-left p-3 font-medium">{t("colStatus")}</th>
                 <th className="p-3" />
               </tr>
             </thead>
@@ -118,14 +122,16 @@ export default function AdminPromoPage() {
                   <td className="p-3 font-mono font-bold">{c.code}</td>
                   <td className="p-3">{c.discount}%</td>
                   <td className="p-3">{c.usedCount}{c.maxUses ? ` / ${c.maxUses}` : ""}</td>
-                  <td className="p-3 text-muted-foreground">{c.expiresAt ? new Date(c.expiresAt).toLocaleDateString("ru") : "—"}</td>
+                  <td className="p-3 text-muted-foreground">{c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : "—"}</td>
                   <td className="p-3">
-                    <Badge variant={c.isActive ? "default" : "secondary"}>{c.isActive ? "Активен" : "Деактивирован"}</Badge>
+                    <Badge variant={c.isActive ? "default" : "secondary"}>
+                      {c.isActive ? t("statusActive") : t("statusInactive")}
+                    </Badge>
                   </td>
                   <td className="p-3">
                     <div className="flex gap-2 justify-end">
                       {c.isActive && (
-                        <Button size="sm" variant="outline" onClick={() => deactivate(c.id)}>Деактивировать</Button>
+                        <Button size="sm" variant="outline" onClick={() => deactivate(c.id)}>{t("deactivateBtn")}</Button>
                       )}
                       <Button size="sm" variant="ghost" onClick={() => remove(c.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -135,7 +141,7 @@ export default function AdminPromoPage() {
                 </tr>
               ))}
               {codes.length === 0 && (
-                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">Промокодов нет</td></tr>
+                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">{t("noCodes")}</td></tr>
               )}
             </tbody>
           </table>
