@@ -555,34 +555,45 @@ export default function GuidePage() {
         {/* ════ VIDEO TUTORIALS ════ */}
         {!query && (
           <section className="mt-14">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/40">
-                  <Play className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-                </div>
-                <h2 className="font-bold">{t("videoGuides")}</h2>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/40">
+                <Play className="h-4 w-4 text-rose-600 dark:text-rose-400" />
               </div>
-              <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">{t("comingSoon")}</span>
+              <h2 className="font-bold">{t("videoGuides")}</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {videos.map(({ title, duration, thumbnail }) => (
-                <div key={title} className="group relative rounded-2xl border border-border/50 bg-card overflow-hidden cursor-pointer hover:shadow-md hover:border-border transition-all duration-200">
-                  <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
-                    <span className="text-5xl">{thumbnail}</span>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <div className="h-12 w-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 scale-90 group-hover:scale-100">
-                        <Play className="h-5 w-5 text-foreground ml-0.5" />
+              {videos.map(({ title, duration }, i) => {
+                const videoId = ["R_F1SvYJTco", "3qTYiXJaXuM", "RVqp23im-po"][i];
+                return (
+                  <a
+                    key={title}
+                    href={`https://youtu.be/${videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative rounded-2xl border border-border/50 bg-card overflow-hidden hover:shadow-md hover:border-border transition-all duration-200"
+                  >
+                    <div className="relative aspect-video bg-muted overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                        alt={title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center opacity-80 group-hover:opacity-100 transition-all duration-200 scale-90 group-hover:scale-100">
+                          <Play className="h-5 w-5 text-foreground ml-0.5" />
+                        </div>
                       </div>
+                      <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[11px] font-semibold px-2 py-0.5 rounded-md">{duration}</span>
                     </div>
-                    <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[11px] font-semibold px-2 py-0.5 rounded-md">{duration}</span>
-                  </div>
-                  <div className="px-4 py-3">
-                    <p className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">{title}</p>
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Clock className="h-3 w-3" /> {duration}</p>
-                  </div>
-                </div>
-              ))}
+                    <div className="px-4 py-3">
+                      <p className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">{title}</p>
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Clock className="h-3 w-3" /> {duration}</p>
+                    </div>
+                  </a>
+                );
+              })}
             </div>
           </section>
         )}
