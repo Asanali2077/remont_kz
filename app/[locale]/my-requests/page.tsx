@@ -8,7 +8,8 @@ import { Link } from "@/i18n/routing";
 import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
          AlertCircle, Sparkles, Building2, X, Heart, MessageSquare,
          Loader2, Eye, EyeOff, Bell, MapPin, User as UserIcon,
-         History, CalendarDays, BadgeCheck, CircleDashed, FileText } from "lucide-react";
+         History, CalendarDays, BadgeCheck, CircleDashed, FileText,
+         ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, ServiceRecord, SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -783,17 +784,19 @@ export default function MyRequestsPage() {
                   {!loading && requests.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {[
-                        { label: t("statsTotal"),     value: stats.total,     color: "text-foreground",   icon: "📋" },
-                        { label: t("statsCompleted"), value: stats.completed, color: "text-green-600",     icon: "✅" },
-                        { label: t("statsActive"),    value: stats.active,    color: "text-amber-600",     icon: "⚡" },
-                        { label: t("statsNew"),       value: stats.newCount,  color: "text-primary",       icon: "🔔" },
-                      ].map(({ label, value, color, icon }) => (
+                        { label: t("statsTotal"),     value: stats.total,     numColor: "text-foreground",  icon: ClipboardList, iconBg: "bg-muted",                                    iconColor: "text-muted-foreground" },
+                        { label: t("statsCompleted"), value: stats.completed, numColor: "text-green-600",   icon: CheckCircle2,  iconBg: "bg-green-100 dark:bg-green-950/40",           iconColor: "text-green-600" },
+                        { label: t("statsActive"),    value: stats.active,    numColor: "text-amber-600",   icon: Zap,           iconBg: "bg-amber-100 dark:bg-amber-950/40",           iconColor: "text-amber-600" },
+                        { label: t("statsNew"),       value: stats.newCount,  numColor: "text-primary",     icon: Bell,          iconBg: "bg-primary/10",                               iconColor: "text-primary" },
+                      ].map(({ label, value, numColor, icon: Icon, iconBg, iconColor }) => (
                         <div key={label} className="bg-card border border-border/50 rounded-2xl p-4">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-base">{icon}</span>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${iconBg}`}>
+                              <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+                            </div>
                             <span className="text-xs text-muted-foreground font-medium">{label}</span>
                           </div>
-                          <p className={`text-2xl font-black ${color}`}>{value}</p>
+                          <p className={`text-2xl font-black ${numColor}`}>{value}</p>
                         </div>
                       ))}
                     </div>
@@ -821,19 +824,21 @@ export default function MyRequestsPage() {
                   {/* Empty state */}
                   {!loading && requests.length === 0 && (
                     <div className="bg-card border border-border/50 rounded-2xl p-10 text-center">
-                      <div className="text-5xl mb-5">👋</div>
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mx-auto mb-5">
+                        <ClipboardList className="h-8 w-8 text-primary" />
+                      </div>
                       <h2 className="text-xl font-bold mb-2">{t("noRequests")}</h2>
                       <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">{t("noRequestsDesc")}</p>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left mb-8">
                         {[
-                          { n: "1", icon: "📝", title: t("describeTask"),  desc: t("tellUsWhat") },
-                          { n: "2", icon: "📬", title: t("receiveOffers"), desc: t("companiesRespond") },
-                          { n: "3", icon: "✅", title: t("chooseBest"),    desc: t("compareAndConfirm") },
-                        ].map(({ n, icon, title, desc }) => (
+                          { n: "1", icon: FileText,     title: t("describeTask"),  desc: t("tellUsWhat") },
+                          { n: "2", icon: Bell,         title: t("receiveOffers"), desc: t("companiesRespond") },
+                          { n: "3", icon: CheckCircle2, title: t("chooseBest"),    desc: t("compareAndConfirm") },
+                        ].map(({ n, icon: Icon, title, desc }) => (
                           <div key={n} className="rounded-xl border border-border/50 bg-muted/30 p-4">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-black">{n}</span>
-                              <span className="text-lg">{icon}</span>
+                              <Icon className="h-4 w-4 text-primary" />
                             </div>
                             <p className="font-semibold text-sm">{title}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
