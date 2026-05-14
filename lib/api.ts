@@ -455,6 +455,8 @@ function fromDbStatus(value: string): RequestStatus {
       return "in_progress";
     case "COMPLETED":
       return "completed";
+    case "CANCELLED":
+      return "cancelled";
     default:
       return "new";
   }

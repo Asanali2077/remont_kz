@@ -441,7 +441,8 @@
       "NEW": "Новая",
       "ACCEPTED": "Принята",
       "IN_PROGRESS": "В работе",
-      "COMPLETED": "Завершена"
+      "COMPLETED": "Завершена",
+      "CANCELLED": "Отменена"
     },
     "budget": "Бюджет",
     "description": "Описание",

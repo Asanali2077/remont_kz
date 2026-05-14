@@ -15,13 +15,18 @@ const ALLOWED_AUDIO_TYPES = (
   process.env.ALLOWED_AUDIO_TYPES || "audio/mpeg,audio/wav,audio/ogg"
 ).split(",");
 
-// S3-compatible storage (optional)
+// Cloudinary (preferred for Vercel)
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY    = process.env.CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
+
+// S3-compatible storage (optional fallback)
 const S3_ENDPOINT = process.env.S3_ENDPOINT;
 const S3_BUCKET   = process.env.S3_BUCKET;
 const S3_REGION   = process.env.S3_REGION   || "auto";
 const S3_KEY      = process.env.S3_ACCESS_KEY_ID;
 const S3_SECRET   = process.env.S3_SECRET_ACCESS_KEY;
-const S3_PUBLIC_URL = process.env.S3_PUBLIC_URL; // e.g. https://pub.r2.dev/my-bucket
+const S3_PUBLIC_URL = process.env.S3_PUBLIC_URL;
 
 export interface UploadResult {
   url: string;
@@ -53,6 +58,34 @@ function detectMimeFromBytes(buf: Buffer): string | null {
     }
   }
   return null;
+}
+
+async function uploadToCloudinary(
+  buf: Buffer,
+  filename: string,
+  subfolder: string,
+  mimetype: string
+): Promise<string> {
+  const { v2: cloudinary } = await import("cloudinary");
+  cloudinary.config({
+    cloud_name: CLOUDINARY_CLOUD_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: CLOUDINARY_API_SECRET,
+  });
+
+  const resourceType = mimetype.startsWith("audio/") ? "video" : "image";
+  const folder = `remont_kz/${subfolder}`;
+
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: resourceType, public_id: filename.replace(/\.[^.]+$/, "") },
+      (error, result) => {
+        if (error || !result) return reject(error ?? new Error("Cloudinary upload failed"));
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(buf);
+  });
 }
 
 async function uploadToS3(
@@ -159,7 +192,12 @@ export async function uploadFile(
 
   const filename = `${Date.now()}-${randomUUID()}.${finalExt}`;
 
-  // Upload to S3 if configured, otherwise local disk
+  // Cloudinary → S3 → local disk
+  if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
+    const url = await uploadToCloudinary(finalBuf, filename, subfolder, finalMime);
+    return { url, filename, size: finalBuf.length, mimetype: finalMime };
+  }
+
   if (S3_ENDPOINT && S3_BUCKET && S3_KEY && S3_SECRET) {
     const url = await uploadToS3(finalBuf, filename, subfolder, finalMime);
     return { url, filename, size: finalBuf.length, mimetype: finalMime };
