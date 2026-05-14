@@ -10,7 +10,7 @@ import { Footer } from "@/components/Footer";
 import {
   Code2, Database, Shield, Zap, Globe, CheckCircle2,
   Users, MessageSquare, Star, MapPin, ArrowRight,
-  Server, Lock, Mail, Smartphone,
+  Server, Lock, Mail, Smartphone, PlusCircle, Wrench, Building2, User,
 } from "lucide-react";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -60,6 +60,35 @@ function ScaleIn({ children, delay = 0, className = "" }: { children: React.Reac
     >{children}</motion.div>
   );
 }
+
+const TECH_BADGES = [
+  "Next.js 14", "TypeScript", "PostgreSQL", "Prisma 7",
+  "Tailwind CSS", "JWT + 2FA", "Resend", "next-intl",
+];
+
+const LIFECYCLE_STEPS = [
+  { status: "NEW",         icon: PlusCircle,  gradient: "from-blue-500 to-blue-600",    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",       label: "Client posts request",  desc: "Category, city, description and budget in 2 min" },
+  { status: "OFFERS",      icon: MessageSquare, gradient: "from-violet-500 to-violet-600", badge: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300", label: "Companies bid",         desc: "Multiple offers with prices and messages arrive" },
+  { status: "ACCEPTED",    icon: CheckCircle2,  gradient: "from-amber-500 to-amber-600",   badge: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",    label: "Best offer chosen",     desc: "Client picks the winner — others auto-rejected" },
+  { status: "IN PROGRESS", icon: Wrench,        gradient: "from-orange-500 to-orange-600", badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300", label: "Work underway",         desc: "Real-time SSE chat between client and company" },
+  { status: "COMPLETED",   icon: Star,          gradient: "from-emerald-500 to-emerald-600", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", label: "Done & reviewed",  desc: "Client rates 1–5 stars; rating updates profile" },
+];
+
+const CLIENT_STEPS = [
+  "Post a request in 2 minutes",
+  "Receive competing offers from companies",
+  "Chat with companies via real-time SSE",
+  "Accept the best price & terms",
+  "Rate the completed job (1–5 stars)",
+];
+
+const COMPANY_STEPS = [
+  "Browse open requests by category & city",
+  "Submit offers with price and message",
+  "Manage all jobs in Kanban board",
+  "Chat with clients in real time",
+  "Build profile rating from client reviews",
+];
 
 /* Static icon arrays — parallel to translation arrays */
 const STAT_ICONS = [Server, Globe, Users, MapPin];
@@ -291,6 +320,24 @@ export default function AboutPage() {
             </Link>
           </motion.div>
         )}
+
+        {/* Tech badges */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="flex flex-wrap justify-center gap-2 mt-8"
+        >
+          {TECH_BADGES.map((badge, i) => (
+            <motion.span key={badge}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 + i * 0.06 }}
+              className="px-3 py-1.5 rounded-full bg-muted/80 border border-border/60 text-xs font-mono text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors cursor-default"
+            >
+              {badge}
+            </motion.span>
+          ))}
+        </motion.div>
       </section>
 
       {/* ── Stats bar ── */}
@@ -349,6 +396,93 @@ export default function AboutPage() {
                     </div>
                   </ScaleIn>
                 ))}
+              </div>
+            </FadeRight>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Request Lifecycle ── */}
+      <section className="py-24 px-4">
+        <div className="mx-auto max-w-6xl">
+          <FadeUp>
+            <div className="text-center mb-16">
+              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{t("lifecycleBadge")}</p>
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">{t("lifecycleTitle")}</h2>
+              <p className="text-muted-foreground text-lg max-w-lg mx-auto">{t("lifecycleDesc")}</p>
+            </div>
+          </FadeUp>
+
+          {/* Step flow */}
+          <div className="relative mb-16">
+            {/* Gradient connector line — desktop only */}
+            <div className="hidden lg:block absolute top-12 left-[calc(10%+2.5rem)] right-[calc(10%+2.5rem)] h-0.5 bg-gradient-to-r from-blue-500 via-violet-500 via-amber-500 via-orange-500 to-emerald-500 opacity-30" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+              {LIFECYCLE_STEPS.map((step, i) => {
+                const Icon = step.icon;
+                return (
+                  <ScaleIn key={step.status} delay={i * 0.1}>
+                    <div className="relative flex flex-col items-center text-center gap-3">
+                      <div className={`relative z-10 h-24 w-24 rounded-full bg-gradient-to-br ${step.gradient} flex items-center justify-center shadow-xl ring-4 ring-white dark:ring-zinc-900`}>
+                        <Icon className="h-10 w-10 text-white" />
+                        {i === 4 && <span className="absolute inset-0 rounded-full animate-ping bg-emerald-400 opacity-20" />}
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${step.badge}`}>
+                        {step.status}
+                      </span>
+                      <p className="font-bold text-sm">{step.label}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed max-w-[150px]">{step.desc}</p>
+                    </div>
+                  </ScaleIn>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Client vs Company split */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FadeLeft delay={0.2}>
+              <div className="rounded-2xl border-2 border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-950/20 p-7 h-full">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-11 w-11 rounded-xl bg-blue-500 flex items-center justify-center shadow">
+                    <User className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-base">{t("lifecycleClientTitle")}</p>
+                    <p className="text-xs text-muted-foreground">{t("lifecycleClientDesc")}</p>
+                  </div>
+                </div>
+                <ul className="space-y-3">
+                  {CLIENT_STEPS.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </FadeLeft>
+
+            <FadeRight delay={0.2}>
+              <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 p-7 h-full">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-11 w-11 rounded-xl bg-emerald-500 flex items-center justify-center shadow">
+                    <Building2 className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-base">{t("lifecycleCompanyTitle")}</p>
+                    <p className="text-xs text-muted-foreground">{t("lifecycleCompanyDesc")}</p>
+                  </div>
+                </div>
+                <ul className="space-y-3">
+                  {COMPANY_STEPS.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </FadeRight>
           </div>
