@@ -576,7 +576,7 @@ export default function GuidePage() {
                     <div className="relative aspect-video bg-muted overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                        src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
                         alt={title}
                         className="w-full h-full object-cover"
                       />
