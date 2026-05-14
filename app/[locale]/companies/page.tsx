@@ -45,7 +45,7 @@ export default function CompaniesPage() {
         <div className="relative max-w-md mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input value={query} onChange={e => setQuery(e.target.value)}
-            placeholder="Search by name or city…" className="pl-10 rounded-xl h-10" />
+            placeholder={t("searchPlaceholder")} className="pl-10 rounded-xl h-10" />
         </div>
 
         {loading ? (
@@ -92,7 +92,7 @@ export default function CompaniesPage() {
                       </span>
                       <span className="flex items-center gap-1">
                         <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                        {c._count.companyRequests} completed
+                        {c._count.companyRequests} {t("completed")}
                       </span>
                     </div>
                   </div>

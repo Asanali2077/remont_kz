@@ -40,7 +40,9 @@
     "budget": "Budget",
     "total": "Total",
     "active": "Active",
-    "new": "New"
+    "new": "New",
+    "signIn": "Sign in",
+    "request": "Request"
   },
   "nav": {
     "catalog": "Catalog",
@@ -67,7 +69,10 @@
     "seeAll": "See all",
     "pressEnter": "Press Enter to search · Esc to close",
     "remontGuide": "Remont Guide",
-    "cabinet": "Cabinet"
+    "cabinet": "Cabinet",
+    "overview": "Overview",
+    "calendar": "Calendar",
+    "security": "Security"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -128,7 +133,209 @@
     "ctaTitle": "Ready to start?",
     "ctaDesc": "Create a request now — it's free.",
     "ctaButton": "Submit a request",
-    "rotateWords": ["car repair", "apartment renovation", "office fit-out", "equipment service", "plumbing work", "electrical work"]
+    "rotateWords": [
+      "car repair",
+      "apartment renovation",
+      "office fit-out",
+      "equipment service",
+      "plumbing work",
+      "electrical work"
+    ],
+    "heroBadge": "#1 Repair marketplace in Kazakhstan",
+    "browseServices": "Browse Services",
+    "viewCompanies": "View Companies",
+    "trustFree": "Free for clients",
+    "trustVerified": "Verified contractors",
+    "trustRating": "4.8 average rating",
+    "trustCities": "14 cities in KZ",
+    "popularCategories": "Popular categories",
+    "catAuto": "Automobiles",
+    "catRenovation": "Renovation",
+    "catPlumbing": "Plumbing",
+    "catElectrical": "Electrical",
+    "catCleaning": "Cleaning",
+    "catPainting": "Painting",
+    "catRoofing": "Roofing",
+    "catAll": "All services",
+    "baTitle": "We transform any space or item",
+    "baBullets": [
+      "Professional quality on every job",
+      "Transparent pricing — no hidden fees",
+      "Work completed on schedule",
+      "5-year warranty from top contractors"
+    ],
+    "baStatSatisfaction": "Client satisfaction",
+    "baStatFirstOffer": "Average first offer",
+    "baStatJobs": "Jobs completed",
+    "baStatRating": "Average rating",
+    "before": "BEFORE",
+    "after": "AFTER",
+    "statsBadge": "By the numbers",
+    "statsTitle": "Kazakhstan’s most trusted repair platform",
+    "statsDesc": "Thousands of homeowners and car owners find reliable specialists through Remont.kz every month.",
+    "statVerifiedCompanies": "Verified companies",
+    "statVerifiedSub": "across 14 cities",
+    "statCompleted": "Requests completed",
+    "statCompletedSub": "and growing daily",
+    "statActive": "Active services",
+    "statActiveSub": "from Almaty to Astana",
+    "statAvgRating": "Avg rating (×10)",
+    "statAvgRatingSub": "based on all reviews",
+    "statTimeValue": "2 hours",
+    "statTimeLabel": "Average time to first offer",
+    "statFreeValue": "Free",
+    "statFreeLabel": "Always free for clients",
+    "statWarrantyValue": "5 years",
+    "statWarrantyLabel": "Max warranty from contractors",
+    "catBadge": "Browse",
+    "catTitle": "Pick your category",
+    "catDesc": "From car repair to full apartment renovation — find the right specialist for any job.",
+    "catAutoTitle": "Automobiles",
+    "catAutoDesc": "Body repair, diagnostics, detailing, engine work",
+    "catAutoItems": [
+      "Engine & transmission",
+      "Body & painting",
+      "Diagnostics",
+      "Tyres & wheels",
+      "Detailing"
+    ],
+    "catAutoCount": "80+ services",
+    "catRealEstateTitle": "Real Estate",
+    "catRealEstateDesc": "Renovation, plumbing, electrical, cleaning",
+    "catRealEstateItems": [
+      "Full renovation",
+      "Plumbing",
+      "Electrical",
+      "Painting & walls",
+      "Cleaning"
+    ],
+    "catRealEstateCount": "95+ services",
+    "catOtherTitle": "Other Services",
+    "catOtherDesc": "Appliances, furniture, gadgets, equipment",
+    "catOtherItems": [
+      "Appliances",
+      "Furniture",
+      "Smartphones",
+      "Watches & bags",
+      "Welding"
+    ],
+    "catOtherCount": "40+ services",
+    "browseAll": "Browse all",
+    "topRatedBadge": "Top rated",
+    "browseAllServices": "Browse all services",
+    "processBadge": "Process",
+    "howItWorksSubDesc": "Get connected with verified contractors in 3 simple steps",
+    "benefitFree": "Free for clients",
+    "benefitVerified": "Verified contractors",
+    "benefitFirstOffer": "First offer in 2h",
+    "benefitRating": "4.8 average rating",
+    "whyBadge": "Why choose us",
+    "whyDesc": "We built Remont.kz to solve one problem — finding a trustworthy specialist should take minutes, not weeks.",
+    "vcTitle": "Verified contractors only",
+    "vcDesc": "Every company on Remont.kz goes through identity and license verification. You see real ratings from real completed jobs — no fake reviews, no anonymous contractors.",
+    "vcTag1": "Identity checked",
+    "vcTag2": "License verified",
+    "vcTag3": "Reviews from real jobs",
+    "ratingTitle": "4.8 / 5 average rating",
+    "ratingDesc": "Based on 1,500+ verified reviews from real completed requests.",
+    "ratingQuality": "Quality of work",
+    "ratingComm": "Communication",
+    "ratingOnTime": "On-time delivery",
+    "whyCard1Title": "First offer in 2 hours",
+    "whyCard1Desc": "Companies compete for your request, so you get responses fast.",
+    "whyCard2Title": "200+ companies",
+    "whyCard2Desc": "Wide network covering Almaty, Astana, Shymkent and 11 more cities.",
+    "whyCard3Title": "Free for clients",
+    "whyCard3Desc": "Post requests, receive offers and chat with specialists — all at no cost.",
+    "reviewsBadge": "Reviews",
+    "reviewsTitle": "Clients love Remont.kz",
+    "reviewsDesc": "Real feedback from verified clients who found specialists through our platform.",
+    "outOf5": "out of 5",
+    "review1Text": "Found a great auto repair shop in 20 minutes. Fair price, excellent quality. Will definitely use again!",
+    "review1Name": "Asel M.",
+    "review1City": "Almaty",
+    "review2Text": "Submitted a request for apartment renovation, got 4 offers the same day. Very happy with the result.",
+    "review2Name": "Dmitry K.",
+    "review2City": "Astana",
+    "review3Text": "No need to call around — companies contact you. Saved a huge amount of time. Love this platform.",
+    "review3Name": "Zarina T.",
+    "review3City": "Shymkent",
+    "clientLabel": "Client",
+    "verifiedLabel": "Verified",
+    "ctaBadge": "200+ companies waiting for your request",
+    "sessionExpired": "Your session expired. Please log in again.",
+    "activityItems": [
+      {
+        "text": "Arman completed auto repair in Almaty",
+        "time": "2 min ago"
+      },
+      {
+        "text": "New offer received: apartment renovation in Astana",
+        "time": "5 min ago"
+      },
+      {
+        "text": "Zarina rated StroiMaster 5 stars",
+        "time": "8 min ago"
+      },
+      {
+        "text": "Request accepted: electrical work in Shymkent",
+        "time": "12 min ago"
+      },
+      {
+        "text": "Dmitry completed engine diagnostics in Almaty",
+        "time": "15 min ago"
+      },
+      {
+        "text": "New request: bathroom renovation in Astana",
+        "time": "18 min ago"
+      },
+      {
+        "text": "AutoCity received 5-star review",
+        "time": "22 min ago"
+      },
+      {
+        "text": "Plumbing work completed in Karaganda",
+        "time": "25 min ago"
+      }
+    ],
+    "baSlides": [
+      {
+        "label": "Apartment renovation",
+        "beforeCaption": "Before: old, worn out",
+        "afterCaption": "After: modern & clean"
+      },
+      {
+        "label": "Car repair",
+        "beforeCaption": "Before: damaged, broken bumper",
+        "afterCaption": "After: fully restored"
+      },
+      {
+        "label": "Bag restoration",
+        "beforeCaption": "Before: torn, worn leather",
+        "afterCaption": "After: like new"
+      },
+      {
+        "label": "Headphones repair",
+        "beforeCaption": "Before: cracked, broken pads",
+        "afterCaption": "After: works perfectly"
+      },
+      {
+        "label": "Watch restoration",
+        "beforeCaption": "Before: cracked glass, dirty",
+        "afterCaption": "After: restored to original"
+      }
+    ],
+    "navLabels": [
+      "Top",
+      "Before & After",
+      "Stats",
+      "Categories",
+      "Services",
+      "How It Works",
+      "Why Us",
+      "Reviews",
+      "Get Started"
+    ]
   },
   "repair": {
     "title": "Services Catalog",
@@ -192,7 +399,20 @@
     "company": "Company",
     "activeFrom": "Active since",
     "tags": "Tags",
-    "location": "Location"
+    "location": "Location",
+    "noPhoto": "No photo",
+    "details": "Details",
+    "openIn2GIS": "Open in 2GIS",
+    "share": "Share",
+    "linkCopied": "Link copied!",
+    "noRatings": "No ratings",
+    "availability": "Availability",
+    "availableNow": "Available now",
+    "viewProfile": "View company profile",
+    "priceRange": "Price range",
+    "removedFromSaved": "Removed from favorites",
+    "savedToFavorites": "Saved to favorites",
+    "failedFavorites": "Failed to update favorites"
   },
   "requests": {
     "title": "My Requests",
@@ -267,7 +487,22 @@
     "statsCompleted": "Completed",
     "statsActive": "Active",
     "statsNew": "New",
-    "ratingLabels": ["", "Poor", "Below avg", "Average", "Good", "Excellent"]
+    "ratingLabels": [
+      "",
+      "Poor",
+      "Below avg",
+      "Average",
+      "Good",
+      "Excellent"
+    ],
+    "noRequestsFound": "No requests found",
+    "tryDifferentFilter": "Try a different filter",
+    "offerSent": "Offer sent",
+    "yourReply": "Your reply",
+    "replyPlaceholder": "Reply to review...",
+    "chatBtn": "Chat",
+    "cancelledMsg": "Request cancelled",
+    "reviewSubmitted": "Review submitted!"
   },
   "requestCreate": {
     "title": "New Request",
@@ -287,7 +522,16 @@
     "submitting": "Submitting...",
     "success": "Request created!",
     "selectCategory": "Select category",
-    "selectCity": "Select city"
+    "selectCity": "Select city",
+    "budgetHint": "Leave empty if not sure. Companies will suggest their price.",
+    "deadline": "Deadline (when to be completed)",
+    "photoOptional": "Photo (optional)",
+    "uploadPhotoHint": "Upload a photo of the problem",
+    "infoText": "After submitting, verified companies matching your request will be notified and will send offers within a few hours. You can review and accept the best one.",
+    "service": "Service",
+    "photo": "Photo",
+    "attached": "✓ Attached",
+    "error": "Failed to create request"
   },
   "company": {
     "dashboard": "Dashboard",
@@ -330,9 +574,59 @@
     "calendarTitle": "Order Calendar",
     "calendarNoOrders": "No orders for this date",
     "calendarMore": "+{count} more",
-    "calendarDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    "calendarMonths": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-    "order": "Order"
+    "calendarDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "calendarMonths": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "order": "Order",
+    "calendar": "Calendar",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "billing": "Billing",
+    "profile": "Profile",
+    "security": "Security",
+    "noConversations": "No conversations yet",
+    "noNotifications": "No notifications yet",
+    "memberSince": "Member since {date}",
+    "uploadPhoto": "Upload photo",
+    "photoFormats": "JPG, PNG, WEBP · max 5 MB",
+    "information": "Information",
+    "photo": "Photo",
+    "companyNamePlaceholder": "Company name",
+    "tellClients": "Tell clients about your company — specialization, experience, advantages…",
+    "jobsCompleted": "Jobs completed",
+    "activeServices": "Active services",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "customRequest": "Custom request",
+    "role": "Company",
+    "noMessages": "No messages yet",
+    "photoUpdated": "Photo updated",
+    "profileSaved": "Profile saved",
+    "deleted": "Deleted",
+    "updated": "Updated",
+    "created": "Created",
+    "offerSent": "Offer sent",
+    "replySent": "Reply sent"
   },
   "chat": {
     "title": "Messages",
@@ -437,13 +731,22 @@
     "namePlaceholder": "Your name",
     "passwordHint": "At least 8 characters",
     "confirmNewPassword": "Confirm new password",
-    "changePasswordBtn": "Change password"
+    "changePasswordBtn": "Change password",
+    "photoFormats": "JPG, PNG, WEBP · max 5 MB",
+    "memberSince": "Member since {date}",
+    "role": "Role",
+    "photoUpdated": "Photo updated",
+    "profileSaved": "Profile saved",
+    "uploadPhoto": "Upload photo",
+    "saving": "Saving…",
+    "addressPlaceholder": "City, street, building"
   },
   "favorites": {
     "title": "Favorites",
     "noFavorites": "Nothing added yet",
     "noFavoritesDesc": "Click the heart on a service card to add it to favorites.",
-    "browseCatalog": "Browse catalog"
+    "browseCatalog": "Browse catalog",
+    "savedCount": "{count, plural, one {# saved} other {# saved}}"
   },
   "compare": {
     "title": "Compare Services",
@@ -455,7 +758,16 @@
     "city": "City",
     "category": "Category",
     "licensed": "Licensed",
-    "createRequest": "Submit request"
+    "createRequest": "Submit request",
+    "photo": "Photo",
+    "noPhoto": "No photo",
+    "bestPrice": "Best price",
+    "vsCheapest": "+{pct}% vs cheapest",
+    "topRated": "Top rated ★",
+    "noRatings": "No ratings",
+    "availableNow": "Available now",
+    "selected": "{count} selected",
+    "availability": "Availability"
   },
   "notifications": {
     "title": "Notifications",
@@ -466,16 +778,402 @@
     "requestCompleted": "Request completed",
     "markAllRead": "Mark all as read",
     "allCaughtUp": "You're all caught up",
-    "yourActivity": "Your activity and updates"
+    "yourActivity": "Your activity and updates",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier",
+    "notifNewRequest": "New request: {service}",
+    "notifAccepted": "Request accepted: {service}",
+    "notifInProgress": "In progress: {service}",
+    "notifCompleted": "Completed: {service}",
+    "notifCancelled": "Request cancelled",
+    "notifClient": "Client: {name}",
+    "custom": "Custom"
   },
   "guide": {
     "title": "Guide",
-    "subtitle": "Everything you need to know about Remont.kz",
-    "faq": "Frequently asked questions"
+    "subtitle": "Quick answers to everything about Remont.kz",
+    "searchPlaceholder": "Search for answers… (e.g. 'password', 'review', 'request')",
+    "noResultsKeywords": "No results found — try different keywords",
+    "resultCount": "{count, plural, one {# answer} other {# answers}} for \"{query}\"",
+    "articleCount": "{count, plural, one {# article} other {# articles}}",
+    "categoriesCount": "{count} categories",
+    "updatedDaily": "Updated daily",
+    "mostPopular": "Most popular questions",
+    "categoriesLabel": "Categories",
+    "clearSearch": "Clear search",
+    "noResultsFor": "No results for \"{query}\"",
+    "noResultsDesc": "Try using different keywords or browse the categories below",
+    "videoGuides": "Video guides",
+    "comingSoon": "Coming soon",
+    "stillNeedHelp": "Still need help?",
+    "supportDesc": "Our support team is here for you",
+    "wasHelpful": "Was this helpful?",
+    "helpfulYes": "Yes",
+    "helpfulNo": "No",
+    "forClients": "For clients",
+    "forCompanies": "For companies",
+    "forBoth": "Clients & Companies",
+    "secRead": "{sec} sec read",
+    "minRead": "{min} min read",
+    "visualGuide": "Visual guide",
+    "howRequestWorks": "How a request works",
+    "howRequestDesc": "From posting to completion in 5 steps — see what each side does",
+    "clientAction": "Client action",
+    "companyAction": "Company action",
+    "bothAction": "Both",
+    "clientBadge": "CLIENT",
+    "companyBadge": "COMPANY",
+    "bothBadge": "BOTH",
+    "emailSupportTitle": "Email support",
+    "emailReply": "Reply within 24 hours",
+    "sendEmail": "Send email",
+    "liveChatTitle": "Live chat",
+    "liveChatSub": "Mon–Fri · 9:00–18:00",
+    "liveChatDesc": "Response in under 5 min",
+    "startChat": "Start chat",
+    "phoneTitle": "Phone",
+    "phoneSub": "+7 (727) 000-00-00",
+    "phoneDesc": "Business hours only",
+    "callUs": "Call us",
+    "mockupNewRequest": "New request",
+    "mockupIncomingOffers": "Incoming offers",
+    "mockupSelectOffer": "Select offer",
+    "mockupChat": "Chat",
+    "mockupChatMsg1": "When can you start?",
+    "mockupChatMsg2": "Tomorrow at 10am ✓",
+    "mockupChatMsg3": "Perfect, see you then!",
+    "mockupRate": "Rate your experience",
+    "mockupSubmit": "Submit review",
+    "sections": [
+      {
+        "id": "start",
+        "title": "Getting Started",
+        "articles": [
+          {
+            "q": "How do I find a service?",
+            "a": "Open the Service Catalog at /repair. Use the sidebar filters — city, category, price range, and minimum rating — to narrow down results. Click any card to see full details, photos, reviews, and the company contact information."
+          },
+          {
+            "q": "How do I submit a request?",
+            "a": "Click the Request button on any service card. Describe your task, set your budget range and city. Verified companies will respond with price offers within a few hours."
+          },
+          {
+            "q": "Is Remont.kz free for clients?",
+            "a": "Yes — completely free. Browsing the catalog, submitting requests, receiving offers, and chatting with companies costs nothing. You only pay the contractor directly for the work they complete."
+          },
+          {
+            "q": "How do I compare companies?",
+            "a": "Click the compare icon on up to 3 service cards. A floating bar appears at the bottom of the screen — click Compare to see them side by side: price, rating, city, availability, and more."
+          },
+          {
+            "q": "How do I save services for later?",
+            "a": "Click the heart icon on any service card or service detail page. Saved services appear in the Saved Services section in your profile dropdown. You must be logged in as a client."
+          }
+        ]
+      },
+      {
+        "id": "ratings",
+        "title": "Ratings & Reviews",
+        "articles": [
+          {
+            "q": "Who can leave a review?",
+            "a": "Only clients whose request status reached Completed can leave a review for that specific company. This guarantees all ratings are from real, verified interactions — no fake reviews."
+          },
+          {
+            "q": "How is the star rating calculated?",
+            "a": "The company overall rating is the arithmetic average of all client star ratings (1 to 5 stars). The count shown next to the rating is the total number of completed requests — not just reviewed ones."
+          },
+          {
+            "q": "Can I edit or delete my review?",
+            "a": "Currently reviews cannot be edited after submission. If you submitted a review by mistake or wish to dispute it, contact support at support@remont.kz and we will review your request."
+          },
+          {
+            "q": "Can companies respond to reviews?",
+            "a": "Yes. After a client leaves a review, the assigned company can post a public reply. This reply is visible to all users below the client review on the service detail page."
+          }
+        ]
+      },
+      {
+        "id": "companies",
+        "title": "For Companies",
+        "articles": [
+          {
+            "q": "How do I list my services?",
+            "a": "Register as a Company account. Go to Dashboard, then Services, then click Add service. Fill in the service name, category, description, price range, city, address, and upload up to 10 photos."
+          },
+          {
+            "q": "How do I receive and manage client requests?",
+            "a": "Go to Dashboard, then Requests. You see two sections: Assigned to you (direct requests) and Unassigned requests (matching your categories). Click Make offer on unassigned ones to send your price."
+          },
+          {
+            "q": "How do I update my company profile?",
+            "a": "Go to Profile (top-right menu, then Profile). You can update your company name, phone number, address, and profile photo. This information is shown to clients on your service cards and in the chat header."
+          },
+          {
+            "q": "Can I deactivate a service without deleting it?",
+            "a": "Yes. In Dashboard, then Services, click the Active or Inactive badge on any service card to toggle its visibility. Inactive services are hidden from the catalog but preserved with all their data and reviews."
+          }
+        ]
+      },
+      {
+        "id": "safety",
+        "title": "Safety & Trust",
+        "articles": [
+          {
+            "q": "How are companies verified?",
+            "a": "Companies register with their contact details and are visible in the catalog. We strongly recommend checking the rating, number of completed requests, and reviews before choosing. The platform shows real client feedback to help you decide."
+          },
+          {
+            "q": "What if something goes wrong with my job?",
+            "a": "First, use the in-app chat to communicate the issue directly with the company. Most disputes are resolved this way. If you cannot reach an agreement, contact our support team at support@remont.kz with your request ID."
+          },
+          {
+            "q": "Is my personal data safe?",
+            "a": "Yes. We store only the information you provide (email, name, phone). We do not share it with third parties. Passwords are hashed using bcrypt. All API connections use HTTPS encryption."
+          }
+        ]
+      },
+      {
+        "id": "account",
+        "title": "Account & Settings",
+        "articles": [
+          {
+            "q": "How do I change my password?",
+            "a": "Go to Settings (top-right menu, then Settings). Enter your current password, then your new password twice. Minimum 6 characters. Click Update password. Your session remains active."
+          },
+          {
+            "q": "I forgot my password. How do I reset it?",
+            "a": "Click Forgot password on the login modal. Enter your registered email address. We will send you a reset link valid for 1 hour. Click the link, enter your new password, and log in."
+          },
+          {
+            "q": "Can I change my account role?",
+            "a": "Account roles cannot be changed after registration. If you need a different role, create a new account with a different email address. Contact support if you need your old account data transferred."
+          },
+          {
+            "q": "How do I delete my account?",
+            "a": "Contact us at support@remont.kz with subject Account deletion request. Include your registered email. We will process your request within 5 business days and permanently delete all your data."
+          }
+        ]
+      }
+    ],
+    "popularQuestions": [
+      {
+        "sId": "start",
+        "aIdx": 1
+      },
+      {
+        "sId": "start",
+        "aIdx": 2
+      },
+      {
+        "sId": "account",
+        "aIdx": 0
+      },
+      {
+        "sId": "safety",
+        "aIdx": 0
+      },
+      {
+        "sId": "ratings",
+        "aIdx": 0
+      },
+      {
+        "sId": "companies",
+        "aIdx": 0
+      }
+    ],
+    "videos": [
+      {
+        "title": "How to submit your first request",
+        "duration": "2:45",
+        "thumbnail": "🔧"
+      },
+      {
+        "title": "Comparing companies side by side",
+        "duration": "1:58",
+        "thumbnail": "📊"
+      },
+      {
+        "title": "Setting up your company profile",
+        "duration": "3:12",
+        "thumbnail": "🏢"
+      }
+    ],
+    "timeline": [
+      {
+        "title": "Client posts a request",
+        "desc": "Describes the task, sets a budget range and city. Takes about 2 minutes."
+      },
+      {
+        "title": "Companies submit price offers",
+        "desc": "Verified contractors see requests matching their category and city — and compete with offers."
+      },
+      {
+        "title": "Client accepts the best offer",
+        "desc": "Compare by price, rating and reviews — one click to confirm. The company is notified instantly."
+      },
+      {
+        "title": "Chat opens — work begins",
+        "desc": "Direct messaging with file sharing. Company updates status: Accepted to In progress."
+      },
+      {
+        "title": "Job completed — leave a review",
+        "desc": "Company marks job as done. Client rates the work 1–5 stars. Rating updates the company profile."
+      }
+    ]
   },
   "about": {
     "title": "About us",
-    "subtitle": "Remont.kz — Kazakhstan's repair services marketplace"
+    "subtitle": "Remont.kz — Kazakhstan's repair services marketplace",
+    "heroBadge": "Diploma Project · Kazakhstan · 2026",
+    "heroDesc": "A full-stack marketplace connecting clients with verified repair and renovation contractors across Kazakhstan — built as a diploma project with production-grade architecture.",
+    "browseServices": "Browse Services",
+    "viewCompanies": "View Companies",
+    "ourMission": "Our mission",
+    "missionTitle": "Repair should be simple, transparent & fast",
+    "missionDesc": "Finding a trustworthy specialist in Kazakhstan used to mean weeks of searching, phone calls with no guarantees, and opaque pricing. Remont.kz changes that — post a request in 2 minutes, get competing offers the same day.",
+    "missionPoint1": "Free for clients — always",
+    "missionPoint2": "Only verified companies can submit offers",
+    "missionPoint3": "Ratings calculated from real completed jobs",
+    "missionPoint4": "Direct chat between client and contractor",
+    "missionStat1Value": "2 min",
+    "missionStat1Label": "To post a request",
+    "missionStat2Value": "2h",
+    "missionStat2Label": "First offer arrives",
+    "missionStat3Value": "4.8",
+    "missionStat3Label": "Average rating",
+    "missionStat4Value": "Free",
+    "missionStat4Label": "For clients",
+    "featuresBuilt": "What's built",
+    "featuresTitle": "Platform features",
+    "featuresDesc": "12 major feature areas, 34+ API endpoints, production-grade code.",
+    "techBuiltWith": "Built with",
+    "techTitle": "Technology stack",
+    "techDesc": "Modern, production-ready tools chosen for performance, type-safety and developer experience.",
+    "archHowItWorks": "How it works",
+    "archTitle": "Architecture overview",
+    "archDesc": "Animated flow showing how data moves through the system in real time.",
+    "dbSchema": "Database schema — 8 models",
+    "ctaTitle": "Ready to try it?",
+    "ctaDesc": "Browse real services, create a request and get offers from verified contractors.",
+    "howItWorks": "How it works",
+    "browserClient": "Browser / Client",
+    "browserSubtitle": "React 18 · Tailwind · Framer Motion · next-intl",
+    "pagesSSR": "Pages (SSR)",
+    "pagesSSRSub": "App Router · i18n · SEO",
+    "apiRoutes": "API Routes (34+)",
+    "apiRoutesSub": "JWT · Zod · RBAC",
+    "httpFetch": "HTTP / fetch",
+    "httpRequest": "HTTP request/response",
+    "apiCall": "API call",
+    "dbQuery": "DB query",
+    "dbSubtitle": "Prisma v7 · 8 models · 30+ indexes",
+    "emailSubtitle": "Mailtrap · Gmail · 6 templates",
+    "sseSubtitle": "Real-time chat · 3s polling · Auto cleanup",
+    "stats": [
+      {
+        "value": "34+",
+        "label": "API endpoints"
+      },
+      {
+        "value": "10",
+        "label": "Service categories"
+      },
+      {
+        "value": "200+",
+        "label": "Verified companies"
+      },
+      {
+        "value": "14",
+        "label": "Cities in KZ"
+      }
+    ],
+    "tech": [
+      {
+        "label": "Next.js 14",
+        "desc": "App Router, SSR, API Routes"
+      },
+      {
+        "label": "PostgreSQL",
+        "desc": "Prisma ORM v7, connection pooling"
+      },
+      {
+        "label": "JWT Auth",
+        "desc": "bcrypt, rate limiting, reCAPTCHA"
+      },
+      {
+        "label": "SSE Chat",
+        "desc": "Real-time via Server-Sent Events"
+      },
+      {
+        "label": "Nodemailer",
+        "desc": "Email verification, notifications"
+      },
+      {
+        "label": "Security",
+        "desc": "Zod validation, XSS sanitization"
+      },
+      {
+        "label": "PWA",
+        "desc": "Installable, offline-ready manifest"
+      },
+      {
+        "label": "i18n",
+        "desc": "next-intl: RU, EN, KZ locales"
+      }
+    ],
+    "features": [
+      {
+        "label": "Client & Company roles",
+        "desc": "Separate dashboards, permissions and flows for each role."
+      },
+      {
+        "label": "Real-time chat",
+        "desc": "SSE-powered messaging with file uploads and read receipts."
+      },
+      {
+        "label": "Reviews & ratings",
+        "desc": "Verified reviews from completed jobs only — no fake data."
+      },
+      {
+        "label": "Offer system",
+        "desc": "Companies compete for requests; clients accept the best offer."
+      },
+      {
+        "label": "Email verification",
+        "desc": "Token-based flow with Mailtrap/SMTP for all environments."
+      },
+      {
+        "label": "Geo-filtering",
+        "desc": "Services filtered by city with OSM geocoding for coordinates."
+      },
+      {
+        "label": "Kanban board",
+        "desc": "Company dashboard with drag-friendly request status tracking."
+      },
+      {
+        "label": "Service comparison",
+        "desc": "Side-by-side compare up to 3 services with all attributes."
+      },
+      {
+        "label": "Admin panel",
+        "desc": "User management, audit logs, promo codes, service moderation."
+      },
+      {
+        "label": "Portfolio system",
+        "desc": "Companies upload before/after work photos to their profile."
+      },
+      {
+        "label": "Rate limiting",
+        "desc": "In-memory rate limits on auth, offers, messages endpoints."
+      },
+      {
+        "label": "Email notifications",
+        "desc": "Transactional emails on offer, acceptance, job completion."
+      }
+    ],
+    "heroTitle": "About"
   },
   "forgotPassword": {
     "title": "Forgot password?",
@@ -506,13 +1204,54 @@
   "billing": {
     "title": "Billing",
     "history": "Payment history",
-    "noPayments": "No payments yet"
+    "noPayments": "No payments yet",
+    "choosePlan": "Choose the plan that fits your needs",
+    "mostPopular": "Most Popular",
+    "currentPlan": "Current plan",
+    "active": "Active",
+    "upgrade": "Upgrade",
+    "perMonth": "/month",
+    "payWithKaspi": "Pay with Kaspi",
+    "kaspiDesc": "Fast and secure payment via Kaspi.kz",
+    "comingSoon": "Coming Soon",
+    "howItWorksTitle": "How it will work:",
+    "kaspiStep1": "Open Kaspi.kz app on your phone",
+    "kaspiStep2": "Scan the QR code",
+    "kaspiStep3": "Confirm payment — done!",
+    "securePayments": "Secure payments",
+    "secureDesc": "Bank-level encryption. Cancel anytime with no hidden fees.",
+    "instantActivation": "Instant activation",
+    "instantDesc": "Your plan activates immediately after payment.",
+    "free": "Free",
+    "plan": {
+      "free": {
+        "name": "Free",
+        "desc": "For occasional use"
+      },
+      "standard": {
+        "name": "Standard",
+        "desc": "For regular users"
+      },
+      "premium": {
+        "name": "Premium",
+        "desc": "Maximum features"
+      }
+    }
   },
   "companies": {
     "title": "Companies",
     "subtitle": "All registered companies",
     "noCompanies": "No companies yet",
-    "services": "Services"
+    "services": "Services",
+    "searchPlaceholder": "Search by name or city…",
+    "completed": "completed",
+    "servicesCount": "Services ({count})",
+    "reviewsCount": "Reviews ({count})",
+    "noContent": "This company hasn't added any services yet.",
+    "notFound": "Company not found",
+    "companyReply": "Company reply",
+    "browseCatalog": "Browse catalog",
+    "emailBtn": "Email"
   },
   "footer": {
     "rights": "All rights reserved",
@@ -521,6 +1260,105 @@
     "guide": "Guide",
     "about": "About",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "description": "Marketplace connecting clients with verified repair professionals across Kazakhstan.",
+    "citiesCount": "14 cities",
+    "companiesCount": "200+ companies",
+    "servicesColumn": "Services",
+    "platformColumn": "Platform",
+    "accountColumn": "Account",
+    "allServices": "All Services",
+    "automobiles": "Automobiles",
+    "realEstate": "Real Estate",
+    "plumbing": "Plumbing",
+    "electrical": "Electrical",
+    "renovation": "Renovation",
+    "howItWorks": "How It Works",
+    "helpCenter": "Help Center",
+    "myRequests": "My Requests",
+    "favorites": "Favorites",
+    "messages": "Messages",
+    "reCaptchaNotice": "Protected by reCAPTCHA"
+  },
+  "settings": {
+    "twoFactor": {
+      "title": "Two-Factor Authentication",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "activeDesc": "2FA is active. An authenticator app is required on each login.",
+      "inactiveDesc": "Protect your account with one-time codes from Google Authenticator, Authy, or similar.",
+      "disable": "Disable",
+      "enable": "Enable",
+      "scanQr": "Scan the QR code in your authenticator app:",
+      "secretKey": "Key: {key}",
+      "enterCodeDisable": "Enter code to disable:",
+      "enterCodeEnable": "Enter code to confirm:",
+      "disableBtn": "Disable 2FA",
+      "confirmBtn": "Confirm",
+      "invalidCode": "Invalid code",
+      "enabledSuccess": "2FA enabled!",
+      "disabledSuccess": "2FA disabled"
+    },
+    "securityTips": {
+      "title": "Security Tips",
+      "tip1": "Use at least 8 characters",
+      "tip2": "Mix uppercase, lowercase, numbers, and symbols",
+      "tip3": "Don't reuse passwords from other sites",
+      "tip4": "Never share your password with anyone"
+    },
+    "passwordMinChars": "At least 6 characters",
+    "repeatPassword": "Repeat password",
+    "passwordMismatch": "Passwords do not match",
+    "changePassword": "Change Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "passwordChanged": "Password changed successfully",
+    "save": "Save"
+  },
+  "orderSummary": {
+    "title": "Order Summary",
+    "notFound": "Order not found",
+    "back": "Back",
+    "print": "Print",
+    "status": "Status",
+    "service": "Service",
+    "client": "Client",
+    "company": "Company",
+    "budget": "Budget",
+    "category": "Category",
+    "city": "City",
+    "deadline": "Deadline",
+    "description": "Description",
+    "created": "Created",
+    "accepted": "Accepted",
+    "started": "Started",
+    "completed": "Completed",
+    "rating": "Rating",
+    "review": "Review",
+    "noRating": "No rating",
+    "orderNumber": "Order",
+    "contactInfo": "Contact info",
+    "timeline": "Timeline",
+    "loadError": "Failed to load order data",
+    "actTitle": "Work Completion Certificate",
+    "contractor": "Contractor",
+    "noContractor": "No contractor assigned",
+    "orderDetails": "Order Details",
+    "companyReply": "Contractor reply",
+    "marketplaceDesc": "Remont.kz — repair services marketplace",
+    "docGenerated": "Document generated on {date}",
+    "statusNew": "New",
+    "statusAccepted": "Accepted",
+    "statusInProgress": "In progress",
+    "statusCompleted": "Completed",
+    "statusCancelled": "Cancelled",
+    "myOrders": "My orders",
+    "orders": "Orders",
+    "printPdf": "Print / PDF",
+    "completedDate": "Completed on {date}",
+    "statusLabel": "Status",
+    "ratingAndReview": "Rating & Review",
+    "createdDate": "Created on {date}",
+    "reviewLabel": "Review"
   }
 }

@@ -13,7 +13,7 @@ import { Footer } from "@/components/Footer";
 import { SettingsSidebar } from "@/components/SettingsSidebar";
 
 export default function SettingsPage() {
-  const t = useTranslations("profile");
+  const t = useTranslations("settings");
   const tCommon = useTranslations("common");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -55,12 +55,12 @@ export default function SettingsPage() {
         body: JSON.stringify({ token: twoFACode }),
       });
       if (!res.ok) { const e = await res.json() as { error: string }; throw new Error(e.error); }
-      toast.success("2FA включена!");
+      toast.success(t("twoFactor.enabledSuccess"));
       setTwoFAEnabled(true);
       setTwoFASetupOpen(false);
       setTwoFACode("");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Неверный код");
+      toast.error(e instanceof Error ? e.message : t("twoFactor.invalidCode"));
     } finally { setTwoFALoading(false); }
   }
 
@@ -74,25 +74,25 @@ export default function SettingsPage() {
         body: JSON.stringify({ token: twoFACode }),
       });
       if (!res.ok) { const e = await res.json() as { error: string }; throw new Error(e.error); }
-      toast.success("2FA отключена");
+      toast.success(t("twoFactor.disabledSuccess"));
       setTwoFAEnabled(false);
       setTwoFASetupOpen(false);
       setTwoFACode("");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Неверный код");
+      toast.error(e instanceof Error ? e.message : t("twoFactor.invalidCode"));
     } finally { setTwoFALoading(false); }
   }
 
   async function handleChangePassword() {
-    if (newPassword !== confirmPassword) { toast.error("Passwords do not match"); return; }
-    if (newPassword.length < 6) { toast.error("Minimum 6 characters"); return; }
+    if (newPassword !== confirmPassword) { toast.error(t("passwordMismatch")); return; }
+    if (newPassword.length < 6) { toast.error(t("passwordMinChars")); return; }
     setSaving(true);
     try {
       await api.changePassword({ currentPassword, newPassword });
-      toast.success("Password changed successfully");
+      toast.success(t("passwordChanged"));
       setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to change password");
+      toast.error(err instanceof Error ? err.message : tCommon("error"));
     } finally { setSaving(false); }
   }
 
@@ -113,7 +113,7 @@ export default function SettingsPage() {
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-5">{t("changePassword")}</h2>
               <div className="space-y-4 max-w-md">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("security")}</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("currentPassword")}</label>
                   <div className="relative">
                     <Input type={showCurrent ? "text" : "password"} value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" className="rounded-xl h-10 pr-10" />
@@ -125,10 +125,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("changePassword")}</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("newPassword")}</label>
                   <div className="relative">
                     <Input type={showNew ? "text" : "password"} value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" className="rounded-xl h-10 pr-10" />
+                      onChange={(e) => setNewPassword(e.target.value)} placeholder={t("passwordMinChars")} className="rounded-xl h-10 pr-10" />
                     <button type="button" tabIndex={-1}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setShowNew(!showNew)}>
@@ -137,16 +137,16 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("changePassword")}</label>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("repeatPassword")}</label>
                   <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repeat password" className="rounded-xl h-10" />
+                    placeholder={t("repeatPassword")} className="rounded-xl h-10" />
                   {confirmPassword && newPassword !== confirmPassword && (
-                    <p className="text-xs text-destructive">Passwords do not match</p>
+                    <p className="text-xs text-destructive">{t("passwordMismatch")}</p>
                   )}
                 </div>
                 <Button onClick={() => void handleChangePassword()} disabled={!isValid || saving} className="rounded-xl">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  {tCommon("save")}
+                  {t("save")}
                 </Button>
               </div>
             </div>
@@ -158,41 +158,41 @@ export default function SettingsPage() {
                   {twoFAEnabled
                     ? <ShieldCheck className="h-5 w-5 text-green-500" />
                     : <Shield className="h-5 w-5 text-muted-foreground" />}
-                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Двухфакторная аутентификация</h2>
+                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t("twoFactor.title")}</h2>
                 </div>
                 {twoFAEnabled
-                  ? <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-semibold px-2 py-0.5 rounded-full">Включена</span>
-                  : <span className="text-xs bg-muted text-muted-foreground font-semibold px-2 py-0.5 rounded-full">Выключена</span>}
+                  ? <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-semibold px-2 py-0.5 rounded-full">{t("twoFactor.enabled")}</span>
+                  : <span className="text-xs bg-muted text-muted-foreground font-semibold px-2 py-0.5 rounded-full">{t("twoFactor.disabled")}</span>}
               </div>
 
               {!twoFASetupOpen ? (
                 <div className="flex items-start justify-between gap-4">
                   <p className="text-sm text-muted-foreground">
-                    {twoFAEnabled
-                      ? "2FA активна. Приложение-аутентификатор требуется при каждом входе."
-                      : "Защитите аккаунт одноразовыми кодами из Google Authenticator, Authy или аналогов."}
+                    {twoFAEnabled ? t("twoFactor.activeDesc") : t("twoFactor.inactiveDesc")}
                   </p>
                   <Button size="sm" variant={twoFAEnabled ? "outline" : "default"} className="rounded-xl shrink-0"
                     onClick={async () => { setTwoFASetupOpen(true); await fetch2FAStatus(); }}>
-                    {twoFAEnabled ? <><ShieldOff className="h-3.5 w-3.5 mr-1.5" />Отключить</> : <><Shield className="h-3.5 w-3.5 mr-1.5" />Включить</>}
+                    {twoFAEnabled
+                      ? <><ShieldOff className="h-3.5 w-3.5 mr-1.5" />{t("twoFactor.disable")}</>
+                      : <><Shield className="h-3.5 w-3.5 mr-1.5" />{t("twoFactor.enable")}</>}
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {!twoFAEnabled && twoFAQR && (
                     <div className="space-y-3">
-                      <p className="text-sm text-muted-foreground">Отсканируйте QR-код в приложении:</p>
+                      <p className="text-sm text-muted-foreground">{t("twoFactor.scanQr")}</p>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={twoFAQR} alt="2FA QR Code" className="h-40 w-40 rounded-xl border border-border/50" />
                       {twoFASecret && (
                         <p className="text-xs font-mono bg-muted px-3 py-2 rounded-lg text-muted-foreground">
-                          Ключ: {twoFASecret}
+                          {t("twoFactor.secretKey", { key: twoFASecret })}
                         </p>
                       )}
                     </div>
                   )}
                   <div className="space-y-2 max-w-xs">
-                    <p className="text-sm font-medium">{twoFAEnabled ? "Введите код для отключения:" : "Введите код для подтверждения:"}</p>
+                    <p className="text-sm font-medium">{twoFAEnabled ? t("twoFactor.enterCodeDisable") : t("twoFactor.enterCodeEnable")}</p>
                     <Input
                       value={twoFACode}
                       onChange={e => setTwoFACode(e.target.value.replace(/\D/g, "").slice(0, 6))}
@@ -205,11 +205,11 @@ export default function SettingsPage() {
                     <Button size="sm" className="rounded-xl" disabled={twoFACode.length !== 6 || twoFALoading}
                       onClick={() => void (twoFAEnabled ? disable2FA() : enable2FA())}>
                       {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                      {twoFAEnabled ? "Отключить 2FA" : "Подтвердить"}
+                      {twoFAEnabled ? t("twoFactor.disableBtn") : t("twoFactor.confirmBtn")}
                     </Button>
                     <Button size="sm" variant="ghost" className="rounded-xl"
                       onClick={() => { setTwoFASetupOpen(false); setTwoFACode(""); }}>
-                      Отмена
+                      {tCommon("cancel")}
                     </Button>
                   </div>
                 </div>
@@ -218,14 +218,9 @@ export default function SettingsPage() {
 
             {/* Security tips */}
             <div className="bg-card border border-border/50 rounded-2xl p-6">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">{t("security")}</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">{t("securityTips.title")}</h2>
               <ul className="space-y-2.5">
-                {[
-                  "Use at least 8 characters",
-                  "Mix uppercase, lowercase, numbers, and symbols",
-                  "Don't reuse passwords from other sites",
-                  "Never share your password with anyone",
-                ].map((tip) => (
+                {[t("securityTips.tip1"), t("securityTips.tip2"), t("securityTips.tip3"), t("securityTips.tip4")].map((tip) => (
                   <li key={tip} className="flex items-center gap-2.5 text-sm text-muted-foreground">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     {tip}

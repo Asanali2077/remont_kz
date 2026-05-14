@@ -687,22 +687,22 @@ export default function MyRequestsPage() {
   async function load() {
     setLoading(true);
     try { setRequests(await api.getRequests()); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Failed to load"); }
+    catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setLoading(false); }
   }
 
   async function handleAcceptOffer(requestId: string, companyId: string) {
     setAcceptingOfferId(companyId);
-    try { await api.acceptOffer(requestId, companyId); toast.success("Offer accepted!"); await load(); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    try { await api.acceptOffer(requestId, companyId); toast.success(t("offerAccepted")); await load(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setAcceptingOfferId(null); }
   }
 
   async function handleCancel() {
     if (!cancelId) return;
     setCancelling(true);
-    try { await api.deleteRequest(cancelId); toast.success("Cancelled"); setCancelId(null); await load(); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    try { await api.deleteRequest(cancelId); toast.success(t("cancelledMsg")); setCancelId(null); await load(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setCancelling(false); }
   }
 
@@ -711,10 +711,10 @@ export default function MyRequestsPage() {
     setSubmittingReview(true);
     try {
       await api.rateRequest(reviewRequest.id, reviewStars, reviewText.trim() || undefined);
-      toast.success("Review submitted!");
+      toast.success(t("reviewSubmitted"));
       setReviewRequest(null); setReviewStars(0); setReviewText("");
       await load();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setSubmittingReview(false); }
   }
 
@@ -952,7 +952,7 @@ export default function MyRequestsPage() {
                                         offer={offer}
                                         requestId={req.id}
                                         onAccept={handleAcceptOffer}
-                                        onReject={() => void api.deleteOffer(req.id).then(load).catch(() => toast.error("Failed"))}
+                                        onReject={() => void api.deleteOffer(req.id).then(load).catch(() => toast.error(tCommon("error")))}
                                         accepting={acceptingOfferId === offer.companyId}
                                       />
                                     ))}

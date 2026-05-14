@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 export default function ChatPage() {
   const t = useTranslations("chat");
+  const tCommon = useTranslations("common");
   const { requestId } = useParams<{ requestId: string }>();
   const router = useRouter();
   const { user } = useAuth();
@@ -45,7 +46,7 @@ export default function ChatPage() {
         setRequest(req);
         await api.markMessagesRead(requestId).catch(() => null);
       } catch {
-        toast.error("Chat not found or no access");
+        toast.error(tCommon("error"));
         router.push("/chat");
       } finally {
         setLoading(false);
@@ -95,7 +96,7 @@ export default function ChatPage() {
   async function sendMessage() {
     if (!input.trim() || !request || !user || sending) return;
     const receiverId = user.id === request.clientId ? request.companyId : request.clientId;
-    if (!receiverId) { toast.error("Cannot determine recipient"); return; }
+    if (!receiverId) { toast.error(tCommon("error")); return; }
 
     setSending(true);
     const text = input.trim();
@@ -104,7 +105,7 @@ export default function ChatPage() {
       await api.sendMessage({ requestId, receiverId, content: text });
       await fetchMessages();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send");
+      toast.error(err instanceof Error ? err.message : tCommon("error"));
       setInput(text);
     } finally {
       setSending(false);
@@ -116,7 +117,7 @@ export default function ChatPage() {
     const file = e.target.files?.[0];
     if (!file || !request || !user) return;
     const receiverId = user.id === request.clientId ? request.companyId : request.clientId;
-    if (!receiverId) { toast.error("Cannot determine recipient"); return; }
+    if (!receiverId) { toast.error(tCommon("error")); return; }
 
     setUploadingFile(true);
     try {
@@ -131,7 +132,7 @@ export default function ChatPage() {
       });
       await fetchMessages();
     } catch {
-      toast.error("Failed to send file");
+      toast.error(tCommon("error"));
     } finally {
       setUploadingFile(false);
       if (fileRef.current) fileRef.current.value = "";

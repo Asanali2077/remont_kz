@@ -23,6 +23,7 @@ interface ChatItem {
 
 export default function ChatInboxPage() {
   const t = useTranslations("chat");
+  const tCommon = useTranslations("common");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [chats, setChats] = useState<ChatItem[]>([]);
@@ -36,7 +37,7 @@ export default function ChatInboxPage() {
       try {
         const data = await api.getChatInbox();
         setChats(data as ChatItem[]);
-      } catch { toast.error("Failed to load chats"); }
+      } catch { toast.error(tCommon("error")); }
       finally { setLoading(false); }
     })();
   }, [user]);

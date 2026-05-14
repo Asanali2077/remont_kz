@@ -12,24 +12,29 @@ import type { RequestRecord } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 import { buildNotifications, type NotifItem } from "@/lib/use-notifications";
 
-function buildCompanyNotifications(requests: RequestRecord[]): NotifItem[] {
-  return requests.map((r) => ({
-    id: r.id,
-    type: r.status === "completed" ? "completed" : r.status === "accepted" ? "accepted" : "offer" as NotifItem["type"],
-    title: r.status === "new"
-      ? `New request: ${r.service?.name ?? "Custom"}`
-      : r.status === "accepted"
-      ? `Request accepted: ${r.service?.name ?? "Custom"}`
-      : r.status === "in_progress"
-      ? `In progress: ${r.service?.name ?? "Custom"}`
-      : r.status === "completed"
-      ? `Completed: ${r.service?.name ?? "Custom"}`
-      : `Request cancelled`,
-    desc: r.client?.name ? `Client: ${r.client.name}` : r.description?.slice(0, 80) ?? "",
-    time: r.updatedAt,
-    href: r.status === "accepted" || r.status === "in_progress" ? `/chat/${r.id}` : "/company/dashboard?tab=requests",
-    read: r.status === "completed" || r.status === "cancelled",
-  })).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+type TFunc = (key: string, params?: Record<string, string>) => string;
+
+function buildCompanyNotifications(requests: RequestRecord[], t: TFunc): NotifItem[] {
+  return requests.map((r) => {
+    const svc = r.service?.name ?? t("custom");
+    return {
+      id: r.id,
+      type: r.status === "completed" ? "completed" : r.status === "accepted" ? "accepted" : "offer" as NotifItem["type"],
+      title: r.status === "new"
+        ? t("notifNewRequest", { service: svc })
+        : r.status === "accepted"
+        ? t("notifAccepted", { service: svc })
+        : r.status === "in_progress"
+        ? t("notifInProgress", { service: svc })
+        : r.status === "completed"
+        ? t("notifCompleted", { service: svc })
+        : t("notifCancelled"),
+      desc: r.client?.name ? t("notifClient", { name: r.client.name }) : r.description?.slice(0, 80) ?? "",
+      time: r.updatedAt,
+      href: r.status === "accepted" || r.status === "in_progress" ? `/chat/${r.id}` : "/company/dashboard?tab=requests",
+      read: r.status === "completed" || r.status === "cancelled",
+    };
+  }).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 }
 
 const ICONS = {
@@ -59,8 +64,8 @@ export default function NotificationsPage() {
   }, [user]);
 
   const notifs = useMemo(
-    () => user?.role === "company" ? buildCompanyNotifications(requests) : buildNotifications(requests),
-    [requests, user]
+    () => user?.role === "company" ? buildCompanyNotifications(requests, t) : buildNotifications(requests),
+    [requests, user, t]
   );
   const unread = notifs.filter(n => !n.read).length;
 
@@ -100,7 +105,7 @@ export default function NotificationsPage() {
                 </span>
               )}
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Your activity and updates</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{t("yourActivity")}</p>
           </div>
           {unread > 0 && (
             <button

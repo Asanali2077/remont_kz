@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter, Link } from "@/i18n/routing";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Star, MapPin, Phone, Mail, Building2, ArrowLeft,
   CheckCircle2, Calendar, Loader2,
@@ -33,6 +34,10 @@ interface CompanyProfile {
 }
 
 export default function CompanyPublicPage() {
+  const t = useTranslations("companies");
+  const tC = useTranslations("company");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [company, setCompany] = useState<CompanyProfile | null>(null);
@@ -45,7 +50,7 @@ export default function CompanyPublicPage() {
         if (!res.ok) throw new Error();
         setCompany(await res.json());
       } catch {
-        toast.error("Company not found");
+        toast.error(t("notFound"));
         router.push("/companies");
       } finally {
         setLoading(false);
@@ -62,7 +67,7 @@ export default function CompanyPublicPage() {
 
   const name = company.name ?? company.email;
   const initial = name[0].toUpperCase();
-  const memberSince = new Date(company.createdAt).toLocaleDateString("en", { year: "numeric", month: "long" });
+  const memberSince = new Date(company.createdAt).toLocaleDateString(locale, { year: "numeric", month: "long" });
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -71,7 +76,7 @@ export default function CompanyPublicPage() {
         {/* Back */}
         <button onClick={() => router.back()}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors group">
-          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> Back
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" /> {tCommon("back")}
         </button>
 
         {/* ── Company header ── */}
@@ -99,7 +104,7 @@ export default function CompanyPublicPage() {
                       </span>
                     )}
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" /> Member since {memberSince}
+                      <Calendar className="h-3.5 w-3.5" /> {tC("memberSince", { date: memberSince })}
                     </span>
                   </div>
                 </div>
@@ -119,12 +124,12 @@ export default function CompanyPublicPage() {
                 <div className="flex items-center gap-1.5 text-sm">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <span className="font-semibold">{company.completedCount}</span>
-                  <span className="text-muted-foreground">jobs completed</span>
+                  <span className="text-muted-foreground">{tC("jobsCompleted")}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-sm">
                   <Building2 className="h-4 w-4 text-primary" />
                   <span className="font-semibold">{company.services.length}</span>
-                  <span className="text-muted-foreground">active services</span>
+                  <span className="text-muted-foreground">{tC("activeServices")}</span>
                 </div>
               </div>
 
@@ -139,7 +144,7 @@ export default function CompanyPublicPage() {
                 )}
                 <a href={`mailto:${company.email}`}>
                   <Button variant="outline" size="sm" className="gap-1.5 rounded-xl h-9">
-                    <Mail className="h-3.5 w-3.5" /> Email
+                    <Mail className="h-3.5 w-3.5" /> {t("emailBtn")}
                   </Button>
                 </a>
               </div>
@@ -151,7 +156,7 @@ export default function CompanyPublicPage() {
         {company.services.length > 0 && (
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">Services ({company.services.length})</h2>
+              <h2 className="text-lg font-bold">{t("servicesCount", { count: company.services.length })}</h2>
             </div>
             <div className="flex flex-col gap-3">
               {company.services.map((s) => (
@@ -165,7 +170,7 @@ export default function CompanyPublicPage() {
         {company.companyRequests.length > 0 && (
           <section>
             <h2 className="text-lg font-bold mb-4">
-              Reviews ({company.companyRequests.length})
+              {t("reviewsCount", { count: company.companyRequests.length })}
             </h2>
             <div className="space-y-3">
               {company.companyRequests.map((req) => (
@@ -176,9 +181,9 @@ export default function CompanyPublicPage() {
                         {(req.client.name ?? req.client.email)[0].toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">{req.client.name ?? "Client"}</p>
+                        <p className="text-sm font-semibold">{req.client.name ?? tCommon("client")}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(req.createdAt).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" })}
+                          {new Date(req.createdAt).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
                         </p>
                       </div>
                     </div>
@@ -193,7 +198,7 @@ export default function CompanyPublicPage() {
                   {req.review && <p className="text-sm text-muted-foreground leading-relaxed">{req.review}</p>}
                   {req.companyReply && (
                     <div className="pl-4 border-l-2 border-primary/30">
-                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5">Company reply</p>
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5">{t("companyReply")}</p>
                       <p className="text-sm text-muted-foreground italic">&ldquo;{req.companyReply}&rdquo;</p>
                     </div>
                   )}
@@ -205,8 +210,8 @@ export default function CompanyPublicPage() {
 
         {company.services.length === 0 && company.companyRequests.length === 0 && (
           <div className="text-center py-12 bg-card border border-border/50 rounded-2xl">
-            <p className="text-muted-foreground">This company hasn&apos;t added any services yet.</p>
-            <Link href="/repair"><Button variant="outline" className="mt-4 rounded-xl">Browse catalog</Button></Link>
+            <p className="text-muted-foreground">{t("noContent")}</p>
+            <Link href="/repair"><Button variant="outline" className="mt-4 rounded-xl">{t("browseCatalog")}</Button></Link>
           </div>
         )}
       </div>

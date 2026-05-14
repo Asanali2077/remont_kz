@@ -116,12 +116,12 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
         await api.createRequest({ description: description.trim(), category: categoryFilter.category ? CATEGORY_MAP[categoryFilter.category] : undefined, city: city.trim(), imageUrl, budgetFrom: budgetFromNum, budgetTo: budgetToNum, deadline: deadlineIso });
       }
 
-      toast.success("Request submitted! Companies will respond shortly.");
+      toast.success(t("success"));
       setOpen(false);
       resetAll();
       await onCreated?.();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to create request");
+      toast.error(e instanceof Error ? e.message : t("error"));
     } finally {
       setSubmitting(false);
     }
@@ -226,11 +226,11 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
                   <span className="text-muted-foreground text-sm shrink-0">—</span>
                   <Input value={budgetTo} onChange={e => setBudgetTo(e.target.value)} type="number" placeholder={t("budgetTo")} className="rounded-xl h-10" />
                 </div>
-                <p className="text-[11px] text-muted-foreground">Leave empty if not sure. Companies will suggest their price.</p>
+                <p className="text-[11px] text-muted-foreground">{t("budgetHint")}</p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Дедлайн (когда нужно выполнить)</label>
+                <label className="text-sm font-medium">{t("deadline")}</label>
                 <Input
                   type="date"
                   value={deadline}
@@ -242,7 +242,7 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                  <Camera className="h-3.5 w-3.5 text-primary" /> Photo (optional)
+                  <Camera className="h-3.5 w-3.5 text-primary" /> {t("photoOptional")}
                 </label>
                 {preview ? (
                   <div className="relative w-full h-36 rounded-xl overflow-hidden border border-border/50">
@@ -257,7 +257,7 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
                   <button onClick={() => fileRef.current?.click()}
                     className="w-full h-24 rounded-xl border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary">
                     <Camera className="h-6 w-6" />
-                    <span className="text-xs font-medium">Upload a photo of the problem</span>
+                    <span className="text-xs font-medium">{t("uploadPhotoHint")}</span>
                   </button>
                 )}
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
@@ -271,7 +271,7 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
               <div className="rounded-xl border border-border/50 bg-muted/30 divide-y divide-border/40 overflow-hidden">
                 {service && (
                   <div className="flex justify-between items-start px-4 py-3 text-sm">
-                    <span className="text-muted-foreground">Service</span>
+                    <span className="text-muted-foreground">{t("service")}</span>
                     <span className="font-semibold text-right max-w-[60%]">{service.name}</span>
                   </div>
                 )}
@@ -295,8 +295,8 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
                 )}
                 {file && (
                   <div className="flex justify-between items-center px-4 py-3 text-sm">
-                    <span className="text-muted-foreground">Photo</span>
-                    <span className="font-semibold text-primary">✓ Attached</span>
+                    <span className="text-muted-foreground">{t("photo")}</span>
+                    <span className="font-semibold text-primary">{t("attached")}</span>
                   </div>
                 )}
                 <div className="px-4 py-3">
@@ -307,7 +307,7 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
               <div className="rounded-xl bg-primary/5 border border-primary/20 px-4 py-3 flex gap-2">
                 <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  After submitting, verified companies matching your request will be notified and will send offers within a few hours. You can review and accept the best one.
+                  {t("infoText")}
                 </p>
               </div>
             </div>

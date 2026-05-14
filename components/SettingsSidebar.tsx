@@ -1,33 +1,28 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { User, Lock } from "lucide-react";
-
-interface NavItem {
-  id: "profile" | "security";
-  label: string;
-  icon: React.ElementType;
-  href: string;
-}
-
-const ITEMS: NavItem[] = [
-  { id: "profile",  label: "Profile",  icon: User, href: "/profile" },
-  { id: "security", label: "Security", icon: Lock, href: "/settings" },
-];
 
 type ActiveId = "profile" | "security";
 
 export function SettingsSidebar({ active }: { active: ActiveId }) {
-  const visible = ITEMS;
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
+
+  const ITEMS = [
+    { id: "profile" as ActiveId,  label: tNav("profile"),    icon: User, href: "/profile" },
+    { id: "security" as ActiveId, label: tCommon("security"), icon: Lock, href: "/settings" },
+  ];
 
   return (
     <aside className="hidden md:block w-52 shrink-0">
       <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-border/50">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Account</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tNav("cabinet")}</p>
         </div>
         <nav className="p-2">
-          {visible.map(({ id, label, icon: Icon, href }) => (
+          {ITEMS.map(({ id, label, icon: Icon, href }) => (
             <Link
               key={id}
               href={href}

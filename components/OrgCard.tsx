@@ -48,15 +48,15 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
       if (isFav) {
         await api.removeFavorite(service.id);
         setIsFav(false);
-        toast.success("Removed from saved");
+        toast.success(t("removedFromSaved"));
         onUnfavorited?.(service.id);
       } else {
         await api.addFavorite(service.id);
         setIsFav(true);
-        toast.success("Saved to favorites");
+        toast.success(t("savedToFavorites"));
       }
     } catch {
-      toast.error("Failed to update favorites");
+      toast.error(t("failedFavorites"));
     } finally {
       setFavLoading(false);
     }
@@ -79,7 +79,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
               <Camera className="h-8 w-8" />
-              <span className="text-xs">No photo</span>
+              <span className="text-xs">{t("noPhoto")}</span>
             </div>
           )}
           {(service.images?.length ?? 0) > 1 && (
@@ -97,7 +97,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
               <Camera className="h-8 w-8" />
-              <span className="text-xs">No photo</span>
+              <span className="text-xs">{t("noPhoto")}</span>
             </div>
           )}
           {(service.images?.length ?? 0) > 1 && (
@@ -225,7 +225,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
             {!disableNavigation && (
               <Link href={`/repair/${service.id}`}>
                 <Button variant="outline" size="sm" className="h-8 gap-1 text-xs font-medium">
-                  Details <ArrowRight className="h-3 w-3" />
+                  {t("details")} <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>
             )}
@@ -240,7 +240,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
             ) : isClient ? (
               <RequestCreateDialog service={service} trigger={
                 <Button size="sm" className="h-8 gap-1.5 text-xs font-medium shadow-sm shadow-primary/20">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Request
+                  <CheckCircle2 className="h-3.5 w-3.5" /> {t("createRequest")}
                 </Button>
               } />
             ) : null}

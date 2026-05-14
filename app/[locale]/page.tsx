@@ -124,68 +124,44 @@ function TypewriterHero({ words }: { words: string[] }) {
   );
 }
 
-/* ─── Activity ticker items ─── */
-const ACTIVITY_ITEMS = [
-  { Icon: Wrench,        text: "Arman completed auto repair in Almaty",         time: "2 min ago" },
-  { Icon: Home,          text: "New offer received: apartment renovation in Astana", time: "5 min ago" },
-  { Icon: Star,          text: "Zarina rated StroiMaster 5 stars",               time: "8 min ago" },
-  { Icon: CheckCircle2,  text: "Request accepted: electrical work in Shymkent",  time: "12 min ago" },
-  { Icon: Wrench,        text: "Dmitry completed engine diagnostics in Almaty",  time: "15 min ago" },
-  { Icon: Home,          text: "New request: bathroom renovation in Astana",      time: "18 min ago" },
-  { Icon: Star,          text: "AutoCity received 5-star review",                 time: "22 min ago" },
-  { Icon: CheckCircle2,  text: "Plumbing work completed in Karaganda",            time: "25 min ago" },
-];
+const ACTIVITY_ICONS = [Wrench, Home, Star, CheckCircle2, Wrench, Home, Star, CheckCircle2];
 
 function ActivityTicker() {
+  const t = useTranslations("home");
+  const items = t.raw("activityItems") as { text: string; time: string }[];
   return (
     <div className="relative overflow-hidden py-2.5 border-y border-border/40 bg-muted/20">
       <div className="flex animate-[marquee_40s_linear_infinite] whitespace-nowrap">
-        {[...ACTIVITY_ITEMS, ...ACTIVITY_ITEMS].map(({ Icon, text, time }, i) => (
-          <span key={i} className="inline-flex items-center gap-2 px-6 text-sm text-muted-foreground shrink-0">
-            <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span className="font-medium text-foreground/80">{text}</span>
-            <span className="text-xs text-muted-foreground/60 flex items-center gap-1">
-              <Clock className="h-3 w-3" />{time}
+        {[...items, ...items].map(({ text, time }, i) => {
+          const Icon = ACTIVITY_ICONS[i % ACTIVITY_ICONS.length];
+          return (
+            <span key={i} className="inline-flex items-center gap-2 px-6 text-sm text-muted-foreground shrink-0">
+              <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span className="font-medium text-foreground/80">{text}</span>
+              <span className="text-xs text-muted-foreground/60 flex items-center gap-1">
+                <Clock className="h-3 w-3" />{time}
+              </span>
+              <span className="mx-4 text-border/40">·</span>
             </span>
-            <span className="mx-4 text-border/40">·</span>
-          </span>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
 
-/* ─── Cinematic full-screen slider (hero background) ─── */
-/* ─── Before/After slider ─── */
-const BA_SLIDES = [
-  {
-    label: "Apartment renovation",
-    before: { url: "/slides/apartment-before.jpg", caption: "Before: old, worn out" },
-    after:  { url: "/slides/apartment-after.jpg",  caption: "After: modern & clean" },
-  },
-  {
-    label: "Car repair",
-    before: { url: "/slides/car-before.jpg", caption: "Before: damaged, broken bumper" },
-    after:  { url: "/slides/car-after.jpg",  caption: "After: fully restored" },
-  },
-  {
-    label: "Bag restoration",
-    before: { url: "/slides/bag-before.jpg", caption: "Before: torn, worn leather" },
-    after:  { url: "/slides/bag-after.jpg",  caption: "After: like new" },
-  },
-  {
-    label: "Headphones repair",
-    before: { url: "/slides/headphones-before.jpg", caption: "Before: cracked, broken pads" },
-    after:  { url: "/slides/headphones-after.jpg",  caption: "After: works perfectly" },
-  },
-  {
-    label: "Watch restoration",
-    before: { url: "/slides/watch-before.jpg", caption: "Before: cracked glass, dirty" },
-    after:  { url: "/slides/watch-after.jpg",  caption: "After: restored to original" },
-  },
+const BA_URLS = [
+  { before: "/slides/apartment-before.jpg", after: "/slides/apartment-after.jpg" },
+  { before: "/slides/car-before.jpg",       after: "/slides/car-after.jpg" },
+  { before: "/slides/bag-before.jpg",       after: "/slides/bag-after.jpg" },
+  { before: "/slides/headphones-before.jpg",after: "/slides/headphones-after.jpg" },
+  { before: "/slides/watch-before.jpg",     after: "/slides/watch-after.jpg" },
 ];
 
 function BeforeAfterSlider() {
+  const t = useTranslations("home");
+  const slideTexts = t.raw("baSlides") as { label: string; beforeCaption: string; afterCaption: string }[];
+
   const [pos, setPos] = useState(50);
   const [slide, setSlide] = useState(0);
   const [fading, setFading] = useState(false);
@@ -196,7 +172,7 @@ function BeforeAfterSlider() {
       if (hovered.current) return;
       setFading(true);
       setTimeout(() => {
-        setSlide((s) => (s + 1) % BA_SLIDES.length);
+        setSlide((s) => (s + 1) % BA_URLS.length);
         setPos(50);
         setFading(false);
       }, 400);
@@ -204,7 +180,8 @@ function BeforeAfterSlider() {
     return () => clearInterval(timer);
   }, []);
 
-  const current = BA_SLIDES[slide];
+  const urls = BA_URLS[slide];
+  const text = slideTexts[slide];
 
   return (
     <div className="space-y-3">
@@ -225,24 +202,24 @@ function BeforeAfterSlider() {
         {/* AFTER */}
         <div className="absolute inset-0 bg-slate-900">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={current.after.url} alt="after" className="w-full h-full object-cover" />
+          <img src={urls.after} alt="after" className="w-full h-full object-cover" />
         </div>
 
         {/* BEFORE — clipped to left of handle */}
         <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={current.before.url} alt="before" className="w-full h-full object-cover" />
+          <img src={urls.before} alt="before" className="w-full h-full object-cover" />
         </div>
 
         {/* Caption overlays */}
         <div className="absolute bottom-3 left-3 right-1/2 pr-2">
           <span className="inline-block bg-black/60 backdrop-blur-sm text-white text-[11px] px-2 py-0.5 rounded-md truncate max-w-full">
-            {current.before.caption}
+            {text?.beforeCaption}
           </span>
         </div>
         <div className="absolute bottom-3 right-3 left-1/2 pl-2 flex justify-end">
           <span className="inline-block bg-emerald-600/80 backdrop-blur-sm text-white text-[11px] px-2 py-0.5 rounded-md truncate max-w-full">
-            {current.after.caption}
+            {text?.afterCaption}
           </span>
         </div>
 
@@ -257,18 +234,18 @@ function BeforeAfterSlider() {
         </div>
 
         {/* BEFORE / AFTER labels */}
-        <div className="absolute top-3 left-3 bg-black/55 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">BEFORE</div>
-        <div className="absolute top-3 right-3 bg-black/55 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">AFTER</div>
+        <div className="absolute top-3 left-3 bg-black/55 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">{t("before")}</div>
+        <div className="absolute top-3 right-3 bg-black/55 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">{t("after")}</div>
 
         {/* Slide label */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/55 backdrop-blur-sm text-white text-xs font-medium px-3 py-1 rounded-full whitespace-nowrap">
-          {current.label}
+          {text?.label}
         </div>
       </div>
 
       {/* Dot indicators */}
       <div className="flex justify-center items-center gap-2 py-3">
-        {BA_SLIDES.map((s, i) => (
+        {BA_URLS.map((_, i) => (
           <button
             key={i}
             onClick={() => { setFading(true); setTimeout(() => { setSlide(i); setPos(50); setFading(false); }, 400); }}
@@ -293,20 +270,11 @@ function ScrollProgress() {
   );
 }
 
-/* ─── Side section dots navigation ─── */
-const NAV_SECTIONS = [
-  { id: "hero",         label: "Top" },
-  { id: "before-after", label: "Before & After" },
-  { id: "stats",        label: "Stats" },
-  { id: "categories",   label: "Categories" },
-  { id: "services",     label: "Services" },
-  { id: "how-it-works", label: "How It Works" },
-  { id: "why-us",       label: "Why Us" },
-  { id: "testimonials", label: "Reviews" },
-  { id: "cta",          label: "Get Started" },
-];
+const NAV_SECTION_IDS = ["hero", "before-after", "stats", "categories", "services", "how-it-works", "why-us", "testimonials", "cta"];
 
 function SectionNav() {
+  const t = useTranslations("home");
+  const navLabels = t.raw("navLabels") as string[];
   const [active, setActive] = useState(0);
   const [visible, setVisible] = useState(false);
 
@@ -317,7 +285,7 @@ function SectionNav() {
   }, []);
 
   useEffect(() => {
-    const observers = NAV_SECTIONS.map(({ id }, i) => {
+    const observers = NAV_SECTION_IDS.map((id, i) => {
       const el = document.getElementById(id);
       if (!el) return null;
       const obs = new IntersectionObserver(
@@ -342,15 +310,15 @@ function SectionNav() {
 
   return (
     <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col items-center gap-2.5 bg-background/70 backdrop-blur-md border border-border/40 shadow-sm rounded-full px-1.5 py-3">
-      {NAV_SECTIONS.map(({ id, label }, i) => (
+      {NAV_SECTION_IDS.map((id, i) => (
         <button
           key={id}
           onClick={() => scrollTo(id)}
-          title={label}
+          title={navLabels[i]}
           className="group relative flex items-center justify-end"
         >
           <span className="absolute right-5 whitespace-nowrap text-xs font-medium bg-popover border border-border text-foreground px-2 py-1 rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {label}
+            {navLabels[i]}
           </span>
           <div className={`rounded-full transition-all duration-300 ${
             active === i
@@ -389,13 +357,13 @@ export default function HomePage() {
     { n: "03", icon: CheckCircle2,  title: t("step3Title"), desc: t("step3Desc") },
   ];
 
-  // Show toast if redirected from session expiry
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.search.includes("session_expired=1")) {
-      import("sonner").then(({ toast }) => toast.error("Your session expired. Please log in again."));
+      import("sonner").then(({ toast }) => toast.error(t("sessionExpired")));
       window.history.replaceState({}, "", "/");
     }
-  }, []);
+  }, [t]);
+
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
@@ -416,16 +384,115 @@ export default function HomePage() {
     }).catch(() => null);
   }, []);
 
+  const trustItems = [
+    { icon: CheckCircle2, text: t("trustFree") },
+    { icon: Shield,       text: t("trustVerified") },
+    { icon: Star,         text: t("trustRating") },
+    { icon: MapPin,       text: t("trustCities") },
+  ];
+
+  const catLinks = [
+    { label: t("catAuto"),       href: "/repair?category=automobiles",  icon: Car },
+    { label: t("catRenovation"), href: "/repair?category=renovation",   icon: Home },
+    { label: t("catPlumbing"),   href: "/repair?category=plumbing",     icon: Wrench },
+    { label: t("catElectrical"), href: "/repair?category=electrical",   icon: Zap },
+    { label: t("catCleaning"),   href: "/repair?category=cleaning",     icon: CheckCircle2 },
+    { label: t("catPainting"),   href: "/repair?category=painting",     icon: Shield },
+    { label: t("catRoofing"),    href: "/repair?category=roofing",      icon: TrendingUp },
+    { label: t("catAll"),        href: "/repair",                       icon: ArrowRight },
+  ];
+
+  const baBullets = t.raw("baBullets") as string[];
+
+  const baStats = [
+    { value: "98%",  label: t("baStatSatisfaction"), icon: Star },
+    { value: "2h",   label: t("baStatFirstOffer"),   icon: Clock },
+    { value: "500+", label: t("baStatJobs"),          icon: CheckCircle2 },
+    { value: "4.8",  label: t("baStatRating"),        icon: TrendingUp },
+  ];
+
+  const mainStats = [
+    { target: liveStats?.companies ?? 200,          suffix: "+", label: t("statVerifiedCompanies"), sub: t("statVerifiedSub"),    icon: Users,        color: "from-blue-500 to-cyan-500" },
+    { target: liveStats?.completedRequests ?? 1500, suffix: "+", label: t("statCompleted"),         sub: t("statCompletedSub"),   icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
+    { target: liveStats?.services ?? 14,            suffix: "+", label: t("statActive"),            sub: t("statActiveSub"),      icon: MapPin,       color: "from-violet-500 to-purple-500" },
+    { target: Math.round((liveStats?.avgRating ?? 4.8) * 10), suffix: "%", label: t("statAvgRating"), sub: t("statAvgRatingSub"), icon: TrendingUp,   color: "from-amber-500 to-orange-500" },
+  ];
+
+  const secondaryStats = [
+    { value: t("statTimeValue"),    label: t("statTimeLabel"),    icon: Clock },
+    { value: t("statFreeValue"),    label: t("statFreeLabel"),    icon: CheckCircle2 },
+    { value: t("statWarrantyValue"),label: t("statWarrantyLabel"),icon: Shield },
+  ];
+
+  const categoryCards = [
+    {
+      icon: Car, label: t("catAutoTitle"), href: "/repair?category=automobiles",
+      gradient: "from-blue-500 to-cyan-500",
+      bg: "bg-blue-50 dark:bg-blue-950/40", border: "border-blue-100 dark:border-blue-900",
+      desc: t("catAutoDesc"),
+      items: t.raw("catAutoItems") as string[],
+      count: t("catAutoCount"),
+    },
+    {
+      icon: Home, label: t("catRealEstateTitle"), href: "/repair?category=real-estate",
+      gradient: "from-emerald-500 to-teal-500",
+      bg: "bg-emerald-50 dark:bg-emerald-950/40", border: "border-emerald-100 dark:border-emerald-900",
+      desc: t("catRealEstateDesc"),
+      items: t.raw("catRealEstateItems") as string[],
+      count: t("catRealEstateCount"),
+    },
+    {
+      icon: Wrench, label: t("catOtherTitle"), href: "/repair?category=other",
+      gradient: "from-violet-500 to-purple-500",
+      bg: "bg-violet-50 dark:bg-violet-950/40", border: "border-violet-100 dark:border-violet-900",
+      desc: t("catOtherDesc"),
+      items: t.raw("catOtherItems") as string[],
+      count: t("catOtherCount"),
+    },
+  ];
+
+  const benefits = [
+    { icon: CheckCircle2, label: t("benefitFree") },
+    { icon: Shield,       label: t("benefitVerified") },
+    { icon: Clock,        label: t("benefitFirstOffer") },
+    { icon: Star,         label: t("benefitRating") },
+  ];
+
+  const vcTags = [t("vcTag1"), t("vcTag2"), t("vcTag3")];
+
+  const ratingMetrics = [
+    { l: t("ratingQuality"), v: 96 },
+    { l: t("ratingComm"),    v: 94 },
+    { l: t("ratingOnTime"),  v: 91 },
+  ];
+
+  const whyCards = [
+    { icon: Zap,          title: t("whyCard1Title"), desc: t("whyCard1Desc"), color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600" },
+    { icon: Users,        title: t("whyCard2Title"), desc: t("whyCard2Desc"), color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600" },
+    { icon: CheckCircle2, title: t("whyCard3Title"), desc: t("whyCard3Desc"), color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600" },
+  ];
+
+  const reviews = [
+    { name: t("review1Name"), city: t("review1City"), rating: 5, text: t("review1Text") },
+    { name: t("review2Name"), city: t("review2City"), rating: 5, text: t("review2Text") },
+    { name: t("review3Name"), city: t("review3City"), rating: 5, text: t("review3Text") },
+  ];
+
+  const ctaTrustItems = [
+    { icon: CheckCircle2, label: t("trustFree") },
+    { icon: Shield,       label: t("trustVerified") },
+    { icon: Star,         label: t("trustRating") },
+  ];
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <ScrollProgress />
       <SectionNav />
 
-      {/* ════ HERO — CARD STYLE ════ */}
+      {/* ════ HERO ════ */}
       <section id="hero" ref={heroRef}
         className="relative overflow-hidden min-h-[calc(100vh-64px)] flex flex-col justify-center">
 
-        {/* Background blobs */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-background" />
           <div className="absolute top-[-20%] left-[-10%] w-[700px] h-[700px] rounded-full opacity-20 dark:opacity-10"
@@ -443,7 +510,7 @@ export default function HomePage() {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
               className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-sm font-semibold text-primary mb-8">
               <Award className="h-3.5 w-3.5" />
-              #1 Repair marketplace in Kazakhstan
+              {t("heroBadge")}
               <span className="ml-1 flex h-2 w-2 rounded-full bg-primary animate-pulse" />
             </motion.div>
 
@@ -466,12 +533,12 @@ export default function HomePage() {
               className="flex flex-wrap justify-center gap-3 mb-10">
               <ClientLink href="/repair">
                 <Button size="lg" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base shadow-lg shadow-primary/20">
-                  <Search className="h-4 w-4" /> Browse Services
+                  <Search className="h-4 w-4" /> {t("browseServices")}
                 </Button>
               </ClientLink>
               <ClientLink href="/companies">
                 <Button size="lg" variant="outline" className="rounded-xl gap-2 h-13 px-8 font-semibold text-base">
-                  <Users className="h-4 w-4" /> View Companies
+                  <Users className="h-4 w-4" /> {t("viewCompanies")}
                 </Button>
               </ClientLink>
             </motion.div>
@@ -479,12 +546,7 @@ export default function HomePage() {
             {/* Trust row */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.45 }}
               className="flex flex-wrap justify-center gap-x-8 gap-y-2 mb-14">
-              {[
-                { icon: CheckCircle2, text: "Free for clients" },
-                { icon: Shield,       text: "Verified contractors" },
-                { icon: Star,         text: "4.8 average rating" },
-                { icon: MapPin,       text: "14 cities in KZ" },
-              ].map(({ icon: Icon, text }) => (
+              {trustItems.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
                   {text}
@@ -495,18 +557,9 @@ export default function HomePage() {
             {/* Category quick-links */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.6 }}
               className="w-full">
-              <p className="text-xs text-muted-foreground/60 uppercase tracking-widest mb-4 font-medium">Popular categories</p>
+              <p className="text-xs text-muted-foreground/60 uppercase tracking-widest mb-4 font-medium">{t("popularCategories")}</p>
               <div className="flex flex-wrap justify-center gap-2">
-                {[
-                  { label: "Automobiles",  href: "/repair?category=automobiles",  icon: Car },
-                  { label: "Renovation",   href: "/repair?category=renovation",   icon: Home },
-                  { label: "Plumbing",     href: "/repair?category=plumbing",     icon: Wrench },
-                  { label: "Electrical",   href: "/repair?category=electrical",   icon: Zap },
-                  { label: "Cleaning",     href: "/repair?category=cleaning",     icon: CheckCircle2 },
-                  { label: "Painting",     href: "/repair?category=painting",     icon: Shield },
-                  { label: "Roofing",      href: "/repair?category=roofing",      icon: TrendingUp },
-                  { label: "All services", href: "/repair",                       icon: ArrowRight },
-                ].map(({ label, href, icon: Icon }) => (
+                {catLinks.map(({ label, href, icon: Icon }) => (
                   <ClientLink key={label} href={href}>
                     <div className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-border/60 bg-card/60 hover:bg-card hover:border-primary/40 hover:text-primary transition-all duration-200 text-sm text-muted-foreground cursor-pointer">
                       <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -520,7 +573,6 @@ export default function HomePage() {
           </div>
         </motion.div>
 
-        {/* Activity ticker pinned to bottom of hero */}
         <motion.div
           className="absolute bottom-0 left-0 right-0"
           initial={{ opacity: 0 }}
@@ -534,22 +586,16 @@ export default function HomePage() {
       {/* ════ BEFORE / AFTER ════ */}
       <section id="before-after" className="min-h-screen flex flex-col justify-center py-16 overflow-hidden">
 
-        {/* Header — contained */}
         <div className="mx-auto max-w-6xl w-full px-4 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <FadeLeft>
               <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
-                We transform<br />any space or item
+                {t("baTitle")}
               </h2>
             </FadeLeft>
             <FadeRight delay={0.15}>
               <ul className="space-y-2.5">
-                {[
-                  "Professional quality on every job",
-                  "Transparent pricing — no hidden fees",
-                  "Work completed on schedule",
-                  "5-year warranty from top contractors",
-                ].map((item) => (
+                {baBullets.map((item) => (
                   <li key={item} className="flex items-center gap-2.5 text-sm text-muted-foreground">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     {item}
@@ -560,7 +606,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Slider — matches navbar width (max-w-6xl px-4) */}
         <FadeUp delay={0.1}>
           <div className="mx-auto max-w-6xl w-full px-4">
             <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/20 border border-border/30">
@@ -569,16 +614,10 @@ export default function HomePage() {
           </div>
         </FadeUp>
 
-        {/* Stats row — contained */}
         <FadeUp delay={0.2}>
           <div className="mx-auto max-w-6xl w-full px-4 mt-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { value: "98%",  label: "Client satisfaction", icon: Star },
-                { value: "2h",   label: "Average first offer",  icon: Clock },
-                { value: "500+", label: "Jobs completed",        icon: CheckCircle2 },
-                { value: "4.8",  label: "Average rating",        icon: TrendingUp },
-              ].map(({ value, label, icon: Icon }) => (
+              {baStats.map(({ value, label, icon: Icon }) => (
                 <div key={label} className="flex items-center gap-3 rounded-2xl border border-border/40 bg-card/60 px-5 py-4">
                   <Icon className="h-5 w-5 text-primary shrink-0" />
                   <div>
@@ -598,24 +637,18 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl w-full">
           <FadeUp>
             <div className="text-center mb-16">
-              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">By the numbers</p>
+              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{t("statsBadge")}</p>
               <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4">
-                Kazakhstan&apos;s most trusted<br />repair platform
+                {t("statsTitle")}
               </h2>
               <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                Thousands of homeowners and car owners find reliable specialists through Remont.kz every month.
+                {t("statsDesc")}
               </p>
             </div>
           </FadeUp>
 
-          {/* Main 4 stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
-            {[
-              { target: liveStats?.companies ?? 200,          suffix: "+", label: "Verified companies",   sub: "across 14 cities",       icon: Users,        color: "from-blue-500 to-cyan-500" },
-              { target: liveStats?.completedRequests ?? 1500, suffix: "+", label: "Requests completed",   sub: "and growing daily",      icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
-              { target: liveStats?.services ?? 14,            suffix: "+", label: "Active services",      sub: "from Almaty to Astana",  icon: MapPin,       color: "from-violet-500 to-purple-500" },
-              { target: Math.round((liveStats?.avgRating ?? 4.8) * 10), suffix: "%", label: "Avg rating (×10)",  sub: "based on all reviews",   icon: TrendingUp,   color: "from-amber-500 to-orange-500" },
-            ].map(({ target, suffix, label, sub, icon: Icon, color }, i) => (
+            {mainStats.map(({ target, suffix, label, sub, icon: Icon, color }, i) => (
               <ScaleIn key={label} delay={i * 0.12}>
                 <div className="relative group rounded-3xl border border-border/50 bg-card p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
                   <div className={`absolute -top-6 -right-6 h-24 w-24 rounded-full bg-gradient-to-br ${color} opacity-10 group-hover:opacity-20 blur-xl transition-opacity`} />
@@ -632,14 +665,9 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Secondary info row */}
           <FadeUp delay={0.3}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { value: "2 hours",   label: "Average time to first offer",  icon: Clock },
-                { value: "Free",      label: "Always free for clients",       icon: CheckCircle2 },
-                { value: "5 years",   label: "Max warranty from contractors", icon: Shield },
-              ].map(({ value, label, icon: Icon }) => (
+              {secondaryStats.map(({ value, label, icon: Icon }) => (
                 <div key={label} className="flex items-center gap-4 rounded-2xl border border-border/40 bg-card/60 px-6 py-4">
                   <Icon className="h-8 w-8 text-primary shrink-0" />
                   <div>
@@ -658,69 +686,35 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl w-full">
           <FadeUp>
             <div className="text-center mb-14">
-              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Browse</p>
-              <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Pick your category</h2>
+              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{t("catBadge")}</p>
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">{t("catTitle")}</h2>
               <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-                From car repair to full apartment renovation — find the right specialist for any job.
+                {t("catDesc")}
               </p>
             </div>
           </FadeUp>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Car, label: "Automobiles", href: "/repair?category=automobiles",
-                gradient: "from-blue-500 to-cyan-500",
-                bg: "bg-blue-50 dark:bg-blue-950/40", border: "border-blue-100 dark:border-blue-900",
-                desc: "Body repair, diagnostics, detailing, engine work",
-                items: ["Engine & transmission", "Body & painting", "Diagnostics", "Tyres & wheels", "Detailing"],
-                count: "80+ services",
-              },
-              {
-                icon: Home, label: "Real Estate", href: "/repair?category=real-estate",
-                gradient: "from-emerald-500 to-teal-500",
-                bg: "bg-emerald-50 dark:bg-emerald-950/40", border: "border-emerald-100 dark:border-emerald-900",
-                desc: "Renovation, plumbing, electrical, cleaning",
-                items: ["Full renovation", "Plumbing", "Electrical", "Painting & walls", "Cleaning"],
-                count: "95+ services",
-              },
-              {
-                icon: Wrench, label: "Other Services", href: "/repair?category=other",
-                gradient: "from-violet-500 to-purple-500",
-                bg: "bg-violet-50 dark:bg-violet-950/40", border: "border-violet-100 dark:border-violet-900",
-                desc: "Appliances, furniture, gadgets, equipment",
-                items: ["Appliances", "Furniture", "Smartphones", "Watches & bags", "Welding"],
-                count: "40+ services",
-              },
-            ].map(({ icon: Icon, label, href, gradient, bg, border, desc, items, count }, i) => (
+            {categoryCards.map(({ icon: Icon, label, href, gradient, bg, border, desc, items, count }, i) => (
               <ScaleIn key={label} delay={i * 0.15}>
                 <ClientLink href={href}>
                   <div className={`group relative rounded-3xl border p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer h-full flex flex-col ${bg} ${border} overflow-hidden`}>
-                    {/* Glow */}
                     <div className={`absolute -top-12 -right-12 h-40 w-40 rounded-full bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-25 transition-opacity blur-2xl`} />
-
-                    {/* Icon */}
                     <div className={`relative inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} mb-6 shadow-xl group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300`}>
                       <Icon className="h-8 w-8 text-white" />
                     </div>
-
-                    {/* Title & count */}
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-2xl font-black">{label}</h3>
                       <span className="text-xs font-semibold text-muted-foreground bg-background/60 px-2.5 py-1 rounded-full shrink-0 mt-1">{count}</span>
                     </div>
-
                     <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{desc}</p>
-
-                    {/* Sub-items */}
                     <div className="flex flex-wrap gap-2 mb-8 flex-1">
                       {items.map(item => (
                         <span key={item} className="text-xs bg-background/60 border border-border/40 px-2.5 py-1 rounded-full text-muted-foreground">{item}</span>
                       ))}
                     </div>
-
                     <span className="inline-flex items-center gap-2 text-sm font-bold text-primary group-hover:gap-4 transition-all duration-300">
-                      Browse all <ChevronRight className="h-4 w-4" />
+                      {t("browseAll")} <ChevronRight className="h-4 w-4" />
                     </span>
                   </div>
                 </ClientLink>
@@ -730,14 +724,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ════ FEATURED SERVICES (real data) ════ */}
+      {/* ════ FEATURED SERVICES ════ */}
       <section id="services" className="min-h-screen flex flex-col justify-center px-4 py-16 bg-muted/20">
         {featuredServices.length > 0 ? (
           <div className="mx-auto max-w-6xl w-full">
             <FadeUp>
               <div className="flex items-end justify-between mb-10">
                 <div>
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Top rated</p>
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">{t("topRatedBadge")}</p>
                   <h2 className="text-3xl md:text-4xl font-black tracking-tight">{t("featuredServices")}</h2>
                 </div>
                 {!isCompany && (
@@ -766,12 +760,12 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="mx-auto max-w-6xl w-full text-center">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Top rated</p>
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{t("topRatedBadge")}</p>
             <h2 className="text-4xl font-black tracking-tight mb-4">{t("featuredServices")}</h2>
             {!isCompany && (
               <Link href="/repair">
                 <Button size="lg" className="rounded-xl gap-2 mt-4">
-                  <Search className="h-4 w-4" /> Browse all services
+                  <Search className="h-4 w-4" /> {t("browseAllServices")}
                 </Button>
               </Link>
             )}
@@ -784,20 +778,17 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl w-full">
           <FadeUp>
             <div className="text-center mb-16">
-              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Process</p>
+              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{t("processBadge")}</p>
               <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">{t("howItWorks")}</h2>
-              <p className="text-muted-foreground text-lg max-w-md mx-auto">Get connected with verified contractors in 3 simple steps</p>
+              <p className="text-muted-foreground text-lg max-w-md mx-auto">{t("howItWorksSubDesc")}</p>
             </div>
           </FadeUp>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative mb-16">
-            {/* Connector line */}
             <div className="hidden md:block absolute top-16 left-[calc(16.7%+56px)] right-[calc(16.7%+56px)] border-t-2 border-dashed border-primary/20" />
-
             {STEPS.map(({ n, icon: Icon, title, desc }, i) => (
               <FadeUp key={n} delay={i * 0.15}>
                 <div className="flex flex-col items-center text-center group">
-                  {/* Spinning ring icon */}
                   <div className="relative mb-8 h-32 w-32 flex items-center justify-center">
                     <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary/30 animate-[spin_20s_linear_infinite]" />
                     <div className="absolute inset-2 rounded-full border border-primary/10" />
@@ -816,15 +807,9 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Bottom benefits strip */}
           <FadeUp delay={0.4}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { icon: CheckCircle2, label: "Free for clients" },
-                { icon: Shield,       label: "Verified contractors" },
-                { icon: Clock,        label: "First offer in 2h" },
-                { icon: Star,         label: "4.8 average rating" },
-              ].map(({ icon: Icon, label }) => (
+              {benefits.map(({ icon: Icon, label }) => (
                 <div key={label} className="flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 px-5 py-4">
                   <Icon className="h-5 w-5 text-primary shrink-0" />
                   <span className="text-sm font-medium">{label}</span>
@@ -836,22 +821,20 @@ export default function HomePage() {
       </section>
 
 
-      {/* ════ FEATURES / WHY US ════ */}
+      {/* ════ WHY US ════ */}
       <section id="why-us" className="min-h-screen flex flex-col justify-center px-4 py-16 bg-muted/20">
         <div className="mx-auto max-w-6xl w-full">
           <FadeUp>
             <div className="text-center mb-14">
-              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Why choose us</p>
+              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{t("whyBadge")}</p>
               <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">{t("whyUs")}</h2>
               <p className="text-muted-foreground text-lg max-w-lg mx-auto">
-                We built Remont.kz to solve one problem — finding a trustworthy specialist should take minutes, not weeks.
+                {t("whyDesc")}
               </p>
             </div>
           </FadeUp>
 
-          {/* Big feature cards — 2 wide + 2 tall */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-5">
-            {/* Large card */}
             <FadeLeft delay={0.05} className="lg:col-span-2">
               <div className="group relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/5 to-primary/10 p-8 h-full overflow-hidden hover:shadow-xl transition-all duration-300">
                 <div className="absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-primary/5 blur-2xl" />
@@ -859,32 +842,31 @@ export default function HomePage() {
                   <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 mb-6">
                     <Shield className="h-7 w-7 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-black mb-3">Verified contractors only</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-6">Every company on Remont.kz goes through identity and license verification. You see real ratings from real completed jobs — no fake reviews, no anonymous contractors.</p>
+                  <h3 className="text-2xl font-black mb-3">{t("vcTitle")}</h3>
+                  <p className="text-muted-foreground leading-relaxed mb-6">{t("vcDesc")}</p>
                   <div className="flex flex-wrap gap-2">
-                    {["Identity checked", "License verified", "Reviews from real jobs"].map(t => (
-                      <span key={t} className="text-xs bg-primary/10 text-primary font-medium px-3 py-1 rounded-full">{t}</span>
+                    {vcTags.map(tag => (
+                      <span key={tag} className="text-xs bg-primary/10 text-primary font-medium px-3 py-1 rounded-full">{tag}</span>
                     ))}
                   </div>
                 </div>
               </div>
             </FadeLeft>
 
-            {/* Tall card */}
             <FadeRight delay={0.1}>
               <div className="group relative rounded-3xl border border-border/50 bg-card p-8 h-full overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-amber-500/10 blur-xl" />
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/40 mb-6">
                   <Star className="h-7 w-7 text-amber-500" />
                 </div>
-                <h3 className="text-xl font-black mb-3">4.8 / 5 average rating</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-4">Based on 1,500+ verified reviews from real completed requests.</p>
+                <h3 className="text-xl font-black mb-3">{t("ratingTitle")}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">{t("ratingDesc")}</p>
                 <div className="space-y-2">
-                  {[{l:"Quality of work",v:96},{l:"Communication",v:94},{l:"On-time delivery",v:91}].map(({l,v})=>(
+                  {ratingMetrics.map(({ l, v }) => (
                     <div key={l}>
                       <div className="flex justify-between text-xs mb-1"><span>{l}</span><span className="font-bold">{v}%</span></div>
                       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-amber-400 rounded-full" style={{width:`${v}%`}} />
+                        <div className="h-full bg-amber-400 rounded-full" style={{ width: `${v}%` }} />
                       </div>
                     </div>
                   ))}
@@ -893,13 +875,8 @@ export default function HomePage() {
             </FadeRight>
           </div>
 
-          {/* Bottom 3 small cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              { icon: Zap,    title: "First offer in 2 hours", desc: "Companies compete for your request, so you get responses fast.", color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600" },
-              { icon: Users,  title: "200+ companies",         desc: "Wide network covering Almaty, Astana, Shymkent and 11 more cities.", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600" },
-              { icon: CheckCircle2, title: "Free for clients", desc: "Post requests, receive offers and chat with specialists — all at no cost.", color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600" },
-            ].map(({ icon: Icon, title, desc, color }, i) => (
+            {whyCards.map(({ icon: Icon, title, desc, color }, i) => (
               <FadeUp key={title} delay={i * 0.1 + 0.2}>
                 <div className="group rounded-2xl border border-border/50 bg-card p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl mb-4 group-hover:scale-110 transition-transform ${color}`}>
@@ -918,20 +895,18 @@ export default function HomePage() {
       <section id="testimonials" className="min-h-screen flex flex-col justify-center px-4 py-16">
         <div className="mx-auto max-w-6xl w-full">
 
-          {/* Top: rating summary */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-14">
-              <FadeLeft>
+            <FadeLeft>
               <div>
-                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Reviews</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{t("reviewsBadge")}</p>
                 <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight mb-4">
-                  Clients love<br />Remont.kz
+                  {t("reviewsTitle")}
                 </h2>
-                <p className="text-muted-foreground text-lg">Real feedback from verified clients who found specialists through our platform.</p>
+                <p className="text-muted-foreground text-lg">{t("reviewsDesc")}</p>
               </div>
-              </FadeLeft>
-              <FadeRight delay={0.1}>
+            </FadeLeft>
+            <FadeRight delay={0.1}>
               <div className="flex flex-col sm:flex-row gap-6 items-center">
-                {/* Big rating */}
                 <div className="text-center">
                   <div className="text-7xl font-black tracking-tight text-primary">4.8</div>
                   <div className="flex justify-center gap-0.5 my-2">
@@ -939,7 +914,7 @@ export default function HomePage() {
                       <Star key={i} className={`h-5 w-5 ${i <= 4 ? "fill-amber-400 text-amber-400" : "fill-amber-200 text-amber-200"}`} />
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground">out of 5</p>
+                  <p className="text-sm text-muted-foreground">{t("outOf5")}</p>
                 </div>
                 <div className="flex-1 space-y-2 w-full">
                   {[{stars:5,pct:82,d:0.1},{stars:4,pct:11,d:0.15},{stars:3,pct:4,d:0.2},{stars:2,pct:2,d:0.25},{stars:1,pct:1,d:0.3}].map(({stars,pct,d})=>(
@@ -952,16 +927,11 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
-              </FadeRight>
-            </div>
+            </FadeRight>
+          </div>
 
-          {/* Review cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              { name: "Asel M.",   city: "Almaty",   rating: 5, text: "Found a great auto repair shop in 20 minutes. Fair price, excellent quality. Will definitely use again!" },
-              { name: "Dmitry K.", city: "Astana",   rating: 5, text: "Submitted a request for apartment renovation, got 4 offers the same day. Very happy with the result." },
-              { name: "Zarina T.", city: "Shymkent", rating: 5, text: "No need to call around — companies contact you. Saved a huge amount of time. Love this platform." },
-            ].map(({ name, city, rating, text }, i) => (
+            {reviews.map(({ name, city, rating, text }, i) => (
               <ScaleIn key={name} delay={i * 0.12}>
                 <div className="group rounded-2xl border border-border/50 bg-card p-6 flex flex-col gap-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full">
                   <div className="flex gap-0.5">
@@ -976,9 +946,9 @@ export default function HomePage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold">{name}</p>
-                      <p className="text-xs text-muted-foreground">Client · {city}</p>
+                      <p className="text-xs text-muted-foreground">{t("clientLabel")} · {city}</p>
                     </div>
-                    <span className="ml-auto text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 px-2 py-0.5 rounded-full">Verified</span>
+                    <span className="ml-auto text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 px-2 py-0.5 rounded-full">{t("verifiedLabel")}</span>
                   </div>
                 </div>
               </ScaleIn>
@@ -999,7 +969,7 @@ export default function HomePage() {
           <FadeUp className="relative max-w-3xl mx-auto w-full">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-4 py-1.5 text-sm font-semibold mb-8">
               <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
-              200+ companies waiting for your request
+              {t("ctaBadge")}
             </div>
 
             <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tight leading-tight">
@@ -1031,11 +1001,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-6">
-              {[
-                { icon: CheckCircle2, label: "Free for clients" },
-                { icon: Shield,       label: "Verified contractors" },
-                { icon: Star,         label: "4.8 average rating" },
-              ].map(({ icon: Icon, label }) => (
+              {ctaTrustItems.map(({ icon: Icon, label }) => (
                 <div key={label} className="flex items-center gap-2 text-white/60 text-sm">
                   <Icon className="h-4 w-4 text-white/80" /> {label}
                 </div>

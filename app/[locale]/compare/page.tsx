@@ -45,7 +45,7 @@ export default function ComparePage() {
             </div>
             <div>
               <h1 className="text-xl font-bold">{t("title")}</h1>
-              <p className="text-xs text-muted-foreground">{selected.length} selected</p>
+              <p className="text-xs text-muted-foreground">{t("selected", { count: selected.length })}</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -82,13 +82,13 @@ export default function ComparePage() {
 
           {/* Photo row */}
           <div className="grid border-b border-border/50" style={{ gridTemplateColumns: `180px repeat(${selected.length}, 1fr)` }}>
-            <div className="px-5 py-4 text-xs font-semibold text-muted-foreground border-r border-border/40 flex items-center">Photo</div>
+            <div className="px-5 py-4 text-xs font-semibold text-muted-foreground border-r border-border/40 flex items-center">{t("photo")}</div>
             {selected.map((s) => (
               <div key={s.id} className="p-3 border-r border-border/40 last:border-0">
                 {s.images[0] ? (
                   <img src={s.images[0].url} alt={s.name} className="w-full h-28 object-cover rounded-xl" />
                 ) : (
-                  <div className="w-full h-28 rounded-xl bg-muted flex items-center justify-center text-xs text-muted-foreground">No photo</div>
+                  <div className="w-full h-28 rounded-xl bg-muted flex items-center justify-center text-xs text-muted-foreground">{t("noPhoto")}</div>
                 )}
               </div>
             ))}
@@ -127,12 +127,12 @@ export default function ComparePage() {
                     </span>
                     {isCheap && selected.length > 1 && (
                       <span className="flex items-center gap-0.5 text-[11px] text-green-600 dark:text-green-400 font-bold mt-0.5">
-                        <TrendingDown className="h-3 w-3" /> Best price
+                        <TrendingDown className="h-3 w-3" /> {t("bestPrice")}
                       </span>
                     )}
                     {pctDiff !== null && (
                       <span className="block text-[11px] text-rose-500 font-semibold mt-0.5">
-                        +{pctDiff}% vs cheapest
+                        {t("vsCheapest", { pct: pctDiff })}
                       </span>
                     )}
                   </div>
@@ -154,10 +154,10 @@ export default function ComparePage() {
                       <span className="ml-0.5 text-sm font-semibold">{s.rating.toFixed(1)}</span>
                     </div>
                     {isBest && selected.length > 1 && (
-                      <span className="block text-[11px] text-amber-600 font-bold mt-0.5">Top rated ★</span>
+                      <span className="block text-[11px] text-amber-600 font-bold mt-0.5">{t("topRated")}</span>
                     )}
                   </div>
-                ) : <span className="text-xs text-muted-foreground">No ratings</span>;
+                ) : <span className="text-xs text-muted-foreground">{t("noRatings")}</span>;
               },
             },
             {
@@ -169,17 +169,17 @@ export default function ComparePage() {
                   {s.startDate && s.endDate && " – "}
                   {s.endDate && new Date(s.endDate).toLocaleDateString("en", { month: "short", day: "numeric" })}
                 </span>
-              ) : <span className="text-sm text-emerald-600 font-medium">Available now</span>,
+              ) : <span className="text-sm text-emerald-600 font-medium">{t("availableNow")}</span>,
             },
             {
               label: t("createRequest"),
               render: (s: typeof selected[0]) => {
-                if (!user) return <AuthModal trigger={<Button size="sm" className="w-full rounded-xl">Log in</Button>} />;
+                if (!user) return <AuthModal trigger={<Button size="sm" className="w-full rounded-xl">{tCommon("signIn")}</Button>} />;
                 if (user.role !== "client") return null;
                 return (
                   <RequestCreateDialog service={s} trigger={
                     <Button size="sm" className="w-full rounded-xl gap-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Request
+                      <CheckCircle2 className="h-3.5 w-3.5" /> {tCommon("request")}
                     </Button>
                   } />
                 );

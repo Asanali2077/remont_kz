@@ -14,6 +14,7 @@ import { Footer } from "@/components/Footer";
 
 export default function FavoritesPage() {
   const t = useTranslations("favorites");
+  const tCommon = useTranslations("common");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [services, setServices] = useState<ServiceRecord[]>([]);
@@ -25,7 +26,7 @@ export default function FavoritesPage() {
     if (!user) return;
     void (async () => {
       try { setServices(await api.getFavorites()); }
-      catch { toast.error("Failed to load favorites"); }
+      catch { toast.error(tCommon("error")); }
       finally { setLoading(false); }
     })();
   }, [user]);
@@ -53,7 +54,7 @@ export default function FavoritesPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold">{t("title")}</h1>
-              {services.length > 0 && <p className="text-xs text-muted-foreground">{services.length} saved</p>}
+              {services.length > 0 && <p className="text-xs text-muted-foreground">{t("savedCount", { count: services.length })}</p>}
             </div>
           </div>
           <Link href="/repair">

@@ -53,7 +53,7 @@ export function RequestsManagement() {
   useEffect(() => {
     void (async () => {
       try { setLoading(true); setRequests(await fetchRequests(statusFilter)); }
-      catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+      catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
       finally { setLoading(false); }
     })();
     setPage(1);
@@ -61,7 +61,7 @@ export function RequestsManagement() {
 
   async function updateStatus(requestId: string, status: RequestStatus) {
     setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
-    try { await api.updateRequest(requestId, { status }); toast.success("Updated"); }
+    try { await api.updateRequest(requestId, { status }); toast.success(t("updated")); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); setRequests(await fetchRequests(statusFilter)); }
   }
 
@@ -70,10 +70,10 @@ export function RequestsManagement() {
     setOfferSubmitting(true);
     try {
       await api.createOffer(offerDialogRequestId, { price, message: message || undefined });
-      toast.success("Offer sent");
+      toast.success(t("offerSent"));
       setOfferDialogRequestId(null);
       setRequests(await fetchRequests(statusFilter));
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setOfferSubmitting(false); }
   }
 
@@ -82,10 +82,10 @@ export function RequestsManagement() {
     setReplySubmitting(true);
     try {
       await api.replyToReview(replyRequestId, replyText.trim());
-      toast.success("Reply sent");
+      toast.success(t("replySent"));
       setReplyRequestId(null); setReplyText("");
       setRequests(await fetchRequests(statusFilter));
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setReplySubmitting(false); }
   }
 
@@ -239,6 +239,7 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
   onUpdateStatus: (id: string, s: RequestStatus) => void;
   onReply?: (id: string) => void;
 }) {
+  const t = useTranslations("company");
   const tReq = useTranslations("requests");
   const borderColor = ({
     new: "border-l-slate-300 dark:border-l-slate-600",
@@ -254,7 +255,7 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-bold text-sm leading-snug">{req.service?.name || "Custom request"}</h4>
+              <h4 className="font-bold text-sm leading-snug">{req.service?.name || t("customRequest")}</h4>
               <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">#{req.id.slice(0, 8).toUpperCase()}</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
@@ -319,6 +320,7 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
 function UnassignedCard({ req, myId, onOffer }: {
   req: RequestRecord; myId: string; onOffer: (id: string) => void;
 }) {
+  const t = useTranslations("company");
   const tReq = useTranslations("requests");
   const myOffer = req.offers?.find(o => o.companyId === myId);
   return (
@@ -326,7 +328,7 @@ function UnassignedCard({ req, myId, onOffer }: {
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <h4 className="font-semibold text-sm">{req.service?.name || "Custom request"}</h4>
+            <h4 className="font-semibold text-sm">{req.service?.name || t("customRequest")}</h4>
             <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">#{req.id.slice(0, 8).toUpperCase()}</span>
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">

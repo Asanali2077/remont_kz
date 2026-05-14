@@ -146,7 +146,7 @@ export default function ServiceDetailPage() {
         setReviews(revs);
         setSimilar(sim);
       } catch {
-        toast.error("Service not found");
+        toast.error(tCommon("notFound"));
         router.push("/repair");
       } finally {
         setLoading(false);
@@ -359,13 +359,13 @@ export default function ServiceDetailPage() {
                     void navigator.share({ title: service.name, text: service.description.slice(0, 100), url: window.location.href });
                   } else {
                     void navigator.clipboard.writeText(window.location.href).then(() => {
-                      toast.success("Link copied!");
+                      toast.success(t("linkCopied"));
                     });
                   }
                 }}
                 className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl text-sm font-medium border border-border hover:bg-muted transition-colors"
               >
-                <Share2 className="h-4 w-4" /> Share
+                <Share2 className="h-4 w-4" /> {t("share")}
               </button>
 
               {/* Company block */}
@@ -493,7 +493,7 @@ export default function ServiceDetailPage() {
                       <MapPin className="h-3 w-3 shrink-0" /> {service.company.address}
                     </p>
                   )}
-                  <p className="text-xs text-primary/70 mt-0.5 group-hover:text-primary transition-colors">View profile →</p>
+                  <p className="text-xs text-primary/70 mt-0.5 group-hover:text-primary transition-colors">{t("viewProfile")} →</p>
                 </div>
               </Link>
               <div className="flex flex-wrap gap-3 shrink-0">
@@ -512,7 +512,7 @@ export default function ServiceDetailPage() {
           </div>
 
           {/* Map — full width */}
-          <LocationCard address={service.address} city={service.city} locationLabel={t("location")} openInLabel="Open in 2GIS" />
+          <LocationCard address={service.address} city={service.city} locationLabel={t("location")} openInLabel={t("openIn2GIS")} />
         </div>
 
         {/* ══ REVIEWS ══ */}

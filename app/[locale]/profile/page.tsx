@@ -40,7 +40,7 @@ export default function ProfilePage() {
         setName(p.name ?? ""); setPhone(p.phone ?? "");
         setAddress(p.address ?? ""); setAvatarUrl(p.avatarUrl);
         setCreatedAt(p.createdAt);
-      } catch { toast.error("Failed to load profile"); }
+      } catch { toast.error(tCommon("error")); }
       finally { setLoaded(true); }
     })();
   }, [user]);
@@ -51,8 +51,8 @@ export default function ProfilePage() {
     setUploading(true);
     try {
       const { url } = await api.uploadAvatar(file);
-      setAvatarUrl(url); toast.success("Photo updated");
-    } catch { toast.error("Failed to upload photo"); setAvatarPreview(null); }
+      setAvatarUrl(url); toast.success(t("photoUpdated"));
+    } catch { toast.error(t("photoFormats")); setAvatarPreview(null); }
     finally { setUploading(false); }
   }
 
@@ -61,8 +61,8 @@ export default function ProfilePage() {
     try {
       const updated = await api.updateProfile({ name: name.trim() || undefined, phone: phone.trim() || null, avatarUrl, address: address.trim() || null });
       updateUser({ name: updated.name, phone: updated.phone });
-      toast.success("Profile saved");
-    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to save"); }
+      toast.success(t("profileSaved"));
+    } catch (err) { toast.error(err instanceof Error ? err.message : t("saving")); }
     finally { setSaving(false); }
   }
 
@@ -100,9 +100,9 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <Button variant="outline" size="sm" className="gap-2 rounded-xl" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                    <Camera className="h-3.5 w-3.5" /> {t("avatar")}
+                    <Camera className="h-3.5 w-3.5" /> {t("uploadPhoto")}
                   </Button>
-                  <p className="text-xs text-muted-foreground mt-1.5">JPG, PNG, WEBP · max 5 MB</p>
+                  <p className="text-xs text-muted-foreground mt-1.5">{t("photoFormats")}</p>
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => void handleAvatarChange(e)} />
               </div>
@@ -118,14 +118,14 @@ export default function ProfilePage() {
                     <Input value={user.email} disabled className="bg-muted/50 rounded-xl h-10" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("title")}</label>
-                    <Input value={user.role === "company" ? "Company" : "Client"} disabled className="bg-muted/50 rounded-xl h-10 capitalize" />
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("role")}</label>
+                    <Input value={user.role === "company" ? tCommon("company") : tCommon("client")} disabled className="bg-muted/50 rounded-xl h-10 capitalize" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("name")}</label>
-                    <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="rounded-xl h-10" />
+                    <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("namePlaceholder")} className="rounded-xl h-10" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("phone")}</label>
@@ -137,7 +137,7 @@ export default function ProfilePage() {
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
                       <MapPin className="h-3 w-3" /> {t("address")}
                     </label>
-                    <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="City, street, building" className="rounded-xl h-10" />
+                    <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={t("addressPlaceholder")} className="rounded-xl h-10" />
                   </div>
                 )}
               </div>
@@ -147,7 +147,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               {createdAt && (
                 <p className="text-xs text-muted-foreground">
-                  Member since {new Date(createdAt).toLocaleDateString("en", { year: "numeric", month: "long" })}
+                  {t("memberSince", { date: new Date(createdAt).toLocaleDateString(undefined, { year: "numeric", month: "long" }) })}
                 </p>
               )}
               <Button onClick={() => void handleSave()} disabled={saving || uploading} className="rounded-xl px-6">

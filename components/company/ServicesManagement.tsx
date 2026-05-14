@@ -46,17 +46,17 @@ export function ServicesManagement() {
 
   async function handleToggleActive(id: string, active: boolean) {
     try { await api.updateService(id, { active: !active }); await reload(); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this service?")) return;
     try {
       await api.deleteService(id);
-      toast.success("Deleted");
+      toast.success(t("deleted"));
       setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
       await reload();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
   }
 
   async function handleBulkDelete() {
@@ -74,11 +74,11 @@ export function ServicesManagement() {
 
   async function handleSave(service: ServiceFormValues) {
     try {
-      if (service.id) { await api.updateService(service.id, service); toast.success("Updated"); }
-      else { await api.createService(service); toast.success("Created"); }
+      if (service.id) { await api.updateService(service.id, service); toast.success(t("updated")); }
+      else { await api.createService(service); toast.success(t("created")); }
       setIsModalOpen(false); setEditingService(null);
       await reload();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
   }
 
   function toggleSelect(id: string) {
