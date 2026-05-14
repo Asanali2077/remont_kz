@@ -407,14 +407,14 @@ export default function HomePage() {
   const baStats = [
     { value: "98%",  label: t("baStatSatisfaction"), icon: Star },
     { value: "2h",   label: t("baStatFirstOffer"),   icon: Clock },
-    { value: "500+", label: t("baStatJobs"),          icon: CheckCircle2 },
+    { value: "30+",  label: t("baStatJobs"),          icon: CheckCircle2 },
     { value: "4.8",  label: t("baStatRating"),        icon: TrendingUp },
   ];
 
   const mainStats = [
-    { target: liveStats?.companies ?? 200,          suffix: "+", label: t("statVerifiedCompanies"), sub: t("statVerifiedSub"),    icon: Users,        color: "from-blue-500 to-cyan-500" },
-    { target: liveStats?.completedRequests ?? 1500, suffix: "+", label: t("statCompleted"),         sub: t("statCompletedSub"),   icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
-    { target: liveStats?.services ?? 14,            suffix: "+", label: t("statActive"),            sub: t("statActiveSub"),      icon: MapPin,       color: "from-violet-500 to-purple-500" },
+    { target: liveStats?.companies ?? 10,          suffix: "+", label: t("statVerifiedCompanies"), sub: t("statVerifiedSub"),    icon: Users,        color: "from-blue-500 to-cyan-500" },
+    { target: liveStats?.completedRequests ?? 13,  suffix: "+", label: t("statCompleted"),         sub: t("statCompletedSub"),   icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
+    { target: liveStats?.services ?? 20,           suffix: "+", label: t("statActive"),            sub: t("statActiveSub"),      icon: MapPin,       color: "from-violet-500 to-purple-500" },
     { target: Math.round((liveStats?.avgRating ?? 4.8) * 10), suffix: "%", label: t("statAvgRating"), sub: t("statAvgRatingSub"), icon: TrendingUp,   color: "from-amber-500 to-orange-500" },
   ];
 

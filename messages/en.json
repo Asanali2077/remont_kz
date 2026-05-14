@@ -165,7 +165,7 @@
     "trustFree": "Free for clients",
     "trustVerified": "Verified contractors",
     "trustRating": "4.8 average rating",
-    "trustCities": "14 cities in KZ",
+    "trustCities": "3 cities in KZ",
     "popularCategories": "Popular categories",
     "catAuto": "Automobiles",
     "catRenovation": "Renovation",
@@ -192,7 +192,7 @@
     "statsTitle": "Kazakhstan’s most trusted repair platform",
     "statsDesc": "Thousands of homeowners and car owners find reliable specialists through Remont.kz every month.",
     "statVerifiedCompanies": "Verified companies",
-    "statVerifiedSub": "across 14 cities",
+    "statVerifiedSub": "Almaty, Astana & Shymkent",
     "statCompleted": "Requests completed",
     "statCompletedSub": "and growing daily",
     "statActive": "Active services",
@@ -255,13 +255,13 @@
     "vcTag2": "License verified",
     "vcTag3": "Reviews from real jobs",
     "ratingTitle": "4.8 / 5 average rating",
-    "ratingDesc": "Based on 1,500+ verified reviews from real completed requests.",
+    "ratingDesc": "Based on verified reviews from real completed requests.",
     "ratingQuality": "Quality of work",
     "ratingComm": "Communication",
     "ratingOnTime": "On-time delivery",
     "whyCard1Title": "First offer in 2 hours",
     "whyCard1Desc": "Companies compete for your request, so you get responses fast.",
-    "whyCard2Title": "200+ companies",
+    "whyCard2Title": "10 companies",
     "whyCard2Desc": "Wide network covering Almaty, Astana, Shymkent and 11 more cities.",
     "whyCard3Title": "Free for clients",
     "whyCard3Desc": "Post requests, receive offers and chat with specialists — all at no cost.",
@@ -280,7 +280,7 @@
     "review3City": "Shymkent",
     "clientLabel": "Client",
     "verifiedLabel": "Verified",
-    "ctaBadge": "200+ companies waiting for your request",
+    "ctaBadge": "10 companies waiting for your request",
     "sessionExpired": "Your session expired. Please log in again.",
     "activityItems": [
       {
@@ -1155,11 +1155,11 @@
         "label": "Service categories"
       },
       {
-        "value": "200+",
+        "value": "10",
         "label": "Verified companies"
       },
       {
-        "value": "14",
+        "value": "3",
         "label": "Cities in KZ"
       }
     ],
@@ -1336,8 +1336,8 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "description": "Marketplace connecting clients with verified repair professionals across Kazakhstan.",
-    "citiesCount": "14 cities",
-    "companiesCount": "200+ companies",
+    "citiesCount": "3 cities",
+    "companiesCount": "10 companies",
     "servicesColumn": "Services",
     "platformColumn": "Platform",
     "accountColumn": "Account",
