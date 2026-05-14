@@ -1511,5 +1511,27 @@
       "Turkistan": "Туркестан",
       "Zhezkazgan": "Жезказган"
     }
+  },
+  "catalog": {
+    "title": "Каталог заявок",
+    "subtitle": "Заявки клиентов, которые ищут исполнителя",
+    "category": "Категория",
+    "city": "Город",
+    "resetFilters": "Сбросить фильтры",
+    "loadingRequests": "Загрузка заявок...",
+    "noRequestsYet": "Новых заявок пока нет",
+    "noRequestsFilter": "Заявки не найдены по выбранным фильтрам",
+    "requestsFound": "Найдено заявок: {n}",
+    "budget": "Бюджет",
+    "clientBudget": "Бюджет клиента",
+    "offerSentPrice": "Предложение: {price} ₸",
+    "withdraw": "Отозвать",
+    "makeOffer": "Откликнуться",
+    "offersCount": "{n, plural, one {# отклик} few {# отклика} other {# откликов}}",
+    "clientLabel": "Клиент",
+    "offerSentToast": "Предложение отправлено",
+    "offerFailedToast": "Не удалось отправить предложение",
+    "withdrawSuccessToast": "Предложение отозвано",
+    "withdrawFailedToast": "Не удалось отозвать предложение"
   }
 }

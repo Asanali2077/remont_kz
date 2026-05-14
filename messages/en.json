@@ -1512,5 +1512,27 @@
       "Turkistan": "Turkistan",
       "Zhezkazgan": "Zhezkazgan"
     }
+  },
+  "catalog": {
+    "title": "Request Catalog",
+    "subtitle": "Client requests looking for a service provider",
+    "category": "Category",
+    "city": "City",
+    "resetFilters": "Reset filters",
+    "loadingRequests": "Loading requests...",
+    "noRequestsYet": "No new requests yet",
+    "noRequestsFilter": "No requests match the selected filters",
+    "requestsFound": "Requests found: {n}",
+    "budget": "Budget",
+    "clientBudget": "Client budget",
+    "offerSentPrice": "Offer sent: {price} ₸",
+    "withdraw": "Withdraw",
+    "makeOffer": "Make offer",
+    "offersCount": "{n, plural, one {# offer} other {# offers}}",
+    "clientLabel": "Client",
+    "offerSentToast": "Offer sent",
+    "offerFailedToast": "Failed to send offer",
+    "withdrawSuccessToast": "Offer withdrawn",
+    "withdrawFailedToast": "Failed to withdraw offer"
   }
 }

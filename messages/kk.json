@@ -1512,5 +1512,27 @@
       "Turkistan": "Түркістан",
       "Zhezkazgan": "Жезқазған"
     }
+  },
+  "catalog": {
+    "title": "Өтінімдер каталогы",
+    "subtitle": "Орындаушы іздейтін клиент өтінімдері",
+    "category": "Санат",
+    "city": "Қала",
+    "resetFilters": "Сүзгіні тазалау",
+    "loadingRequests": "Өтінімдер жүктелуде...",
+    "noRequestsYet": "Әзірше жаңа өтінімдер жоқ",
+    "noRequestsFilter": "Таңдалған сүзгілер бойынша өтінімдер табылмады",
+    "requestsFound": "Табылды: {n} өтінім",
+    "budget": "Бюджет",
+    "clientBudget": "Клиент бюджеті",
+    "offerSentPrice": "Ұсыныс: {price} ₸",
+    "withdraw": "Кері алу",
+    "makeOffer": "Ұсыныс жіберу",
+    "offersCount": "{n} ұсыныс",
+    "clientLabel": "Клиент",
+    "offerSentToast": "Ұсыныс жіберілді",
+    "offerFailedToast": "Ұсынысты жіберу сәтсіз болды",
+    "withdrawSuccessToast": "Ұсыныс кері алынды",
+    "withdrawFailedToast": "Ұсынысты кері алу сәтсіз болды"
   }
 }

@@ -1,7 +1,7 @@
-﻿"use client";
-import { fmtNum } from "@/lib/utils";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
@@ -10,91 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CitySelect } from "@/components/ui/CitySelect";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Footer } from "@/components/Footer";
+import { OfferDialog } from "@/components/OfferDialog";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 import type { RequestRecord } from "@/lib/types";
-import { TOP_CATEGORY_LABELS } from "@/lib/categories";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  automobiles: TOP_CATEGORY_LABELS.AUTOMOBILES,
-  "real-estate": TOP_CATEGORY_LABELS.REAL_ESTATE,
-  other: TOP_CATEGORY_LABELS.OTHER,
-};
-
-function OfferDialog({
-  request,
-  open,
-  onOpenChange,
-  onSubmit,
-  submitting,
-}: {
-  request: RequestRecord;
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  onSubmit: (price: number, message: string) => void;
-  submitting: boolean;
-}) {
-  const [price, setPrice] = useState("");
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (open) { setPrice(""); setMessage(""); }
-  }, [open]);
-
-  const priceNum = parseInt(price || "0", 10);
-  const isValid = priceNum > 0;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px]">
-        <DialogHeader>
-          <DialogTitle>Make an offer</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
-          {request.budgetFrom || request.budgetTo ? (
-            <p className="text-xs text-muted-foreground">
-              Client budget: {request.budgetFrom?.toLocaleString()} – {request.budgetTo?.toLocaleString()} ₸
-            </p>
-          ) : null}
-          <div className="space-y-2">
-            <Label htmlFor="offer-price">Your price (₸) *</Label>
-            <Input
-              id="offer-price"
-              type="number"
-              min={1}
-              placeholder="e.g. 50000"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="offer-message">Message (optional)</Label>
-            <Textarea
-              id="offer-message"
-              rows={3}
-              placeholder="Briefly describe your approach, timeline, etc."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              maxLength={500}
-            />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={() => onSubmit(priceNum, message)} disabled={!isValid || submitting}>
-              {submitting ? "Sending..." : "Send offer"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+import { fmtNum } from "@/lib/utils";
 
 function RequestCard({
   request,
@@ -109,7 +31,13 @@ function RequestCard({
   onWithdrawOffer: (id: string) => void;
   offerSubmitting: boolean;
 }) {
-  const categoryLabel = request.category ? CATEGORY_LABELS[request.category] : null;
+  const t = useTranslations("catalog");
+  const tCat = useTranslations("categories");
+
+  const categoryKey = request.category
+    ? request.category.toUpperCase().replace(/-/g, "_")
+    : null;
+  const categoryLabel = categoryKey ? tCat(categoryKey) : null;
   const myOffer = request.offers?.find((o) => o.companyId === myCompanyId);
 
   return (
@@ -120,7 +48,7 @@ function RequestCard({
           {request.city && <span className="text-sm text-muted-foreground">{request.city}</span>}
           {(request.offers?.length ?? 0) > 0 && (
             <span className="text-xs text-muted-foreground ml-auto">
-              {request.offers!.length} offer{request.offers!.length !== 1 ? "s" : ""}
+              {t("offersCount", { n: request.offers!.length })}
             </span>
           )}
         </div>
@@ -129,36 +57,27 @@ function RequestCard({
       <CardContent className="pt-0 space-y-2">
         {(request.budgetFrom || request.budgetTo) && (
           <p className="text-xs text-muted-foreground">
-            Budget: {request.budgetFrom?.toLocaleString()} – {request.budgetTo?.toLocaleString()} ₸
+            {t("budget")}: {request.budgetFrom?.toLocaleString()} – {request.budgetTo?.toLocaleString()} ₸
           </p>
         )}
         <div className="flex items-center justify-between gap-2">
           <div className="text-xs text-muted-foreground">
-            {request.client?.name || request.client?.email || "Client"}
+            {request.client?.name || request.client?.email || t("clientLabel")}
             {" · "}
             {new Date(request.createdAt).toLocaleDateString()}
           </div>
           {myOffer ? (
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
-                Offer sent: {fmtNum(myOffer.price)} ₸
+                {t("offerSentPrice", { price: fmtNum(myOffer.price) })}
               </span>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={offerSubmitting}
-                onClick={() => onWithdrawOffer(request.id)}
-              >
-                Withdraw
+              <Button size="sm" variant="outline" disabled={offerSubmitting} onClick={() => onWithdrawOffer(request.id)}>
+                {t("withdraw")}
               </Button>
             </div>
           ) : (
-            <Button
-              size="sm"
-              disabled={offerSubmitting}
-              onClick={() => onMakeOffer(request.id)}
-            >
-              Make offer
+            <Button size="sm" disabled={offerSubmitting} onClick={() => onMakeOffer(request.id)}>
+              {t("makeOffer")}
             </Button>
           )}
         </div>
@@ -168,6 +87,7 @@ function RequestCard({
 }
 
 function CatalogContent() {
+  const t = useTranslations("catalog");
   const { user } = useAuth();
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,16 +110,16 @@ function CatalogContent() {
     }
   }
 
-  async function handleSubmitOffer(price: number, message: string) {
+  async function handleSubmitOffer(price: number, message: string): Promise<void> {
     if (!offerDialogRequestId) return;
     setOfferSubmitting(true);
     try {
       await api.createOffer(offerDialogRequestId, { price, message: message || undefined });
-      toast.success("Offer sent");
+      toast.success(t("offerSentToast"));
       setOfferDialogRequestId(null);
       await loadRequests();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to send offer");
+      toast.error(e instanceof Error ? e.message : t("offerFailedToast"));
     } finally {
       setOfferSubmitting(false);
     }
@@ -209,10 +129,10 @@ function CatalogContent() {
     setOfferSubmitting(true);
     try {
       await api.deleteOffer(requestId);
-      toast.success("Offer withdrawn");
+      toast.success(t("withdrawSuccessToast"));
       await loadRequests();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to withdraw offer");
+      toast.error(e instanceof Error ? e.message : t("withdrawFailedToast"));
     } finally {
       setOfferSubmitting(false);
     }
@@ -232,34 +152,32 @@ function CatalogContent() {
     });
   }, [requests, categoryFilter, city]);
 
-  const offerDialogRequest = filtered.find((r) => r.id === offerDialogRequestId) ?? null;
+  const offerDialogRequest = requests.find((r) => r.id === offerDialogRequestId) ?? null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-1">Request Catalog</h1>
-          <p className="text-sm text-muted-foreground">
-            Client requests looking for a service provider
-          </p>
+          <h1 className="text-3xl font-bold mb-1">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <Card className="mb-6">
           <CardContent className="pt-4 pb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label>Category</Label>
+                <Label>{t("category")}</Label>
                 <CategoryFilter value={categoryFilter} onChange={setCategoryFilter} />
               </div>
               <div className="space-y-1">
-                <Label>City</Label>
+                <Label>{t("city")}</Label>
                 <CitySelect value={city} onChange={setCity} allowAny />
               </div>
             </div>
             {(categoryFilter.category || city) && (
               <div className="mt-3">
                 <Button variant="ghost" size="sm" onClick={() => { setCategoryFilter({}); setCity(""); }}>
-                  Reset filters
+                  {t("resetFilters")}
                 </Button>
               </div>
             )}
@@ -267,19 +185,17 @@ function CatalogContent() {
         </Card>
 
         {loading ? (
-          <div className="py-16 text-center text-muted-foreground">Loading requests...</div>
+          <div className="py-16 text-center text-muted-foreground">{t("loadingRequests")}</div>
         ) : filtered.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <ClipboardList className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground">
-                {requests.length === 0
-                  ? "No new requests yet"
-                  : "No requests match the selected filters"}
+                {requests.length === 0 ? t("noRequestsYet") : t("noRequestsFilter")}
               </p>
               {requests.length > 0 && (
                 <Button variant="ghost" size="sm" className="mt-2" onClick={() => { setCategoryFilter({}); setCity(""); }}>
-                  Reset filters
+                  {t("resetFilters")}
                 </Button>
               )}
             </CardContent>
@@ -287,7 +203,7 @@ function CatalogContent() {
         ) : (
           <>
             <div className="mb-3 text-sm text-muted-foreground">
-              Requests found: {filtered.length}
+              {t("requestsFound", { n: filtered.length })}
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {filtered.map((request) => (
@@ -306,15 +222,13 @@ function CatalogContent() {
       </main>
       <Footer />
 
-      {offerDialogRequest && (
-        <OfferDialog
-          request={offerDialogRequest}
-          open={offerDialogRequestId !== null}
-          onOpenChange={(v) => { if (!v) setOfferDialogRequestId(null); }}
-          onSubmit={handleSubmitOffer}
-          submitting={offerSubmitting}
-        />
-      )}
+      <OfferDialog
+        request={offerDialogRequest}
+        open={offerDialogRequestId !== null}
+        onOpenChange={(v) => { if (!v) setOfferDialogRequestId(null); }}
+        onSubmit={handleSubmitOffer}
+        submitting={offerSubmitting}
+      />
     </div>
   );
 }
@@ -326,5 +240,3 @@ export default function CompanyCatalogPage() {
     </ProtectedRoute>
   );
 }
-
-
