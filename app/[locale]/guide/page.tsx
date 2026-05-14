@@ -609,7 +609,7 @@ export default function GuidePage() {
             {[
               { icon: Mail, title: t("emailSupportTitle"), sub: "support@remont.kz", desc: t("emailReply"), action: "mailto:support@remont.kz", label: t("sendEmail"), color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400", border: "hover:border-blue-300 dark:hover:border-blue-700" },
               { icon: MessageSquare, title: t("liveChatTitle"), sub: t("liveChatSub"), desc: t("liveChatDesc"), action: "mailto:support@remont.kz", label: t("startChat"), color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400", border: "hover:border-emerald-300 dark:hover:border-emerald-700", live: true },
-              { icon: Phone, title: t("phoneTitle"), sub: t("phoneSub"), desc: t("phoneDesc"), action: "tel:+77270000000", label: t("callUs"), color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400", border: "hover:border-violet-300 dark:hover:border-violet-700" },
+              { icon: Phone, title: t("phoneTitle"), sub: t("phoneSub"), desc: t("phoneDesc"), action: "tel:+77712885238", label: t("callUs"), color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400", border: "hover:border-violet-300 dark:hover:border-violet-700" },
             ].map(({ icon: Icon, title, sub, desc, action, label, color, border, live }) => (
               <a key={title} href={action}
                 className={`group flex flex-col items-center text-center rounded-2xl border border-border/50 bg-card p-7 hover:shadow-lg transition-all duration-200 ${border}`}>
