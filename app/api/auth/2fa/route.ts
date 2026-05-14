@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/middleware";
 
-/** GET — generate secret + QR code for setup */
+/** GET — return status; generate secret + QR only if 2FA is not yet enabled */
 export async function GET(request: NextRequest) {
   const auth = await requireAuth()(request);
   if ("error" in auth) return auth.error;
@@ -12,13 +12,16 @@ export async function GET(request: NextRequest) {
   const user = await prisma.user.findUnique({ where: { id: auth.user.userId }, select: { email: true, twoFactorEnabled: true } });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+  if (user.twoFactorEnabled) {
+    return NextResponse.json({ enabled: true, qrCode: null, secret: null });
+  }
+
   const secret = speakeasy.generateSecret({
     name: `Remont.kz (${user.email})`,
     issuer: "Remont.kz",
     length: 20,
   });
 
-  // Store the pending secret (not yet enabled)
   await prisma.user.update({
     where: { id: auth.user.userId },
     data: { twoFactorSecret: secret.base32 },
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     secret: secret.base32,
     qrCode: qrUrl,
-    enabled: user.twoFactorEnabled,
+    enabled: false,
   });
 }
 

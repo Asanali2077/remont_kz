@@ -107,7 +107,11 @@
     "hidePassword": "Hide password",
     "loginButton": "Log In",
     "registerButton": "Create Account",
-    "passwordMismatch": "Passwords don't match"
+    "passwordMismatch": "Passwords don't match",
+    "twoFactorTitle": "Two-step verification",
+    "twoFactorDesc": "Enter the 6-digit code from your authenticator app",
+    "verify": "Verify",
+    "back": "Back"
   },
   "home": {
     "heroTitle": "Find a specialist",
@@ -511,7 +515,12 @@
     "chatBtn": "Chat",
     "cancelledMsg": "Request cancelled",
     "reviewSubmitted": "Review submitted!",
-    "offerMessagePlaceholder": "Timeline, approach, guarantees…"
+    "offerMessagePlaceholder": "Timeline, approach, guarantees…",
+    "finalPrice": "Final price",
+    "finalPriceTitle": "Set final price",
+    "finalPriceDesc": "Enter the exact amount agreed with the client before starting work. This amount will appear in the document.",
+    "finalPricePlaceholder": "Enter amount",
+    "finalPriceStart": "Start work"
   },
   "requestCreate": {
     "title": "New Request",
@@ -648,6 +657,18 @@
     "addTag": "Add",
     "startDate": "Start date",
     "endDate": "End date",
+    "schedule": "Work schedule",
+    "scheduleFrom": "From",
+    "scheduleTo": "To",
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
     "fixedPrice": "Fixed price (single rate)",
     "price": "Price",
     "priceFrom": "Price from",
@@ -1147,7 +1168,7 @@
       },
       {
         "label": "JWT Auth",
-        "desc": "bcrypt, rate limiting, reCAPTCHA"
+        "desc": "bcrypt, rate limiting, 2FA TOTP"
       },
       {
         "label": "SSE Chat",
@@ -1324,8 +1345,7 @@
     "helpCenter": "Help Center",
     "myRequests": "My Requests",
     "favorites": "Favorites",
-    "messages": "Messages",
-    "reCaptchaNotice": "Protected by reCAPTCHA"
+    "messages": "Messages"
   },
   "settings": {
     "twoFactor": {
@@ -1406,7 +1426,8 @@
     "statusLabel": "Status",
     "ratingAndReview": "Rating & Review",
     "createdDate": "Created on {date}",
-    "reviewLabel": "Review"
+    "reviewLabel": "Review",
+    "finalPrice": "Final price"
   },
   "categoryFilter": {
     "allCategories": "All categories",

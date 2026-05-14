@@ -16,6 +16,7 @@ const requestStatusMap: Record<(typeof requestStatuses)[number], RequestStatus> 
 
 const updateRequestSchema = z.object({
   status: z.enum(requestStatuses),
+  finalPrice: z.number().int().positive().optional(),
 });
 
 export async function GET(
@@ -165,7 +166,15 @@ export async function PUT(
         );
       }
 
+      if (!validatedData.finalPrice) {
+        return NextResponse.json(
+          { error: "Final price is required before starting work" },
+          { status: 400 }
+        );
+      }
+
       updateData.status = RequestStatus.IN_PROGRESS;
+      updateData.finalPrice = validatedData.finalPrice;
     }
 
     if (nextStatus === RequestStatus.COMPLETED) {

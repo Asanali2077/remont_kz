@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import {
   LogOut, Menu, X, Moon, Sun, ChevronDown, ClipboardList,
-  Bell, BookOpen, User, Settings, CreditCard, LayoutDashboard,
-  Heart, MessageSquare, Search, ShieldCheck, History, Briefcase, Shield,
+  Bell, BookOpen, User, CreditCard, LayoutDashboard,
+  Heart, MessageSquare, Search, ShieldCheck, History, Briefcase, Shield, Lock,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -155,7 +155,7 @@ export function MainNavbar() {
     { href: "/my-requests?tab=notifications",  icon: Bell,          label: t("notifications") },
     { href: "/my-requests?tab=history",        icon: History,       label: t("orderHistory") },
     { href: "/my-requests?tab=profile",        icon: User,          label: t("profile") },
-    { href: "/my-requests?tab=settings",       icon: Settings,      label: t("settings") },
+    { href: "/my-requests?tab=settings",       icon: Lock,          label: t("security") },
   ];
 
   return (
@@ -269,18 +269,6 @@ export function MainNavbar() {
                       </Link>
                     )}
 
-                    {/* Profile / Settings for admin only (company & client have them above) */}
-                    {user.role === "admin" && (
-                      <>
-                        <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
-                          <User className="h-4 w-4 text-muted-foreground" /> {t("profile")}
-                        </Link>
-                        <Link href="/settings" className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors" onClick={() => setDropdownOpen(false)}>
-                          <Settings className="h-4 w-4 text-muted-foreground" /> {t("settings")}
-                        </Link>
-                      </>
-                    )}
-
                     <div className="border-t">
                       <button
                         onClick={() => { logout(); setDropdownOpen(false); }}
@@ -348,8 +336,8 @@ export function MainNavbar() {
                 <Link href="/profile" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
                   <User className="h-4 w-4 text-muted-foreground" /> {t("profile")}
                 </Link>
-                <Link href="/settings" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
-                  <Settings className="h-4 w-4 text-muted-foreground" /> {t("settings")}
+                <Link href="/my-requests?tab=settings" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
+                  <Lock className="h-4 w-4 text-muted-foreground" /> {t("security")}
                 </Link>
                 <button onClick={() => { logout(); setMobileOpen(false); }} className="flex items-center gap-3 px-2 py-2.5 text-sm text-destructive rounded-lg hover:bg-muted w-full text-left">
                   <LogOut className="h-4 w-4" /> {t("logout")}

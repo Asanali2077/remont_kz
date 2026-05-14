@@ -40,6 +40,7 @@ const createServiceSchema = z.object({
   imageUrls: z.array(z.string()).max(10).optional(),
   startDate: z.string().datetime({ offset: true }).optional().nullable(),
   endDate: z.string().datetime({ offset: true }).optional().nullable(),
+  schedule: z.string().optional().nullable(),
   imageUrl: z.union([z.string().min(1), z.literal(""), z.null()]).optional(),
 });
 
@@ -251,6 +252,7 @@ export async function POST(request: NextRequest) {
         lng: geocoded?.lng,
         startDate: validatedData.startDate ? new Date(validatedData.startDate) : undefined,
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : undefined,
+        schedule: validatedData.schedule ?? undefined,
         rating: validatedData.rating,
         licensed: validatedData.licensed ?? false,
         tags: validatedData.tags ?? [],

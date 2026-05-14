@@ -39,6 +39,7 @@ const updateServiceSchema = z.object({
   imageUrls: z.array(z.string()).max(10).optional(),
   startDate: z.string().datetime({ offset: true }).optional().nullable(),
   endDate: z.string().datetime({ offset: true }).optional().nullable(),
+  schedule: z.string().optional().nullable(),
   imageUrl: z.union([z.string().min(1), z.literal(""), z.null()]).optional(),
 });
 
@@ -140,6 +141,7 @@ export async function PUT(
     if (validatedData.active !== undefined) updateData.active = validatedData.active;
     if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate ? new Date(validatedData.startDate) : null;
     if (validatedData.endDate !== undefined) updateData.endDate = validatedData.endDate ? new Date(validatedData.endDate) : null;
+    if (validatedData.schedule !== undefined) updateData.schedule = validatedData.schedule ?? null;
     if (validatedData.address !== undefined) {
       updateData.address = validatedData.address || null;
       if (validatedData.address) {

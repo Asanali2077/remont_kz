@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { LayoutGrid, LayoutList, CheckCircle2, PlayCircle, Star, ClipboardList, Download } from "lucide-react";
+import { LayoutGrid, LayoutList, CheckCircle2, Star, ClipboardList, Download, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -14,7 +14,9 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { OfferDialog } from "@/components/OfferDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 type RequestFilter = RequestStatus | "all";
@@ -49,6 +51,8 @@ export function RequestsManagement() {
   const [replyRequestId, setReplyRequestId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [replySubmitting, setReplySubmitting] = useState(false);
+  const [startWorkId, setStartWorkId] = useState<string | null>(null);
+  const [finalPriceInput, setFinalPriceInput] = useState("");
 
   useEffect(() => {
     void (async () => {
@@ -59,10 +63,19 @@ export function RequestsManagement() {
     setPage(1);
   }, [statusFilter]);
 
-  async function updateStatus(requestId: string, status: RequestStatus) {
-    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
-    try { await api.updateRequest(requestId, { status }); toast.success(t("updated")); }
+  async function updateStatus(requestId: string, status: RequestStatus, finalPrice?: number) {
+    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status, ...(finalPrice && { finalPrice }) } : r));
+    try { await api.updateRequest(requestId, { status, ...(finalPrice && { finalPrice }) }); toast.success(t("updated")); }
     catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); setRequests(await fetchRequests(statusFilter)); }
+  }
+
+  async function confirmStartWork() {
+    const price = parseInt(finalPriceInput, 10);
+    if (!startWorkId || isNaN(price) || price <= 0) return;
+    const id = startWorkId;
+    setStartWorkId(null);
+    setFinalPriceInput("");
+    await updateStatus(id, "in_progress", price);
   }
 
   async function handleSubmitOffer(price: number, message: string): Promise<void> {
@@ -171,6 +184,7 @@ export function RequestsManagement() {
                 {assignedPage.map(req => (
                   <RequestCard key={req.id} req={req}
                     onUpdateStatus={updateStatus}
+                    onStartWork={id => { setStartWorkId(id); setFinalPriceInput(""); }}
                     onReply={(id) => { setReplyRequestId(id); setReplyText(""); }} />
                 ))}
               </div>
@@ -213,6 +227,48 @@ export function RequestsManagement() {
           onSubmit={handleSubmitOffer} submitting={offerSubmitting} />
       )}
 
+      {/* Final price dialog */}
+      <Dialog open={startWorkId !== null} onOpenChange={v => { if (!v) { setStartWorkId(null); setFinalPriceInput(""); } }}>
+        <DialogContent className="sm:max-w-[360px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-primary" />
+              {tReq("finalPriceTitle")}
+            </DialogTitle>
+            <DialogDescription>{tReq("finalPriceDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {tReq("finalPrice")}
+            </Label>
+            <div className="relative">
+              <Input
+                type="number"
+                min={1}
+                value={finalPriceInput}
+                onChange={e => setFinalPriceInput(e.target.value)}
+                placeholder={tReq("finalPricePlaceholder")}
+                className="rounded-xl pr-8"
+                autoFocus
+                onKeyDown={e => { if (e.key === "Enter") void confirmStartWork(); }}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">₸</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setStartWorkId(null); setFinalPriceInput(""); }}>
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              onClick={() => void confirmStartWork()}
+              disabled={!finalPriceInput || parseInt(finalPriceInput, 10) <= 0}
+            >
+              {tReq("finalPriceStart")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Reply dialog */}
       <Dialog open={replyRequestId !== null} onOpenChange={v => { if (!v) setReplyRequestId(null); }}>
         <DialogContent className="sm:max-w-[420px]">
@@ -234,9 +290,10 @@ export function RequestsManagement() {
 }
 
 /* ── Assigned request card ── */
-function RequestCard({ req, onUpdateStatus, onReply }: {
+function RequestCard({ req, onUpdateStatus, onStartWork, onReply }: {
   req: RequestRecord;
   onUpdateStatus: (id: string, s: RequestStatus) => void;
+  onStartWork: (id: string) => void;
   onReply?: (id: string) => void;
 }) {
   const t = useTranslations("company");
@@ -274,6 +331,14 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
           <p className="text-xs mb-3"><span className="text-muted-foreground">Budget: </span><span className="font-semibold">{formatBudget(req.budgetFrom, req.budgetTo)}</span></p>
         )}
 
+        {req.finalPrice && (req.status === "in_progress" || req.status === "completed") && (
+          <div className="flex items-center gap-2 rounded-xl bg-primary/5 border border-primary/20 px-3 py-2 mb-3">
+            <DollarSign className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="text-xs text-muted-foreground">{tReq("finalPrice")}:</span>
+            <span className="text-sm font-bold text-primary ml-auto">{fmtNum(req.finalPrice)} ₸</span>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex flex-wrap gap-2 items-center">
           {req.status === "new" && (
@@ -283,8 +348,8 @@ function RequestCard({ req, onUpdateStatus, onReply }: {
           )}
           {req.status === "accepted" && (
             <>
-              <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs" onClick={() => onUpdateStatus(req.id, "in_progress")}>
-                <PlayCircle className="h-3.5 w-3.5 mr-1" /> {tReq("workStarted")}
+              <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs gap-1" onClick={() => onStartWork(req.id)}>
+                <DollarSign className="h-3.5 w-3.5" /> {tReq("workStarted")}
               </Button>
               <Link href={`/chat/${req.id}` as `/chat/${string}`}>
                 <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5">💬 Chat</Button>

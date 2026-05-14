@@ -27,10 +27,11 @@ interface Pagination {
 }
 
 export interface AuthResponse {
-  user: UserSummary;
-  token: string;
+  user?: UserSummary;
+  token?: string;
   verifyUrl?: string;
   emailVerified?: boolean;
+  requires2FA?: boolean;
 }
 
 export interface CreateRequestPayload {
@@ -124,7 +125,6 @@ class ApiClient {
     role: "client" | "company";
     name?: string;
     phone?: string;
-    recaptchaToken?: string;
   }) {
     return this.request<AuthResponse>("/auth/register", {
       method: "POST",
@@ -132,10 +132,10 @@ class ApiClient {
     });
   }
 
-  async login(email: string, password: string, recaptchaToken?: string) {
+  async login(email: string, password: string, totpCode?: string) {
     return this.request<AuthResponse>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password, recaptchaToken }),
+      body: JSON.stringify({ email, password, ...(totpCode && { totpCode }) }),
     });
   }
 
@@ -330,7 +330,7 @@ class ApiClient {
     return normalizeRequest(request);
   }
 
-  async updateRequest(id: string, data: { status: RequestStatus }) {
+  async updateRequest(id: string, data: { status: RequestStatus; finalPrice?: number }) {
     const request = await this.request<Record<string, unknown>>(`/requests/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),

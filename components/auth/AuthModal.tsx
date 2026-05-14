@@ -9,13 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
-import { Eye, EyeOff, Loader2, Wrench, CheckCircle2, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Wrench, CheckCircle2, Mail, Shield } from "lucide-react";
 
 export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactNode; defaultMode?: "login" | "register" }) {
   const t = useTranslations("auth");
   const { login, register } = useAuth();
-  const { executeRecaptcha } = useGoogleReCaptcha();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "register">(defaultMode);
   const [email, setEmail] = useState("");
@@ -29,6 +27,8 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
   const [error, setError] = useState("");
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
   const [devVerifyUrl, setDevVerifyUrl] = useState<string | null>(null);
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [totpCode, setTotpCode] = useState("");
 
   const isValid = mode === "login"
     ? !!(email && password)
@@ -39,16 +39,32 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
     setError("");
     setLoading(true);
     try {
-      const recaptchaToken = executeRecaptcha ? await executeRecaptcha(mode === "login" ? "login" : "register") : "";
       if (mode === "login") {
-        await login(email, password, recaptchaToken);
-        setOpen(false);
+        const result = await login(email, password);
+        if (result?.requires2FA) {
+          setRequires2FA(true);
+        } else {
+          setOpen(false);
+        }
       } else {
-        const result = await register(email, password, role, name, phone, recaptchaToken);
-        // Always show the "check your email" screen after registration
+        const result = await register(email, password, role, name, phone);
         setRegisteredEmail(email);
         if (result?.verifyUrl) setDevVerifyUrl(result.verifyUrl);
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function verify2FA() {
+    if (totpCode.length !== 6 || loading) return;
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, password, totpCode);
+      setOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -62,6 +78,7 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
       setEmail(""); setPassword(""); setConfirm("");
       setName(""); setPhone(""); setError(""); setShowPw(false);
       setMode(defaultMode); setDevVerifyUrl(null); setRegisteredEmail(null);
+      setRequires2FA(false); setTotpCode("");
     }
   }
 
@@ -71,6 +88,42 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
         {trigger ?? <Button variant="outline" size="sm">Log In</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden gap-0">
+
+        {/* ── 2FA step ── */}
+        {requires2FA && (
+          <div className="px-7 py-8 space-y-5">
+            <div className="text-center space-y-3">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mx-auto">
+                <Shield className="h-7 w-7 text-primary" />
+              </div>
+              <div>
+                <p className="font-bold text-lg">{t("twoFactorTitle")}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t("twoFactorDesc")}</p>
+              </div>
+            </div>
+            <Input
+              value={totpCode}
+              onChange={e => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="000000"
+              className="rounded-xl text-center text-2xl font-mono tracking-widest h-12"
+              maxLength={6}
+              autoFocus
+              onKeyDown={e => { if (e.key === "Enter") void verify2FA(); }}
+            />
+            {error && (
+              <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-3 py-2.5">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+            <Button onClick={() => void verify2FA()} disabled={totpCode.length !== 6 || loading} className="w-full h-10 rounded-xl font-semibold">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {t("verify")}
+            </Button>
+            <Button variant="ghost" className="w-full" onClick={() => { setRequires2FA(false); setTotpCode(""); setError(""); }}>
+              {t("back")}
+            </Button>
+          </div>
+        )}
 
         {/* ── Email verification screen ── */}
         {registeredEmail && (
@@ -111,7 +164,7 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
           </div>
         )}
 
-        {!registeredEmail && <>
+        {!registeredEmail && !requires2FA && <>
         {/* Header */}
         <div className="px-7 pt-7 pb-5 border-b border-border/50">
           <div className="flex items-center gap-2.5 mb-1">
@@ -132,6 +185,8 @@ export function AuthModal({ trigger, defaultMode = "login" }: { trigger?: ReactN
 
         {/* Form */}
         <div className="px-7 py-5 space-y-3.5">
+          {/* Honeypot — bots fill this, humans don't */}
+          <input type="text" name="website" autoComplete="off" tabIndex={-1} style={{ display: "none" }} />
           {mode === "register" && (
             <>
               <div className="space-y-1.5">

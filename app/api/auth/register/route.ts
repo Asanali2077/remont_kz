@@ -7,7 +7,6 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/utils";
 import { sendWelcomeEmail, sendVerificationEmail } from "@/lib/email";
 import { randomUUID } from "crypto";
-import { verifyRecaptcha } from "@/lib/recaptcha";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -28,11 +27,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { recaptchaToken } = body as { recaptchaToken?: string };
-
-    const captchaOk = await verifyRecaptcha(recaptchaToken ?? "", "register");
-    if (!captchaOk) {
-      return NextResponse.json({ error: "reCAPTCHA verification failed" }, { status: 400 });
+    const { honeypot } = body as { honeypot?: string };
+    if (honeypot) {
+      return NextResponse.json({ error: "Bad request" }, { status: 400 });
     }
 
     const validatedData = registerSchema.parse(body);
@@ -52,9 +49,10 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(validatedData.password);
 
-    const verifyToken = randomUUID();
+    const isDev = process.env.NODE_ENV !== "production";
+    const verifyToken = isDev ? null : randomUUID();
 
-    // Create user
+    // Create user — auto-verified in dev, requires email link in production
     const user = await prisma.user.create({
       data: {
         email: validatedData.email,
@@ -62,6 +60,7 @@ export async function POST(request: NextRequest) {
         role: validatedData.role.toUpperCase() as UserRole,
         name: validatedData.name,
         phone: validatedData.phone,
+        emailVerified: isDev,
         emailVerifyToken: verifyToken,
       },
       select: {
@@ -81,16 +80,13 @@ export async function POST(request: NextRequest) {
       role: user.role,
     });
 
-    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/auth/verify-email?token=${verifyToken}`;
-    void sendVerificationEmail(user.email, verifyUrl).catch((err) => console.error("sendVerificationEmail failed", { to: user.email, err }));
     void sendWelcomeEmail(user.email, user.name ?? "").catch((err) => console.error("sendWelcomeEmail failed", { to: user.email, err }));
+    if (!isDev && verifyToken) {
+      const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/auth/verify-email?token=${verifyToken}`;
+      void sendVerificationEmail(user.email, verifyUrl).catch((err) => console.error("sendVerificationEmail failed", { to: user.email, err }));
+    }
 
-    return NextResponse.json({
-      user,
-      token,
-      // Expose in dev so you can test without real email
-      ...(process.env.NODE_ENV !== "production" && { verifyUrl }),
-    }, { status: 201 });
+    return NextResponse.json({ user, token }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

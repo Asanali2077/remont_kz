@@ -37,16 +37,6 @@ export default function AdminUsersPage() {
     }
   }, [user, search, role, blocked, page]);
 
-  const handleVerify = useCallback(async (id: string, value: boolean) => {
-    if (!user?.token) return;
-    await fetch(`/api/admin/users/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` },
-      body: JSON.stringify({ isVerified: value }),
-    });
-    load(page);
-  }, [user, page, load]);
-
   useEffect(() => { load(1); }, [user, search, role, blocked]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -92,7 +82,6 @@ export default function AdminUsersPage() {
           pages={pages}
           onPageChange={(p) => load(p)}
           onRefresh={() => load(page)}
-          onVerify={handleVerify}
           token={user?.token ?? ""}
         />
       )}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireCompany, assertEmailVerified } from "@/lib/middleware";
+import { requireCompany } from "@/lib/middleware";
 import { RequestStatus } from "@prisma/client";
 import { sendNewOfferEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
@@ -18,16 +18,6 @@ export async function POST(
   try {
     const authResult = await requireCompany()(request);
     if ("error" in authResult) return authResult.error;
-
-    try { await assertEmailVerified(authResult.user.userId); }
-    catch (err) {
-      const message = err instanceof Error ? err.message : "";
-      if (message === "Email not verified") {
-        return NextResponse.json({ error: "Please verify your email before submitting offers." }, { status: 403 });
-      }
-      console.error("assertEmailVerified DB error", err);
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-    }
 
     // 20 offers per hour per company
     const rl = rateLimit(`offer:${authResult.user.userId}`, 20, 60 * 60_000);

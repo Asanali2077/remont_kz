@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, MessageSquare, Heart, Bell, History, User, Settings } from "lucide-react";
+import { ClipboardList, MessageSquare, Heart, Bell, History, User, Lock } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useTranslations } from "next-intl";
 
@@ -13,7 +13,7 @@ const ITEMS: { labelKey: string; icon: React.ElementType; tab: CabinetTab }[] = 
   { labelKey: "notifications", icon: Bell,          tab: "notifications" },
   { labelKey: "orderHistory",  icon: History,       tab: "history" },
   { labelKey: "profile",       icon: User,          tab: "profile" },
-  { labelKey: "settings",      icon: Settings,      tab: "settings" },
+  { labelKey: "security",      icon: Lock,          tab: "settings" },
 ];
 
 interface ClientSidebarProps {

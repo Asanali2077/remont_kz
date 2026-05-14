@@ -99,12 +99,6 @@ export function Footer() {
 
         <div className="border-t pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">© 2026 Remont.kz. {t("rights")}.</p>
-          <p className="text-xs text-muted-foreground">
-            {t("reCaptchaNotice")} —{" "}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{t("privacy")}</a>
-            {" & "}
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">{t("terms")}</a>
-          </p>
         </div>
       </div>
     </footer>

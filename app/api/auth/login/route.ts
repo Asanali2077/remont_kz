@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import speakeasy from "speakeasy";
 import { prisma } from "@/lib/db";
 import { verifyPassword, generateToken } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/utils";
-import { verifyRecaptcha } from "@/lib/recaptcha";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -19,11 +19,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { recaptchaToken } = body as { recaptchaToken?: string };
-
-    const captchaOk = await verifyRecaptcha(recaptchaToken ?? "", "login");
-    if (!captchaOk) {
-      return NextResponse.json({ error: "reCAPTCHA verification failed" }, { status: 400 });
+    const { honeypot } = body as { honeypot?: string };
+    if (honeypot) {
+      return NextResponse.json({ error: "Bad request" }, { status: 400 });
     }
 
     const validatedData = loginSchema.parse(body);
@@ -46,6 +44,22 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await verifyPassword(validatedData.password, user.password);
     if (!isValidPassword) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    }
+
+    if (user.twoFactorEnabled && user.twoFactorSecret) {
+      const { totpCode } = body as { totpCode?: string };
+      if (!totpCode) {
+        return NextResponse.json({ requires2FA: true }, { status: 200 });
+      }
+      const valid = speakeasy.totp.verify({
+        secret: user.twoFactorSecret,
+        encoding: "base32",
+        token: totpCode,
+        window: 1,
+      });
+      if (!valid) {
+        return NextResponse.json({ error: "Invalid authentication code" }, { status: 401 });
+      }
     }
 
     const token = generateToken({ userId: user.id, email: user.email, role: user.role });

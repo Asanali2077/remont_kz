@@ -100,14 +100,22 @@ function buildUnassignedCondition(
       ? { OR: [{ budgetTo: null }, { budgetTo: { gte: minPrice } }] }
       : {};
 
-  return {
+  const base: Prisma.RequestWhereInput = {
     companyId: null,
-    category: { in: companyCategories },
+    status: RequestStatus.NEW,
     OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-    AND: [cityCondition, budgetCondition].filter(
-      (c) => Object.keys(c).length > 0
-    ) as Prisma.RequestWhereInput[],
   };
+
+  if (companyCategories.length > 0) {
+    base.category = { in: companyCategories };
+  }
+
+  const andConditions = [cityCondition, budgetCondition].filter(
+    (c) => Object.keys(c).length > 0
+  ) as Prisma.RequestWhereInput[];
+  if (andConditions.length > 0) base.AND = andConditions;
+
+  return base;
 }
 
 export async function GET(request: NextRequest) {
@@ -185,20 +193,14 @@ export async function GET(request: NextRequest) {
       where.city = city;
     }
 
-    const isClient = user.role === "CLIENT";
-
     const requests = await prisma.request.findMany({
       where,
       include: {
         ...requestInclude,
-        ...(isClient
-          ? {
-              offers: {
-                include: { company: { select: { id: true, name: true, email: true, phone: true } } },
-                orderBy: { createdAt: "asc" },
-              },
-            }
-          : {}),
+        offers: {
+          include: { company: { select: { id: true, name: true, email: true, phone: true } } },
+          orderBy: { createdAt: "asc" },
+        },
       },
       orderBy: { createdAt: "desc" },
     });

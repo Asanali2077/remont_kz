@@ -107,7 +107,11 @@
     "hidePassword": "Скрыть пароль",
     "loginButton": "Войти",
     "registerButton": "Создать аккаунт",
-    "passwordMismatch": "Пароли не совпадают"
+    "passwordMismatch": "Пароли не совпадают",
+    "twoFactorTitle": "Двухэтапная проверка",
+    "twoFactorDesc": "Введите 6-значный код из приложения аутентификатора",
+    "verify": "Подтвердить",
+    "back": "Назад"
   },
   "home": {
     "heroTitle": "Найдите мастера",
@@ -510,7 +514,12 @@
     "chatBtn": "Чат",
     "cancelledMsg": "Заявка отменена",
     "reviewSubmitted": "Отзыв отправлен!",
-    "offerMessagePlaceholder": "Сроки, подход, гарантии…"
+    "offerMessagePlaceholder": "Сроки, подход, гарантии…",
+    "finalPrice": "Финальная сумма",
+    "finalPriceTitle": "Установите финальную сумму",
+    "finalPriceDesc": "Укажите точную сумму, согласованную с клиентом, до начала работ. Эта сумма отобразится в документе.",
+    "finalPricePlaceholder": "Введите сумму",
+    "finalPriceStart": "Начать работу"
   },
   "requestCreate": {
     "title": "Новая заявка",
@@ -647,6 +656,18 @@
     "addTag": "Добавить",
     "startDate": "Дата начала",
     "endDate": "Дата окончания",
+    "schedule": "График работы",
+    "scheduleFrom": "с",
+    "scheduleTo": "до",
+    "days": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Вс"
+    },
     "fixedPrice": "Фиксированная цена (единый тариф)",
     "price": "Цена",
     "priceFrom": "Цена от",
@@ -1146,7 +1167,7 @@
       },
       {
         "label": "JWT Auth",
-        "desc": "bcrypt, ограничение запросов, reCAPTCHA"
+        "desc": "bcrypt, ограничение запросов, 2FA TOTP"
       },
       {
         "label": "SSE Chat",
@@ -1323,8 +1344,7 @@
     "helpCenter": "Центр помощи",
     "myRequests": "Мои заявки",
     "favorites": "Избранное",
-    "messages": "Сообщения",
-    "reCaptchaNotice": "Защищено reCAPTCHA"
+    "messages": "Сообщения"
   },
   "settings": {
     "twoFactor": {
@@ -1405,7 +1425,8 @@
     "statusLabel": "Статус",
     "ratingAndReview": "Оценка и отзыв",
     "createdDate": "от {date}",
-    "reviewLabel": "Отзыв"
+    "reviewLabel": "Отзыв",
+    "finalPrice": "Итоговая сумма"
   },
   "categoryFilter": {
     "allCategories": "Все категории",

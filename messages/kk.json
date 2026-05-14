@@ -107,7 +107,11 @@
     "hidePassword": "Жасыру",
     "loginButton": "Кіру",
     "registerButton": "Аккаунт жасау",
-    "passwordMismatch": "Құпия сөздер сәйкес келмейді"
+    "passwordMismatch": "Құпия сөздер сәйкес келмейді",
+    "twoFactorTitle": "Екі сатылы тексеру",
+    "twoFactorDesc": "Аутентификатор қолданбасынан 6 таңбалы кодты енгізіңіз",
+    "verify": "Растау",
+    "back": "Артқа"
   },
   "home": {
     "heroTitle": "Маман табыңыз",
@@ -511,7 +515,12 @@
     "chatBtn": "Чат",
     "cancelledMsg": "Өтінім болдырылмады",
     "reviewSubmitted": "Пікір жіберілді!",
-    "offerMessagePlaceholder": "Мерзімдер, тәсіл, кепілдіктер…"
+    "offerMessagePlaceholder": "Мерзімдер, тәсіл, кепілдіктер…",
+    "finalPrice": "Соңғы сома",
+    "finalPriceTitle": "Соңғы соманы белгілеңіз",
+    "finalPriceDesc": "Жұмысты бастамас бұрын клиентпен келісілген нақты соманы енгізіңіз. Бұл сома құжатта көрсетіледі.",
+    "finalPricePlaceholder": "Соманы енгізіңіз",
+    "finalPriceStart": "Жұмысты бастау"
   },
   "requestCreate": {
     "title": "Жаңа өтінім",
@@ -648,6 +657,18 @@
     "addTag": "Қосу",
     "startDate": "Басталу күні",
     "endDate": "Аяқталу күні",
+    "schedule": "Жұмыс кестесі",
+    "scheduleFrom": "бастап",
+    "scheduleTo": "дейін",
+    "days": {
+      "mon": "Дс",
+      "tue": "Сс",
+      "wed": "Ср",
+      "thu": "Бс",
+      "fri": "Жм",
+      "sat": "Сб",
+      "sun": "Жк"
+    },
     "fixedPrice": "Тіркелген баға (бір тариф)",
     "price": "Баға",
     "priceFrom": "Баға (бастап)",
@@ -1147,7 +1168,7 @@
       },
       {
         "label": "JWT Auth",
-        "desc": "bcrypt, сұраныс шектеу, reCAPTCHA"
+        "desc": "bcrypt, сұраныс шектеу, 2FA TOTP"
       },
       {
         "label": "SSE Chat",
@@ -1324,8 +1345,7 @@
     "helpCenter": "Анықтама орталығы",
     "myRequests": "Менің өтінімдерім",
     "favorites": "Таңдаулылар",
-    "messages": "Хабарламалар",
-    "reCaptchaNotice": "reCAPTCHA арқылы қорғалған"
+    "messages": "Хабарламалар"
   },
   "settings": {
     "twoFactor": {
@@ -1406,7 +1426,8 @@
     "statusLabel": "Күй",
     "ratingAndReview": "Баға және пікір",
     "createdDate": "{date} жасалды",
-    "reviewLabel": "Пікір"
+    "reviewLabel": "Пікір",
+    "finalPrice": "Қорытынды сома"
   },
   "categoryFilter": {
     "allCategories": "Барлық санаттар",

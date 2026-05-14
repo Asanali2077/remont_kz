@@ -9,9 +9,12 @@ import { SERVICE_CATEGORY_LABELS } from "@/lib/types";
 import { toast } from "sonner";
 import {
   Clock, CheckCircle2, PlayCircle, Zap, User,
-  MessageSquare, Star,
+  MessageSquare, Star, DollarSign,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { timeAgo, formatBudget, fmtNum } from "@/lib/utils";
 import { OfferDialog } from "@/components/OfferDialog";
 
@@ -24,10 +27,11 @@ const COLUMN_DEFS: { id: RequestStatus | "unassigned"; labelKey: string; icon: R
 ];
 
 
-function KanbanCard({ request, onMove, onOffer, myId }: {
+function KanbanCard({ request, onMove, onOffer, onStartWork, myId }: {
   request: RequestRecord;
   onMove: (id: string, status: RequestStatus) => void;
   onOffer: (r: RequestRecord) => void;
+  onStartWork: (id: string) => void;
   myId: string;
 }) {
   const t = useTranslations("requests");
@@ -97,8 +101,8 @@ function KanbanCard({ request, onMove, onOffer, myId }: {
           </Button>
         )}
         {isAssigned && request.status === "accepted" && (
-          <Button size="sm" variant="outline" className="h-7 text-[11px] rounded-lg flex-1" onClick={() => onMove(request.id, "in_progress")}>
-            {t("workStarted")}
+          <Button size="sm" variant="outline" className="h-7 text-[11px] rounded-lg flex-1 gap-1" onClick={() => onStartWork(request.id)}>
+            <DollarSign className="h-3 w-3" />{t("workStarted")}
           </Button>
         )}
         {isAssigned && request.status === "in_progress" && (
@@ -120,10 +124,13 @@ function KanbanCard({ request, onMove, onOffer, myId }: {
 
 export function KanbanBoard({ userId }: { userId: string }) {
   const t = useTranslations("company");
+  const tR = useTranslations("requests");
   const tCommon = useTranslations("common");
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [offerTarget, setOfferTarget] = useState<RequestRecord | null>(null);
+  const [startWorkId, setStartWorkId] = useState<string | null>(null);
+  const [finalPriceInput, setFinalPriceInput] = useState("");
 
   const COLUMNS = COLUMN_DEFS.map(col => ({
     ...col,
@@ -140,10 +147,23 @@ export function KanbanBoard({ userId }: { userId: string }) {
 
   useEffect(() => { void load(); }, [load]);
 
-  async function handleMove(requestId: string, status: RequestStatus) {
-    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status } : r));
-    try { await api.updateRequest(requestId, { status }); toast.success("Status updated"); }
-    catch { toast.error("Failed to update"); void load(); }
+  async function handleMove(requestId: string, status: RequestStatus, finalPrice?: number) {
+    setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status, ...(finalPrice && { finalPrice }) } : r));
+    try {
+      await api.updateRequest(requestId, { status, ...(finalPrice && { finalPrice }) });
+      toast.success("Status updated");
+    } catch {
+      toast.error("Failed to update");
+      void load();
+    }
+  }
+
+  async function confirmStartWork() {
+    const price = parseInt(finalPriceInput, 10);
+    if (!startWorkId || isNaN(price) || price <= 0) return;
+    setStartWorkId(null);
+    setFinalPriceInput("");
+    await handleMove(startWorkId, "in_progress", price);
   }
 
   function getColumn(col: typeof COLUMNS[number]) {
@@ -188,7 +208,7 @@ export function KanbanBoard({ userId }: { userId: string }) {
                   </div>
                 ) : (
                   items.map(r => (
-                    <KanbanCard key={r.id} request={r} onMove={handleMove} onOffer={setOfferTarget} myId={userId} />
+                    <KanbanCard key={r.id} request={r} onMove={handleMove} onOffer={setOfferTarget} onStartWork={id => { setStartWorkId(id); setFinalPriceInput(""); }} myId={userId} />
                   ))
                 )}
               </div>
@@ -209,6 +229,48 @@ export function KanbanBoard({ userId }: { userId: string }) {
           void load();
         }}
       />
+
+      {/* Final price dialog — shown before ACCEPTED → IN_PROGRESS */}
+      <Dialog open={startWorkId !== null} onOpenChange={v => { if (!v) { setStartWorkId(null); setFinalPriceInput(""); } }}>
+        <DialogContent className="sm:max-w-[360px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-primary" />
+              {tR("finalPriceTitle")}
+            </DialogTitle>
+            <DialogDescription>{tR("finalPriceDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {tR("finalPrice")}
+            </Label>
+            <div className="relative">
+              <Input
+                type="number"
+                min={1}
+                value={finalPriceInput}
+                onChange={e => setFinalPriceInput(e.target.value)}
+                placeholder={tR("finalPricePlaceholder")}
+                className="rounded-xl pr-8"
+                autoFocus
+                onKeyDown={e => { if (e.key === "Enter") void confirmStartWork(); }}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">₸</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setStartWorkId(null); setFinalPriceInput(""); }}>
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              onClick={() => void confirmStartWork()}
+              disabled={!finalPriceInput || parseInt(finalPriceInput, 10) <= 0}
+            >
+              {tR("finalPriceStart")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

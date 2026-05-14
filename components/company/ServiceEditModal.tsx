@@ -55,8 +55,11 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
   const [fixedPrice, setFixedPrice] = useState(false);
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+  type Day = typeof DAYS[number];
+  const [scheduleDays, setScheduleDays] = useState<Day[]>(["mon","tue","wed","thu","fri"]);
+  const [scheduleFrom, setScheduleFrom] = useState("09:00");
+  const [scheduleTo, setScheduleTo] = useState("18:00");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
@@ -83,8 +86,18 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
       setFixedPrice(service.priceFrom === service.priceTo);
       setCity(service.city || "");
       setAddress(service.address || "");
-      setStartDate(service.startDate ? new Date(service.startDate).toISOString().slice(0, 10) : "");
-      setEndDate(service.endDate ? new Date(service.endDate).toISOString().slice(0, 10) : "");
+      if (service.schedule) {
+        try {
+          const s = JSON.parse(service.schedule) as { days: Day[]; from: string; to: string };
+          setScheduleDays(s.days ?? ["mon","tue","wed","thu","fri"]);
+          setScheduleFrom(s.from ?? "09:00");
+          setScheduleTo(s.to ?? "18:00");
+        } catch { /* keep defaults */ }
+      } else {
+        setScheduleDays(["mon","tue","wed","thu","fri"]);
+        setScheduleFrom("09:00");
+        setScheduleTo("18:00");
+      }
       setTags(service.tags ?? []);
       setTagInput("");
       setExistingUrls(service.images.map((img) => img.url));
@@ -98,7 +111,8 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
   function resetForm() {
     setName(""); setCategoryFilter({}); setDescription("");
     setPriceFrom(""); setPriceTo(""); setFixedPrice(false);
-    setCity(""); setAddress(""); setStartDate(""); setEndDate("");
+    setCity(""); setAddress("");
+    setScheduleDays(["mon","tue","wed","thu","fri"]); setScheduleFrom("09:00"); setScheduleTo("18:00");
     setTags([]); setTagInput("");
     setExistingUrls([]); setNewFiles([]); setNewPreviews([]);
   }
@@ -170,8 +184,7 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
         address: address.trim() || undefined,
         imageUrls: allUrls,
         tags,
-        startDate: startDate ? new Date(startDate).toISOString() : undefined,
-        endDate: endDate ? new Date(endDate).toISOString() : undefined,
+        schedule: JSON.stringify({ days: scheduleDays, from: scheduleFrom, to: scheduleTo }),
       });
     } finally {
       setSubmitting(false);
@@ -311,15 +324,36 @@ export function ServiceEditModal({ service, open, onOpenChange, onSave }: Servic
             )}
           </div>
 
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startDate">{t("startDate")}</Label>
-              <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          {/* Schedule */}
+          <div className="space-y-2">
+            <Label>{t("schedule")}</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {DAYS.map((day) => {
+                const active = scheduleDays.includes(day);
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => setScheduleDays(active ? scheduleDays.filter(d => d !== day) : [...scheduleDays, day])}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors ${
+                      active ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/60"
+                    }`}
+                  >
+                    {t(`days.${day}`)}
+                  </button>
+                );
+              })}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="endDate">{t("endDate")}</Label>
-              <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={startDate || undefined} />
+            <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground">{t("scheduleFrom")}</span>
+                <Input type="time" value={scheduleFrom} onChange={e => setScheduleFrom(e.target.value)} className="h-8 w-24 text-sm rounded-lg" />
+              </div>
+              <span className="text-muted-foreground">—</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground">{t("scheduleTo")}</span>
+                <Input type="time" value={scheduleTo} onChange={e => setScheduleTo(e.target.value)} className="h-8 w-24 text-sm rounded-lg" />
+              </div>
             </div>
           </div>
 

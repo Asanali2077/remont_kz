@@ -88,6 +88,7 @@ export interface ServiceRecord {
 
   startDate?: string | null;
   endDate?: string | null;
+  schedule?: string | null;
   companyId: string;
   company: UserSummary;
   images: ServiceImageRecord[];
@@ -109,6 +110,7 @@ export interface ServiceFormValues {
   tags?: string[];
   startDate?: string;
   endDate?: string;
+  schedule?: string;
 }
 
 export interface RequestServiceSummary {
@@ -144,6 +146,7 @@ export interface RequestRecord {
   companyReply?: string | null;
   budgetFrom?: number | null;
   budgetTo?: number | null;
+  finalPrice?: number | null;
   expiresAt?: string | null;
   deadline?: string | null;
   createdAt: string;

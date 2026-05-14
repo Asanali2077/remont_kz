@@ -108,6 +108,7 @@ model Service {
   licensed          Boolean         @default(false)
   startDate         DateTime?
   endDate           DateTime?
+  schedule          String?
   tags              String[]        @default([])
   customAttributes  Json?
   address           String?
@@ -157,8 +158,9 @@ model Request {
   review        String?     @db.Text
   companyReply  String?     @db.Text
   budgetFrom    Float?
-  budgetTo    Float?
-  expiresAt   DateTime?
+  budgetTo      Float?
+  finalPrice    Int?
+  expiresAt     DateTime?
   deadline    DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

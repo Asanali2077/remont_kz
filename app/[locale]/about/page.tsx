@@ -136,7 +136,7 @@ function ArchDiagram() {
           </div>
           <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground border-l border-blue-200 dark:border-blue-800 pl-4">
             <span className="flex items-center gap-1"><Smartphone className="h-3 w-3" /> PWA</span>
-            <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> reCAPTCHA v3</span>
+            <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> 2FA TOTP</span>
             <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> SSE stream</span>
           </div>
         </div>

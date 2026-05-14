@@ -18,8 +18,8 @@ export type User = {
 
 type AuthContextValue = {
   user: User;
-  login: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
-  register: (email: string, password: string, role: "client" | "company", name?: string, phone?: string, recaptchaToken?: string) => Promise<{ verifyUrl?: string }>;
+  login: (email: string, password: string, totpCode?: string) => Promise<{ requires2FA?: boolean }>;
+  register: (email: string, password: string, role: "client" | "company", name?: string, phone?: string) => Promise<{ verifyUrl?: string }>;
   logout: () => void;
   loading: boolean;
   updateUser: (data: { name?: string | null; phone?: string | null }) => void;
@@ -32,71 +32,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Try to restore session from localStorage
+    let cancelled = false;
     try {
       const raw = localStorage.getItem("session:user");
       if (raw) {
-        const userData = JSON.parse(raw);
-        if (userData.token) {
-          // Verify token by fetching user data
+        const parsed = JSON.parse(raw) as { token?: string };
+        if (parsed.token) {
           api.getMe()
-            .then((userData) => {
-              const role = userData.role.toLowerCase() as UserRole;
+            .then((data) => {
+              if (cancelled) return;
               setUser({
-                id: userData.id,
-                email: userData.email,
-                role,
-                name: userData.name,
-                phone: userData.phone,
-                token: JSON.parse(raw).token,
+                id: data.id,
+                email: data.email,
+                role: data.role.toLowerCase() as UserRole,
+                name: data.name,
+                phone: data.phone,
+                token: parsed.token!,
               });
             })
             .catch(() => {
-              // Token invalid, clear storage
-              localStorage.removeItem("session:user");
+              if (cancelled) return;
+              // Token invalid or expired — clear storage explicitly
+              try { localStorage.removeItem("session:user"); } catch {}
               setUser(null);
             })
-            .finally(() => setLoading(false));
-        } else {
-          setLoading(false);
+            .finally(() => { if (!cancelled) setLoading(false); });
+          return () => { cancelled = true; };
         }
-      } else {
-        setLoading(false);
       }
-    } catch {
-      setLoading(false);
-    }
+    } catch {}
+    setLoading(false);
   }, []);
 
+  // Only persist when user is set — removal is handled explicitly in logout / catch above
   useEffect(() => {
-    if (user) {
-      try {
-        localStorage.setItem("session:user", JSON.stringify(user));
-      } catch {}
-    } else {
-      try {
-        localStorage.removeItem("session:user");
-      } catch {}
-    }
+    if (!user) return;
+    try {
+      localStorage.setItem("session:user", JSON.stringify(user));
+    } catch {}
   }, [user]);
 
-  const login = async (email: string, password: string, recaptchaToken?: string) => {
+  const login = async (email: string, password: string, totpCode?: string): Promise<{ requires2FA?: boolean }> => {
     try {
-      const response = await api.login(email, password, recaptchaToken);
-      const role = response.user.role.toLowerCase() as UserRole;
+      const response = await api.login(email, password, totpCode);
+      if (response.requires2FA) {
+        return { requires2FA: true };
+      }
+      const role = response.user!.role.toLowerCase() as UserRole;
       setUser({
-        id: response.user.id,
-        email: response.user.email,
+        id: response.user!.id,
+        email: response.user!.email,
         role,
-        name: response.user.name,
-        phone: response.user.phone,
-        token: response.token,
+        name: response.user!.name,
+        phone: response.user!.phone,
+        token: response.token!,
       });
       if (response.emailVerified === false) {
         toast.warning("Please verify your email to access all features.", { duration: 6000 });
       } else {
         toast.success("Signed in");
       }
+      return {};
     } catch (error) {
       const message = error instanceof Error ? error.message : "Sign in failed";
       toast.error(message);
@@ -110,17 +106,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: "client" | "company",
     name?: string,
     phone?: string,
-    recaptchaToken?: string
   ): Promise<{ verifyUrl?: string }> => {
     try {
-      const response = await api.register({ email, password, role, name, phone, recaptchaToken });
+      const response = await api.register({ email, password, role, name, phone });
       setUser({
-        id: response.user.id,
-        email: response.user.email,
-        role: response.user.role.toLowerCase() as UserRole,
-        name: response.user.name,
-        phone: response.user.phone,
-        token: response.token,
+        id: response.user!.id,
+        email: response.user!.email,
+        role: response.user!.role.toLowerCase() as UserRole,
+        name: response.user!.name,
+        phone: response.user!.phone,
+        token: response.token!,
       });
       // Toast is shown by AuthModal after getting verifyUrl
       return { verifyUrl: response.verifyUrl };
@@ -132,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    try { localStorage.removeItem("session:user"); } catch {}
     setUser(null);
     toast.success("Signed out");
   };
