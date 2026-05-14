@@ -593,17 +593,17 @@ async function main() {
 
   /* ── Offers on NEW requests ── */
   await prisma.requestOffer.createMany({ data: [
-    { requestId: reqNew1.id, companyId: techmaster.id, price: 18000, comment: "We can come tomorrow morning. Bosch E18 is usually a pump filter blockage — quick fix. Price includes parts if needed." },
-    { requestId: reqNew2.id, companyId: paintmaster.id, price: 55000, comment: "Ready to start next Monday. Price includes primer, 2 coats of paint, all materials. Surface prep included." },
-    { requestId: reqNew3.id, companyId: plumbing.id, price: 12000, comment: "We do all three jobs in one visit. Parts included. Can come tomorrow or day after." },
-    { requestId: reqNew3.id, companyId: stroymast.id, price: 15000, comment: "Our plumber is available this week. We'll check all connections while we're there at no extra charge." },
-    { requestId: reqNew4.id, companyId: electroserv.id, price: 28000, comment: "Straightforward job. We'll bring all fittings needed. Can do it on Saturday if convenient." },
-    { requestId: reqNew5.id, companyId: stroymast.id, price: 280000, comment: "We specialize in exactly this type of work. Free on-site estimate this week. Price may adjust slightly after inspection." },
-    { requestId: reqNew6.id, companyId: cleanpro.id, price: 22000, comment: "Post-tenancy specialist team. 4-5 hours, eco products. Oven and fridge deep clean included." },
-    { requestId: reqNew7.id, companyId: kazweld.id, price: 220000, comment: "We'll draw up a design sketch for you first. Open riser stairs with metal handrails is our signature work." },
-    { requestId: reqNew8.id, companyId: renovkz.id, price: 380000, comment: "We have a great island kitchen project we just finished — can show photos. Free design consultation included." },
-    { requestId: reqNew9.id, companyId: autocity.id, price: 35000, comment: "Likely wheel bearing or stabilizer bar link — we'll know after lifting the car. Oil change included in price." },
-    { requestId: reqNew10.id, companyId: roofpro.id, price: 45000, comment: "We'll do full inspection and fix all problem areas. Any shifted tiles reseated and sealed. Photo report provided." },
+    { requestId: reqNew1.id, companyId: techmaster.id, price: 18000, message: "We can come tomorrow morning. Bosch E18 is usually a pump filter blockage — quick fix. Price includes parts if needed." },
+    { requestId: reqNew2.id, companyId: paintmaster.id, price: 55000, message: "Ready to start next Monday. Price includes primer, 2 coats of paint, all materials. Surface prep included." },
+    { requestId: reqNew3.id, companyId: plumbing.id, price: 12000, message: "We do all three jobs in one visit. Parts included. Can come tomorrow or day after." },
+    { requestId: reqNew3.id, companyId: stroymast.id, price: 15000, message: "Our plumber is available this week. We'll check all connections while we're there at no extra charge." },
+    { requestId: reqNew4.id, companyId: electroserv.id, price: 28000, message: "Straightforward job. We'll bring all fittings needed. Can do it on Saturday if convenient." },
+    { requestId: reqNew5.id, companyId: stroymast.id, price: 280000, message: "We specialize in exactly this type of work. Free on-site estimate this week. Price may adjust slightly after inspection." },
+    { requestId: reqNew6.id, companyId: cleanpro.id, price: 22000, message: "Post-tenancy specialist team. 4-5 hours, eco products. Oven and fridge deep clean included." },
+    { requestId: reqNew7.id, companyId: kazweld.id, price: 220000, message: "We'll draw up a design sketch for you first. Open riser stairs with metal handrails is our signature work." },
+    { requestId: reqNew8.id, companyId: renovkz.id, price: 380000, message: "We have a great island kitchen project we just finished — can show photos. Free design consultation included." },
+    { requestId: reqNew9.id, companyId: autocity.id, price: 35000, message: "Likely wheel bearing or stabilizer bar link — we'll know after lifting the car. Oil change included in price." },
+    { requestId: reqNew10.id, companyId: roofpro.id, price: 45000, message: "We'll do full inspection and fix all problem areas. Any shifted tiles reseated and sealed. Photo report provided." },
   ]});
 
   /* ── Update service ratings ── */
