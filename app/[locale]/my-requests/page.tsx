@@ -9,7 +9,8 @@ import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
          AlertCircle, Sparkles, Building2, X, Heart, MessageSquare,
          Loader2, Eye, EyeOff, Bell, MapPin, User as UserIcon,
          History, CalendarDays, BadgeCheck, CircleDashed, FileText,
-         ClipboardList, Shield, ShieldCheck, ShieldOff } from "lucide-react";
+         ClipboardList, Shield, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
+import { useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, ServiceRecord, SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -329,14 +330,19 @@ function NotificationsPanel() {
 
 /* ─── Profile Panel ─── */
 function ProfilePanel() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const tP = useTranslations("profile");
   const tC = useTranslations("common");
+  const tNav = useTranslations("nav");
+  const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -359,6 +365,20 @@ function ProfilePanel() {
       toast.success(tP("saved"));
     } catch { toast.error(tC("error")); }
     finally { setSaving(false); }
+  }
+
+  async function handleDeleteAccount() {
+    if (!deletePassword) return;
+    setDeleteLoading(true);
+    try {
+      await api.deleteAccount(deletePassword);
+      logout();
+      router.push("/");
+    } catch {
+      toast.error(tC("error"));
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   if (!loaded) return (
@@ -454,6 +474,42 @@ function ProfilePanel() {
         </div>
       </div>
 
+      {/* Danger zone */}
+      <div className="bg-card border border-red-200 dark:border-red-900/50 rounded-2xl p-6">
+        <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide mb-1">{tNav("deleteAccount")}</h2>
+        <p className="text-sm text-muted-foreground mb-4">{tNav("deleteAccountConfirmDesc")}</p>
+        <Button variant="destructive" size="sm" className="gap-2 rounded-xl" onClick={() => setDeleteOpen(true)}>
+          <Trash2 className="h-4 w-4" /> {tNav("deleteAccount")}
+        </Button>
+      </div>
+
+      <Dialog open={deleteOpen} onOpenChange={(o) => { setDeleteOpen(o); if (!o) setDeletePassword(""); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 dark:text-red-400">{tNav("deleteAccountConfirmTitle")}</DialogTitle>
+            <DialogDescription>{tNav("deleteAccountConfirmDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <label className="text-sm font-medium">{tNav("deleteAccountPasswordLabel")}</label>
+            <Input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && void handleDeleteAccount()}
+              className="border-red-200 focus-visible:ring-red-400"
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setDeleteOpen(false); setDeletePassword(""); }}>
+              {tNav("deleteAccountCancel")}
+            </Button>
+            <Button variant="destructive" onClick={() => void handleDeleteAccount()} disabled={!deletePassword || deleteLoading}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : tNav("deleteAccountConfirmBtn")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

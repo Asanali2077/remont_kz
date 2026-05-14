@@ -21,8 +21,10 @@ import {
   LayoutDashboard, Briefcase, ClipboardList, Menu, X,
   MessageSquare, CreditCard, User, Shield, ShieldCheck, ShieldOff, Bell,
   Loader2, ArrowRight, Circle, CheckCircle2, Eye, EyeOff,
-  Camera, MapPin, Smartphone, Zap, CalendarDays,
+  Camera, MapPin, Smartphone, Zap, CalendarDays, Trash2,
 } from "lucide-react";
+import { useRouter } from "@/i18n/routing";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 type Tab = "overview" | "services" | "requests" | "calendar" | "notifications" | "messages" | "billing" | "profile" | "security";
 
@@ -261,7 +263,9 @@ function ProfilePanel() {
   const t = useTranslations("profile");
   const tC = useTranslations("company");
   const tCommon = useTranslations("common");
-  const { user, updateUser } = useAuth();
+  const tNav = useTranslations("nav");
+  const { user, updateUser, logout } = useAuth();
+  const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -273,6 +277,9 @@ function ProfilePanel() {
   const [saving, setSaving] = useState(false);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -306,6 +313,20 @@ function ProfilePanel() {
       toast.success(tC("profileSaved"));
     } catch (err) { toast.error(err instanceof Error ? err.message : tCommon("error")); }
     finally { setSaving(false); }
+  }
+
+  async function handleDeleteAccount() {
+    if (!deletePassword) return;
+    setDeleteLoading(true);
+    try {
+      await api.deleteAccount(deletePassword);
+      logout();
+      router.push("/");
+    } catch {
+      toast.error(tCommon("error"));
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   const displayAvatar = avatarPreview ?? avatarUrl;
@@ -394,6 +415,43 @@ function ProfilePanel() {
           {saving ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{tC("saving")}</> : tC("saveChanges")}
         </Button>
       </div>
+
+      {/* Danger zone */}
+      <div className="bg-card border border-red-200 dark:border-red-900/50 rounded-2xl p-6">
+        <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide mb-1">{tNav("deleteAccount")}</h2>
+        <p className="text-sm text-muted-foreground mb-4">{tNav("deleteAccountConfirmDesc")}</p>
+        <Button variant="destructive" size="sm" className="gap-2 rounded-xl" onClick={() => setDeleteOpen(true)}>
+          <Trash2 className="h-4 w-4" /> {tNav("deleteAccount")}
+        </Button>
+      </div>
+
+      <Dialog open={deleteOpen} onOpenChange={(o) => { setDeleteOpen(o); if (!o) setDeletePassword(""); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 dark:text-red-400">{tNav("deleteAccountConfirmTitle")}</DialogTitle>
+            <DialogDescription>{tNav("deleteAccountConfirmDesc")}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <label className="text-sm font-medium">{tNav("deleteAccountPasswordLabel")}</label>
+            <Input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && void handleDeleteAccount()}
+              className="border-red-200 focus-visible:ring-red-400"
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setDeleteOpen(false); setDeletePassword(""); }}>
+              {tNav("deleteAccountCancel")}
+            </Button>
+            <Button variant="destructive" onClick={() => void handleDeleteAccount()} disabled={!deletePassword || deleteLoading}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : tNav("deleteAccountConfirmBtn")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
