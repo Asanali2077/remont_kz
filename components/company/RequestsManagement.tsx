@@ -28,6 +28,22 @@ async function fetchRequests(statusFilter: RequestFilter) {
 
 const PAGE_SIZE = 6;
 
+async function downloadCsv() {
+  const session = localStorage.getItem("session:user");
+  const token = session ? JSON.parse(session).token : null;
+  const res = await fetch("/api/company/export", {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) { toast.error("Export failed"); return; }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `requests-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function RequestsManagement() {
   const t = useTranslations("company");
   const tReq = useTranslations("requests");
@@ -135,11 +151,9 @@ export function RequestsManagement() {
           <p className="text-xs text-muted-foreground mt-0.5">{requests.length} total · {unassigned.length} available</p>
         </div>
         <div className="flex items-center gap-2">
-          <a href="/api/company/export" download>
-            <Button variant="outline" size="sm" className="h-8 rounded-xl gap-1.5 text-xs">
-              <Download className="h-3.5 w-3.5" /> CSV
-            </Button>
-          </a>
+          <Button variant="outline" size="sm" className="h-8 rounded-xl gap-1.5 text-xs" onClick={downloadCsv}>
+            <Download className="h-3.5 w-3.5" /> CSV
+          </Button>
           <div className="flex items-center gap-1 border border-border/50 rounded-xl p-0.5 bg-card">
             <button onClick={() => setViewMode("list")}
               className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>

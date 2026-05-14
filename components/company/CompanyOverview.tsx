@@ -28,6 +28,22 @@ interface CompanyStats {
   requestsByDay: { date: string; count: number }[];
 }
 
+async function downloadCsv() {
+  const session = localStorage.getItem("session:user");
+  const token = session ? JSON.parse(session).token : null;
+  const res = await fetch("/api/company/export", {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) return;
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `requests-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const { user } = useAuth();
   const tCo = useTranslations("company");
@@ -174,8 +190,7 @@ export function CompanyOverview({ onNavigate }: { onNavigate: (tab: string) => v
               </button>
             ))}
           </div>
-          <Button variant="outline" size="sm" className="rounded-xl gap-2 h-9"
-            onClick={() => window.open("/api/company/export", "_blank")}>
+          <Button variant="outline" size="sm" className="rounded-xl gap-2 h-9" onClick={downloadCsv}>
             <Download className="h-3.5 w-3.5" /> {tCo("export")}
           </Button>
           <Button size="sm" className="rounded-xl gap-2 h-9 shadow-sm shadow-primary/20"
