@@ -96,7 +96,12 @@
 
 /* OrderSummary print styles */
 @media print {
-  body { background: white !important; }
+  html, body {
+    background: white !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
+    overflow: hidden !important;
+  }
   nav, header, footer, .print\:hidden { display: none !important; }
   @page {
     margin: 0;

@@ -171,16 +171,16 @@ export default function ChatPage() {
             </p>
             <p className="text-[11px] text-muted-foreground truncate">{requestTitle}</p>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {otherParty?.phone && (
-              <a href={`tel:${otherParty.phone}`}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl"><Phone className="h-4 w-4" /></Button>
-              </a>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border text-xs text-muted-foreground">
+                <Phone className="h-3.5 w-3.5" /> {otherParty.phone}
+              </span>
             )}
             {otherParty?.email && (
-              <a href={`mailto:${otherParty.email}`}>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl"><Mail className="h-4 w-4" /></Button>
-              </a>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border text-xs text-muted-foreground">
+                <Mail className="h-3.5 w-3.5" /> {otherParty.email}
+              </span>
             )}
           </div>
         </div>

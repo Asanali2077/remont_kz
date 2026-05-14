@@ -97,20 +97,22 @@ export default function OrderSummaryPage() {
 
   return (
     /* Page background */
-    <div className="min-h-screen bg-gray-200 dark:bg-gray-950 print:bg-white py-0">
+    <div className="min-h-screen print:min-h-0 print:h-[297mm] print:overflow-hidden bg-gray-200 dark:bg-gray-950 print:bg-white py-0">
 
-      {/* Toolbar — hidden on print */}
-      <div className="print:hidden bg-white dark:bg-gray-900 border-b border-border/40 px-6 py-3 flex items-center justify-between">
-        <Link href={backHref}>
-          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-            <ArrowLeft className="h-4 w-4" />
-            {backLabel}
+      {/* Toolbar — hidden on print, aligned to navbar max-w-6xl bounds */}
+      <div className="print:hidden bg-white dark:bg-gray-900 border-b border-border/40 px-4 py-3">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link href={backHref}>
+            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+              <ArrowLeft className="h-4 w-4" />
+              {backLabel}
+            </Button>
+          </Link>
+          <Button onClick={handlePrint} size="sm" className="gap-2">
+            <Printer className="h-4 w-4" />
+            {t("printPdf")}
           </Button>
-        </Link>
-        <Button onClick={handlePrint} size="sm" className="gap-2">
-          <Printer className="h-4 w-4" />
-          {t("printPdf")}
-        </Button>
+        </div>
       </div>
 
       {/* A4 sheet wrapper */}
@@ -142,8 +144,8 @@ function A4Document({
   return (
     <div
       ref={printRef}
-      /* A4: 210mm × 297mm — at 96dpi: 794px × 1123px */
-      className="w-[794px] min-h-[1123px] bg-white print:bg-white shadow-2xl print:shadow-none rounded-lg print:rounded-none overflow-hidden flex flex-col"
+      /* A4: 210mm × 297mm. Screen px approx; print exact mm */
+      className="w-[794px] min-h-[1123px] print:h-[297mm] print:min-h-0 bg-white print:bg-white shadow-2xl print:shadow-none rounded-lg print:rounded-none overflow-hidden flex flex-col"
     >
       {/* ── HEADER ── */}
       <div className="bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] px-10 py-8 text-white">
@@ -225,7 +227,7 @@ function A4Document({
           </div>
         </div>
 
-        {/* Details + Right column */}
+        {/* Order Details + Timeline — side by side */}
         <div className="grid grid-cols-2 gap-6 items-start">
 
           {/* Order details table */}
@@ -253,43 +255,42 @@ function A4Document({
             </div>
           </div>
 
-          {/* Description + Timeline */}
-          <div className="space-y-5">
-            <div>
-              <h2 className="font-bold text-base mb-3 flex items-center gap-2 text-gray-800">
-                <Hash className="h-4 w-4 text-blue-600" />
-                {t("description")}
-              </h2>
-              <div className="bg-gray-50 rounded-xl px-5 py-4">
-                <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-wrap">{req.description}</p>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="font-bold text-base mb-3 flex items-center gap-2 text-gray-800">
-                <Clock className="h-4 w-4 text-blue-600" />
-                {t("timeline")}
-              </h2>
-              <div className="relative pl-7">
-                <div className="absolute left-3 top-3 bottom-3 w-px bg-gray-200" />
-                {timeline.map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={i} className="relative mb-4 last:mb-0">
-                      <div className={`absolute -left-7 h-6 w-6 rounded-full border-2 flex items-center justify-center ${
-                        item.done ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-white text-gray-300"
-                      }`}>
-                        <Icon className="h-3 w-3" />
-                      </div>
-                      <div className={`ml-2 ${item.done ? "" : "opacity-30"}`}>
-                        <p className="text-sm font-semibold text-gray-800">{item.label}</p>
-                        {item.done && <p className="text-xs text-gray-400 mt-0.5">{formatDate(item.date)}</p>}
-                      </div>
+          {/* Timeline — aligned to Order Details top */}
+          <div>
+            <h2 className="font-bold text-base mb-3 flex items-center gap-2 text-gray-800">
+              <Clock className="h-4 w-4 text-blue-600" />
+              {t("timeline")}
+            </h2>
+            <div className="relative pl-7">
+              <div className="absolute left-3 top-3 bottom-3 w-px bg-gray-200" />
+              {timeline.map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div key={i} className="relative mb-5 last:mb-0">
+                    <div className={`absolute -left-7 h-6 w-6 rounded-full border-2 flex items-center justify-center ${
+                      item.done ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-white text-gray-300"
+                    }`}>
+                      <Icon className="h-3 w-3" />
                     </div>
-                  );
-                })}
-              </div>
+                    <div className={`ml-2 ${item.done ? "" : "opacity-30"}`}>
+                      <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+                      {item.done && <p className="text-xs text-gray-400 mt-0.5">{formatDate(item.date)}</p>}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        </div>
+
+        {/* Description — full width below */}
+        <div>
+          <h2 className="font-bold text-base mb-3 flex items-center gap-2 text-gray-800">
+            <Hash className="h-4 w-4 text-blue-600" />
+            {t("description")}
+          </h2>
+          <div className="bg-gray-50 rounded-xl px-5 py-4">
+            <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-wrap">{req.description}</p>
           </div>
         </div>
 

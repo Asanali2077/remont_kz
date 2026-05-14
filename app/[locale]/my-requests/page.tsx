@@ -1063,18 +1063,14 @@ export default function MyRequestsPage() {
                                   {isAccepted && (
                                     <div className="flex flex-wrap gap-2">
                                       {req.company?.phone && (
-                                        <a href={`tel:${req.company.phone}`}>
-                                          <Button size="sm" variant="outline" className="h-8 rounded-xl gap-1.5 text-xs">
-                                            <Phone className="h-3.5 w-3.5" /> {req.company.phone}
-                                          </Button>
-                                        </a>
+                                        <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border text-xs text-muted-foreground">
+                                          <Phone className="h-3.5 w-3.5" /> {req.company.phone}
+                                        </span>
                                       )}
                                       {req.company?.email && (
-                                        <a href={`mailto:${req.company.email}`}>
-                                          <Button size="sm" variant="outline" className="h-8 rounded-xl gap-1.5 text-xs">
-                                            <Mail className="h-3.5 w-3.5" /> Email
-                                          </Button>
-                                        </a>
+                                        <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border text-xs text-muted-foreground">
+                                          <Mail className="h-3.5 w-3.5" /> {req.company.email}
+                                        </span>
                                       )}
                                       <Link href={`/chat/${req.id}`}>
                                         <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs">
