@@ -563,7 +563,6 @@
     "services": "Services",
     "requests": "Requests",
     "statistics": "Statistics",
-    "portfolio": "Portfolio",
     "addService": "Add service",
     "editService": "Edit service",
     "deleteService": "Delete service",
@@ -773,14 +772,6 @@
     "promoSuccessToast": "Promo applied: {discount}% off",
     "promoErrorToast": "Invalid promo code",
     "mockNotice": "Mock payment — no real money charged"
-  },
-  "portfolio": {
-    "title": "Portfolio",
-    "addPhoto": "Add photo",
-    "noPhotos": "No photos yet",
-    "caption": "Caption",
-    "upload": "Upload",
-    "delete": "Delete"
   },
   "profile": {
     "title": "Profile",

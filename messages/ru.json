@@ -563,7 +563,6 @@
     "services": "Услуги",
     "requests": "Заявки",
     "statistics": "Статистика",
-    "portfolio": "Портфолио",
     "addService": "Добавить услугу",
     "editService": "Редактировать услугу",
     "deleteService": "Удалить услугу",
@@ -773,14 +772,6 @@
     "promoSuccessToast": "Промокод применён: скидка {discount}%",
     "promoErrorToast": "Неверный промокод",
     "mockNotice": "Тестовый платёж — деньги не списываются"
-  },
-  "portfolio": {
-    "title": "Портфолио",
-    "addPhoto": "Добавить фото",
-    "noPhotos": "Фотографий пока нет",
-    "caption": "Подпись",
-    "upload": "Загрузить",
-    "delete": "Удалить"
   },
   "profile": {
     "title": "Профиль",

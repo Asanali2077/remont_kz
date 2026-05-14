@@ -563,7 +563,6 @@
     "services": "Қызметтер",
     "requests": "Өтінімдер",
     "statistics": "Статистика",
-    "portfolio": "Портфолио",
     "addService": "Қызмет қосу",
     "editService": "Қызметті өңдеу",
     "deleteService": "Қызметті жою",
@@ -773,14 +772,6 @@
     "promoSuccessToast": "Промокод қолданылды: {discount}% жеңілдік",
     "promoErrorToast": "Промокод дұрыс емес",
     "mockNotice": "Тест төлемі — ақша алынбайды"
-  },
-  "portfolio": {
-    "title": "Портфолио",
-    "addPhoto": "Фото қосу",
-    "noPhotos": "Фотолар әлі жоқ",
-    "caption": "Жазба",
-    "upload": "Жүктеу",
-    "delete": "Жою"
   },
   "profile": {
     "title": "Профиль",

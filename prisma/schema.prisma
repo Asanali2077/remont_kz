@@ -88,7 +88,6 @@ model User {
   sentOffers         RequestOffer[]  @relation("CompanyOffers")
   favorites          Favorite[]
   payments           Payment[]
-  portfolio          PortfolioPhoto[]
   auditLogs          AuditLog[]
 
   @@index([email])
@@ -260,18 +259,6 @@ model Payment {
   @@index([promoCodeId])
 }
 
-model PortfolioPhoto {
-  id          String   @id @default(uuid())
-  companyId   String
-  url         String
-  caption     String?
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-
-  company     User     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@index([companyId])
-}
 
 model AuditLog {
   id         String   @id @default(uuid())
