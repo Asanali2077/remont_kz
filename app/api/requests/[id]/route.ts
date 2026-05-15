@@ -5,13 +5,12 @@ import { prisma } from "@/lib/db";
 import { requireAuth, requireClient, requireCompany } from "@/lib/middleware";
 import { sendRequestAcceptedEmail, sendJobCompletedEmail } from "@/lib/email";
 
-const requestStatuses = ["accepted", "in_progress", "completed", "cancelled"] as const;
+const requestStatuses = ["accepted", "in_progress", "completed"] as const;
 
 const requestStatusMap: Record<(typeof requestStatuses)[number], RequestStatus> = {
   accepted: RequestStatus.ACCEPTED,
   in_progress: RequestStatus.IN_PROGRESS,
   completed: RequestStatus.COMPLETED,
-  cancelled: RequestStatus.CANCELLED,
 };
 
 const updateRequestSchema = z.object({

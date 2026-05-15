@@ -24,7 +24,7 @@ export async function GET(
           select: {
             id: true, rating: true, review: true, companyReply: true,
             createdAt: true,
-            client: { select: { name: true, email: true } },
+            client: { select: { name: true } },
           },
           orderBy: { createdAt: "desc" },
           take: 20,
