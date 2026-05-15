@@ -12,7 +12,7 @@ npm install
 
 # 2. Configure environment
 cp .env.example .env
-# Edit .env — set DATABASE_URL, JWT_SECRET, SMTP_*, reCAPTCHA keys
+# Edit .env — set DATABASE_URL, JWT_SECRET, SMTP_PASS (Resend API key), reCAPTCHA keys
 
 # 3. Push schema to database (no migration history)
 npm run db:push
@@ -37,15 +37,22 @@ After running `npm run db:seed` (password for all: `password123`):
 
 | Role | Email | Company |
 |------|-------|---------|
-| Company | stroymast@remont.kz | StroiMaster, Almaty |
-| Company | autocity@remont.kz | AutoCity KZ, Astana |
-| Company | electroserv@remont.kz | ElectroServ, Almaty |
-| Company | plumbing@remont.kz | PlumbingKZ, Astana |
-| Company | cleanpro@remont.kz | CleanPro, Almaty |
+| Company | stroymast@remont.kz | StroiMaster — REAL_ESTATE, Almaty |
+| Company | autocity@remont.kz | AutoCity KZ — AUTOMOBILES, Astana |
+| Company | electroserv@remont.kz | ElectroServ — ELECTRICAL, Almaty |
+| Company | plumbing@remont.kz | PlumbingKZ — PLUMBING, Astana |
+| Company | cleanpro@remont.kz | CleanPro — CLEANING, Almaty |
+| Company | kazweld@remont.kz | KazWeld — WELDING, Almaty |
+| Company | roofpro@remont.kz | RoofPro KZ — ROOFING, Astana |
+| Company | paintmaster@remont.kz | PaintMaster — PAINTING, Almaty |
+| Company | renovkz@remont.kz | RenovKZ — RENOVATION, Shymkent |
+| Company | techmaster@remont.kz | TechMaster KZ — OTHER, Almaty |
 | Client | asel@remont.kz | — |
 | Client | dmitry@remont.kz | — |
 | Client | zarina@remont.kz | — |
 | Client | arman@remont.kz | — |
+| Client | aibek@remont.kz | — |
+| Client | nurgul@remont.kz | — |
 | Admin | admin@remont.kz | password: `Admin123!` |
 
 ---
@@ -61,7 +68,7 @@ After running `npm run db:seed` (password for all: `password123`):
 | ORM | Prisma 7 (driver adapter + pool) |
 | Auth | JWT stateless + bcrypt (12 rounds) |
 | i18n | next-intl (ru / en / kk) |
-| Email | Nodemailer → Mailtrap sandbox |
+| Email | Resend HTTP SDK |
 | Real-time | Server-Sent Events (SSE) |
 | Animation | Framer Motion |
 | Charts | Recharts |
@@ -107,7 +114,7 @@ remont_kz/
 │   ├── upload.ts               # File upload (local / S3)
 │   └── use-notifications.ts    # Notification polling
 ├── prisma/
-│   ├── schema.prisma           # 11 models
+│   ├── schema.prisma           # 10 models
 │   └── seed.ts                 # Demo data
 └── messages/                   # i18n: ru.json, en.json, kk.json
 ```
@@ -154,12 +161,9 @@ JWT_SECRET="remont-kz-jwt-secret-2024-diploma-project"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_API_URL="/api"
 
-# SMTP — Mailtrap sandbox (dev)
-SMTP_HOST=sandbox.smtp.mailtrap.io
-SMTP_PORT=2525
-SMTP_USER=<mailtrap_user>
-SMTP_PASS=<mailtrap_pass>
-SMTP_FROM="Remont.kz <noreply@remont.kz>"
+# Email — Resend HTTP SDK (SMTP_PASS = Resend API key)
+SMTP_PASS=re_xxxxxxxxxxxx
+SMTP_FROM="Remont.kz <onboarding@resend.dev>"
 
 # reCAPTCHA v3 (login + register)
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=<site_key>
@@ -176,7 +180,7 @@ RECAPTCHA_SECRET_KEY=<secret_key>
 
 ## Database Schema
 
-11 models:
+10 models:
 
 | Model | Purpose |
 |-------|---------|
@@ -188,7 +192,6 @@ RECAPTCHA_SECRET_KEY=<secret_key>
 | `Message` | Chat message. TEXT / IMAGE / AUDIO, read receipt |
 | `Favorite` | Saved service. Unique per (user, service) |
 | `Payment` | Mock payment tied to request. Supports promo codes |
-| `PortfolioPhoto` | Company portfolio gallery |
 | `AuditLog` | Admin action tracking |
 | `PromoCode` | Discount codes (% off, maxUses, expiry) |
 
@@ -201,7 +204,7 @@ RECAPTCHA_SECRET_KEY=<secret_key>
 - Side-by-side service comparison (up to 3)
 - Multi-step request wizard, offer system, status timeline
 - Real-time chat via SSE, image/audio attachments, read receipts
-- Company dashboard: Kanban board, statistics charts, CSV export, portfolio
+- Company dashboard: Kanban board, statistics charts, CSV export
 - Favorites, notification center, activity heatmap
 - Email notifications: new offer, offer accepted, job completed
 - Admin panel: user management, audit logs, promo codes, service moderation

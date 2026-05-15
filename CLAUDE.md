@@ -29,21 +29,13 @@ JWT_SECRET="remont-kz-jwt-secret-2024-diploma-project"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_API_URL="/api"
 
-# SMTP — Mailtrap sandbox (credentials in .env file)
-SMTP_HOST=sandbox.smtp.mailtrap.io
-SMTP_PORT=2525
-SMTP_USER=1e0f43111229f4
-SMTP_PASS=2f93385123531d
-SMTP_FROM="Remont.kz <noreply@remont.kz>"
+# Email — Resend HTTP SDK (SMTP_PASS stores the Resend API key)
+SMTP_PASS=re_xxxxxxxxxxxx
+SMTP_FROM="Remont.kz <onboarding@resend.dev>"
 
 # reCAPTCHA v3
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LdFsOcsAAAAAC7z2e_KFLgg8udvpD1yylu-WIW5
 RECAPTCHA_SECRET_KEY=6LdFsOcsAAAAAH46d_F4d4tS8aByy_NcL_sOVY2p
-
-# OpenRouter AI (free models)
-OPENROUTER_API_KEY="sk-or-v1-..."
-OPENROUTER_BOT_MODEL="google/gemma-4-31b-it:free"
-OPENROUTER_SUMMARY_MODEL="google/gemma-4-31b-it:free"
 ```
 
 ---
@@ -94,7 +86,7 @@ Conversion: `fromDbCategory()` in `lib/api.ts`. Update all three categoryMap obj
 
 ---
 
-## Database Schema (8 models)
+## Database Schema (10 models)
 
 ```
 User          — CLIENT | COMPANY | ADMIN roles. emailVerified, isBlocked, avatarUrl, etc.
@@ -105,7 +97,6 @@ RequestOffer  — Company bid on a request. status: PENDING|ACCEPTED|REJECTED. @
 Message       — Chat message. type: TEXT|IMAGE|AUDIO. read boolean
 Favorite      — Client saved service. @@unique([userId, serviceId])
 Payment       — Mock payment tied to Request. status: PENDING|PAID|FAILED|REFUNDED
-PortfolioPhoto — Company work photos
 AuditLog      — Admin action tracking
 PromoCode     — Discount codes for payments
 ```
@@ -152,7 +143,6 @@ PromoCode     — Discount codes for payments
 | `/api/payments/[requestId]` | GET/POST | Any | Get/create payment |
 | `/api/payments/[requestId]/confirm` | POST | Any | Confirm payment |
 | `/api/admin/*` | Various | Admin | User mgmt, audit logs, promo codes, services |
-| `/api/portfolio` | GET/POST/DELETE | Company | Portfolio photos |
 | `/api/promo/validate` | POST | Client | Validate promo code |
 
 ---
@@ -166,7 +156,7 @@ PromoCode     — Discount codes for payments
 | `/repair/[id]` | `repair/[id]/page.tsx` | Service detail, gallery, reviews, similar services |
 | `/companies` | `companies/page.tsx` | Company directory |
 | `/company/[id]` | `company/[id]/page.tsx` | Company public profile |
-| `/company/dashboard` | `company/dashboard/page.tsx` | Company dashboard (Kanban, stats, services, portfolio) |
+| `/company/dashboard` | `company/dashboard/page.tsx` | Company dashboard (Kanban, stats, services) |
 | `/company/catalog` | `company/catalog/page.tsx` | Company service catalog view |
 | `/my-requests` | `my-requests/page.tsx` | Client request list with offers, timeline |
 | `/chat` | `chat/page.tsx` | Chat inbox |
@@ -242,8 +232,9 @@ Client creates Request (NEW, expires in 14 days)
 - Cleans up on `request.signal` abort
 
 ### Email Flow
-- `lib/email.ts` — 6 templates via Nodemailer
-- Mailtrap SMTP for dev (credentials in .env)
+- `lib/email.ts` — 6 templates via Resend HTTP SDK
+- `SMTP_PASS` env var holds the Resend API key (legacy name kept to avoid renaming)
+- Falls back to `console.log` if `SMTP_PASS` is unset (dev convenience)
 - Triggers: register, verify-email, forgot-password, new-offer, offer-accepted, job-completed
 
 ### i18n
@@ -261,6 +252,7 @@ Client creates Request (NEW, expires in 14 days)
 | `AiRequestBot.tsx` | OpenRouter free tier rate limits made it unreliable |
 | `app/api/ai/` (both routes) | Same reason — AI features removed from frontend |
 | AI service summary | Removed |
+| `PortfolioPhoto` model + `/api/portfolio` | No UI was ever built for it — model existed in schema only |
 | Billing for clients | Remont.kz is **free for clients**. Billing page only for companies. |
 | `/my-payments` for clients | Same reason |
 | Payment button in my-requests | Same reason |
@@ -298,12 +290,24 @@ Before/After slider auto-cycles every 5s, pauses on hover. Images from `public/s
 ## Demo Accounts (after `npm run db:seed`)
 Password for all: `password123`
 
-| Role | Email |
-|------|-------|
-| Company | stroymast@remont.kz |
-| Company | autocity@remont.kz |
-| Client | asel@remont.kz |
-| Client | dmitry@remont.kz |
+| Role | Email | Notes |
+|------|-------|-------|
+| Company | stroymast@remont.kz | StroiMaster — REAL_ESTATE, Almaty |
+| Company | autocity@remont.kz | AutoCity KZ — AUTOMOBILES, Astana |
+| Company | electroserv@remont.kz | ElectroServ — ELECTRICAL, Almaty |
+| Company | plumbing@remont.kz | PlumbingKZ — PLUMBING, Astana |
+| Company | cleanpro@remont.kz | CleanPro — CLEANING, Almaty |
+| Company | kazweld@remont.kz | KazWeld — WELDING, Almaty |
+| Company | roofpro@remont.kz | RoofPro KZ — ROOFING, Astana |
+| Company | paintmaster@remont.kz | PaintMaster — PAINTING, Almaty |
+| Company | renovkz@remont.kz | RenovKZ — RENOVATION, Shymkent |
+| Company | techmaster@remont.kz | TechMaster KZ — OTHER, Almaty |
+| Client | asel@remont.kz | |
+| Client | dmitry@remont.kz | |
+| Client | zarina@remont.kz | |
+| Client | arman@remont.kz | |
+| Client | aibek@remont.kz | |
+| Client | nurgul@remont.kz | |
 
 ---
 

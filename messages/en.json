@@ -1233,10 +1233,6 @@
         "desc": "User management, audit logs, promo codes, service moderation."
       },
       {
-        "label": "Portfolio system",
-        "desc": "Companies upload before/after work photos to their profile."
-      },
-      {
         "label": "Rate limiting",
         "desc": "In-memory rate limits on auth, offers, messages endpoints."
       },
