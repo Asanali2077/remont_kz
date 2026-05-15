@@ -14,6 +14,7 @@ export type User = {
   name?: string | null;
   phone?: string | null;
   token?: string;
+  emailVerified?: boolean;
 } | null;
 
 type AuthContextValue = {
@@ -48,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 name: data.name,
                 phone: data.phone,
                 token: parsed.token!,
+                emailVerified: data.emailVerified,
               });
             })
             .catch(() => {
@@ -86,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: response.user!.name,
         phone: response.user!.phone,
         token: response.token!,
+        emailVerified: response.emailVerified ?? true,
       });
       if (response.emailVerified === false) {
         toast.warning("Please verify your email to access all features.", { duration: 6000 });
@@ -116,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: response.user!.name,
         phone: response.user!.phone,
         token: response.token!,
+        emailVerified: false,
       });
       // Toast is shown by AuthModal after getting verifyUrl
       return { verifyUrl: response.verifyUrl };

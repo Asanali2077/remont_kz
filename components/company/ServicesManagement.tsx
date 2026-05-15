@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   CheckCircle2, Edit, Plus, Trash2, XCircle, Loader2,
-  Star, TrendingUp, ImageIcon, MapPin,
+  Star, TrendingUp, ImageIcon, MapPin, MailWarning,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -93,6 +93,19 @@ export function ServicesManagement() {
 
   return (
     <div className="space-y-5">
+      {/* Email verification banner */}
+      {user?.emailVerified === false && (
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+          <MailWarning className="h-5 w-5 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-semibold">Подтвердите email</p>
+            <p className="text-amber-700 dark:text-amber-400">
+              Вы не сможете добавлять услуги до подтверждения email-адреса. Проверьте почту и перейдите по ссылке в письме.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Onboarding checklist */}
       <OnboardingChecklist
         services={services}
@@ -122,7 +135,12 @@ export function ServicesManagement() {
               )}
             </div>
           )}
-          <Button onClick={() => { setEditingService(null); setIsModalOpen(true); }} className="rounded-xl gap-2">
+          <Button
+            onClick={() => { setEditingService(null); setIsModalOpen(true); }}
+            className="rounded-xl gap-2"
+            disabled={user?.emailVerified === false}
+            title={user?.emailVerified === false ? "Подтвердите email для добавления услуг" : undefined}
+          >
             <Plus className="h-4 w-4" /> {t("addService")}
           </Button>
         </div>

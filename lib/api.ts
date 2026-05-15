@@ -113,7 +113,9 @@ class ApiClient {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`API error: ${response.status} ${text || response.statusText}`);
+      let message = response.statusText || `Error ${response.status}`;
+      try { message = (JSON.parse(text) as { error?: string }).error ?? message; } catch { /* */ }
+      throw new Error(message);
     }
 
     return response.json();
@@ -420,7 +422,9 @@ class ApiClient {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`API error: ${response.status} ${text || response.statusText}`);
+      let message = response.statusText || `Error ${response.status}`;
+      try { message = (JSON.parse(text) as { error?: string }).error ?? message; } catch { /* */ }
+      throw new Error(message);
     }
 
     return response.json() as Promise<{

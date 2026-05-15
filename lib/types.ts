@@ -61,6 +61,7 @@ export interface UserSummary {
   avatarUrl?: string | null;
   address?: string | null;
   isVerified?: boolean | null;
+  emailVerified?: boolean;
 }
 
 export interface ServiceImageRecord {
