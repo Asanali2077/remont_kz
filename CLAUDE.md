@@ -56,7 +56,7 @@ All pages are under `app/[locale]/` — i18n via `next-intl` (RU, EN, KZ locales
 - `lib/middleware.ts` — per-route guards: `requireAuth()`, `requireClient()`, `requireCompany()`, `assertEmailVerified()`
 - All API routes extract token from `Authorization: Bearer <token>` header
 - `components/auth/AuthProvider.tsx` — React context, `useAuth()` hook
-- reCAPTCHA v3 on login + register via `react-google-recaptcha-v3`, verified server-side in `lib/recaptcha.ts`
+- reCAPTCHA v3: `lib/recaptcha.ts` exists and `react-google-recaptcha-v3` is installed, but **not connected** — neither AuthModal nor login/register routes call it. Rate limiting is the active bot protection.
 - Email verification enforced on: POST /api/services (create), POST /api/requests/[id]/offer
 
 ### API Client (frontend)
@@ -259,7 +259,7 @@ Client creates Request (NEW, expires in 14 days)
 | Billing link in client navbar | Same reason |
 | Billing in SettingsSidebar | Same reason |
 | Admin role visible to users | Admin panel exists at `/admin/*` but no UI link for regular users |
-| reCAPTCHA badge | Hidden via CSS (`.grecaptcha-badge { visibility: hidden }`). Disclosure in footer. |
+| reCAPTCHA v3 UI integration | `lib/recaptcha.ts` prepared but never wired to AuthModal or API routes — rate limiting covers bot protection |
 
 ---
 
