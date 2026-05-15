@@ -296,7 +296,7 @@ class ApiClient {
     serviceId?: string;
     category?: ServiceCategory;
     city?: string;
-    scope?: "assigned" | "unassigned" | "all";
+    scope?: "assigned" | "unassigned" | "all" | "browse";
   }) {
     const query = new URLSearchParams();
     if (params) {

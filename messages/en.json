@@ -584,9 +584,12 @@
     "export": "Export CSV",
     "onboarding": {
       "title": "Getting started",
+      "completeProfile": "Add your name and phone",
+      "addAvatar": "Upload a profile photo",
       "addService": "Add your first service",
-      "verifyEmail": "Verify your email",
-      "completeProfile": "Complete your profile"
+      "addServicePhoto": "Add a photo to your service",
+      "completeRequest": "Complete your first order",
+      "verifyEmail": "Verify your email"
     },
     "totalServices": "Total services",
     "inProgress": "In progress",
@@ -688,7 +691,8 @@
     "selectAll": "Select all",
     "nSelected": "{n} selected",
     "deleteN": "Delete {n}",
-    "totalActive": "{total} total · {active} active"
+    "totalActive": "{total} total · {active} active",
+    "forMe": "For me"
   },
   "chat": {
     "title": "Messages",
@@ -1567,7 +1571,8 @@
     "offerSentToast": "Offer sent",
     "offerFailedToast": "Failed to send offer",
     "withdrawSuccessToast": "Offer withdrawn",
-    "withdrawFailedToast": "Failed to withdraw offer"
+    "withdrawFailedToast": "Failed to withdraw offer",
+    "forMe": "For me"
   },
   "adminPromo": {
     "title": "Promo Codes",

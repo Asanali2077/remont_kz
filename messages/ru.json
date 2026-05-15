@@ -584,9 +584,12 @@
     "export": "Экспорт CSV",
     "onboarding": {
       "title": "Начало работы",
+      "completeProfile": "Заполните имя и телефон",
+      "addAvatar": "Добавьте фото профиля",
       "addService": "Добавьте первую услугу",
-      "verifyEmail": "Верифицируйте email",
-      "completeProfile": "Заполните профиль"
+      "addServicePhoto": "Добавьте фото к услуге",
+      "completeRequest": "Завершите первый заказ",
+      "verifyEmail": "Верифицируйте email"
     },
     "totalServices": "Всего услуг",
     "inProgress": "В работе",
@@ -688,7 +691,8 @@
     "selectAll": "Выбрать все",
     "nSelected": "Выбрано: {n}",
     "deleteN": "Удалить {n}",
-    "totalActive": "{total} всего · {active} активных"
+    "totalActive": "{total} всего · {active} активных",
+    "forMe": "Для меня"
   },
   "chat": {
     "title": "Сообщения",
@@ -1567,7 +1571,8 @@
     "offerSentToast": "Предложение отправлено",
     "offerFailedToast": "Не удалось отправить предложение",
     "withdrawSuccessToast": "Предложение отозвано",
-    "withdrawFailedToast": "Не удалось отозвать предложение"
+    "withdrawFailedToast": "Не удалось отозвать предложение",
+    "forMe": "Для меня"
   },
   "adminPromo": {
     "title": "Промокоды",

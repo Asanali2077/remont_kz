@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
@@ -95,15 +95,16 @@ function CatalogContent() {
   const [city, setCity] = useState("");
   const [offerDialogRequestId, setOfferDialogRequestId] = useState<string | null>(null);
   const [offerSubmitting, setOfferSubmitting] = useState(false);
+  const [forMe, setForMe] = useState(false);
 
   useEffect(() => {
     void loadRequests();
-  }, []);
+  }, [forMe]);
 
   async function loadRequests() {
     try {
       setLoading(true);
-      const data = await api.getRequests({ scope: "unassigned" });
+      const data = await api.getRequests({ scope: forMe ? "unassigned" : "browse" });
       setRequests(data);
     } finally {
       setLoading(false);
@@ -157,9 +158,22 @@ function CatalogContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-1">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+        <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold mb-1">{t("title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+          </div>
+          <button
+            onClick={() => setForMe(v => !v)}
+            className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold transition-all ${
+              forMe
+                ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                : "bg-card border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/30"
+            }`}
+          >
+            <UserCheck className="h-4 w-4" />
+            {t("forMe")}
+          </button>
         </div>
 
         <Card className="mb-6">

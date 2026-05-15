@@ -17,11 +17,11 @@ export function OnboardingChecklist({ services, hasCompletedRequest, hasAvatar, 
   const { user } = useAuth();
 
   const steps = [
-    { label: t("onboarding.completeProfile"),  done: !!(user?.name && user?.phone),   tab: "profile" },
-    { label: t("onboarding.completeProfile"),  done: hasAvatar,                       tab: "profile" },
-    { label: t("onboarding.addService"),       done: services.length > 0,            tab: "services" },
-    { label: t("onboarding.addService"),       done: services.some(s => s.images.length > 0), tab: "services" },
-    { label: t("stats.completedRequests"),     done: hasCompletedRequest,             tab: "requests" },
+    { label: t("onboarding.completeProfile"),   done: !!(user?.name && user?.phone),                  tab: "profile" },
+    { label: t("onboarding.addAvatar"),         done: hasAvatar,                                      tab: "profile" },
+    { label: t("onboarding.addService"),        done: services.length > 0,                            tab: "services" },
+    { label: t("onboarding.addServicePhoto"),   done: services.some(s => s.images.length > 0),        tab: "services" },
+    { label: t("onboarding.completeRequest"),   done: hasCompletedRequest,                            tab: "requests" },
   ];
 
   const completed = steps.filter(s => s.done).length;
@@ -49,8 +49,8 @@ export function OnboardingChecklist({ services, hasCompletedRequest, hasAvatar, 
 
       {/* Steps */}
       <div className="divide-y divide-border/40">
-        {steps.map(({ label, done, tab }) => (
-          <button key={label} onClick={() => !done && onNavigate(tab)}
+        {steps.map(({ label, done, tab }, i) => (
+          <button key={i} onClick={() => !done && onNavigate(tab)}
             disabled={done}
             className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors ${done ? "opacity-60" : "hover:bg-muted/40"}`}>
             {done

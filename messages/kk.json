@@ -584,9 +584,12 @@
     "export": "CSV экспорт",
     "onboarding": {
       "title": "Бастау",
+      "completeProfile": "Аты мен телефонды толтырыңыз",
+      "addAvatar": "Профиль суретін қосыңыз",
       "addService": "Алғашқы қызметті қосыңыз",
-      "verifyEmail": "Email-ды растаңыз",
-      "completeProfile": "Профильді толтырыңыз"
+      "addServicePhoto": "Қызметке сурет қосыңыз",
+      "completeRequest": "Алғашқы тапсырысты орындаңыз",
+      "verifyEmail": "Email-ды растаңыз"
     },
     "totalServices": "Барлық қызметтер",
     "inProgress": "Жұмыста",
@@ -688,7 +691,8 @@
     "selectAll": "Барлығын таңдау",
     "nSelected": "Таңдалды: {n}",
     "deleteN": "{n} жою",
-    "totalActive": "{total} барлығы · {active} белсенді"
+    "totalActive": "{total} барлығы · {active} белсенді",
+    "forMe": "Маған арналған"
   },
   "chat": {
     "title": "Хабарламалар",
@@ -1567,7 +1571,8 @@
     "offerSentToast": "Ұсыныс жіберілді",
     "offerFailedToast": "Ұсынысты жіберу сәтсіз болды",
     "withdrawSuccessToast": "Ұсыныс кері алынды",
-    "withdrawFailedToast": "Ұсынысты кері алу сәтсіз болды"
+    "withdrawFailedToast": "Ұсынысты кері алу сәтсіз болды",
+    "forMe": "Маған арналған"
   },
   "adminPromo": {
     "title": "Промокодтар",

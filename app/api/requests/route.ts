@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireAuth, requireClient } from "@/lib/middleware";
 
 const requestStatuses = ["new", "accepted", "in_progress", "completed"] as const;
-const requestScopes = ["assigned", "unassigned", "all"] as const;
+const requestScopes = ["assigned", "unassigned", "all", "browse"] as const;
 const serviceCategories = [
   "automobiles", "real-estate", "plumbing", "electrical",
   "painting", "cleaning", "renovation", "welding", "roofing", "other",
@@ -160,6 +160,12 @@ export async function GET(request: NextRequest) {
 
         if (resolvedScope === "unassigned") {
           Object.assign(where, buildUnassignedCondition(companyCategories, companyCities, minPrice));
+        } else if (resolvedScope === "browse") {
+          const now = new Date();
+          where.OR = [
+            { companyId: user.userId },
+            { companyId: null, status: RequestStatus.NEW, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+          ];
         } else {
           where.OR = [
             { companyId: user.userId },

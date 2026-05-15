@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { LayoutGrid, LayoutList, CheckCircle2, Star, ClipboardList, Download, DollarSign } from "lucide-react";
+import { LayoutGrid, LayoutList, CheckCircle2, Star, ClipboardList, Download, DollarSign, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -21,8 +21,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 type RequestFilter = RequestStatus | "all";
 
-async function fetchRequests(statusFilter: RequestFilter) {
-  return api.getRequests({ scope: "all", status: statusFilter === "all" ? undefined : statusFilter });
+async function fetchRequests(statusFilter: RequestFilter, forMe: boolean) {
+  return api.getRequests({ scope: forMe ? "unassigned" : "browse", status: statusFilter === "all" ? undefined : statusFilter });
 }
 
 
@@ -59,6 +59,7 @@ export function RequestsManagement() {
   ];
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [statusFilter, setStatusFilter] = useState<RequestFilter>("all");
+  const [forMe, setForMe] = useState(false);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
   const [offerDialogRequestId, setOfferDialogRequestId] = useState<string | null>(null);
@@ -72,17 +73,17 @@ export function RequestsManagement() {
 
   useEffect(() => {
     void (async () => {
-      try { setLoading(true); setRequests(await fetchRequests(statusFilter)); }
+      try { setLoading(true); setRequests(await fetchRequests(statusFilter, forMe)); }
       catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
       finally { setLoading(false); }
     })();
     setPage(1);
-  }, [statusFilter]);
+  }, [statusFilter, forMe]);
 
   async function updateStatus(requestId: string, status: RequestStatus, finalPrice?: number) {
     setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status, ...(finalPrice && { finalPrice }) } : r));
     try { await api.updateRequest(requestId, { status, ...(finalPrice && { finalPrice }) }); toast.success(t("updated")); }
-    catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); setRequests(await fetchRequests(statusFilter)); }
+    catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); setRequests(await fetchRequests(statusFilter, forMe)); }
   }
 
   async function confirmStartWork() {
@@ -101,7 +102,7 @@ export function RequestsManagement() {
       await api.createOffer(offerDialogRequestId, { price, message: message || undefined });
       toast.success(t("offerSent"));
       setOfferDialogRequestId(null);
-      setRequests(await fetchRequests(statusFilter));
+      setRequests(await fetchRequests(statusFilter, forMe));
     } catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setOfferSubmitting(false); }
   }
@@ -113,7 +114,7 @@ export function RequestsManagement() {
       await api.replyToReview(replyRequestId, replyText.trim());
       toast.success(t("replySent"));
       setReplyRequestId(null); setReplyText("");
-      setRequests(await fetchRequests(statusFilter));
+      setRequests(await fetchRequests(statusFilter, forMe));
     } catch (e) { toast.error(e instanceof Error ? e.message : tCommon("error")); }
     finally { setReplySubmitting(false); }
   }
@@ -151,6 +152,17 @@ export function RequestsManagement() {
           <p className="text-xs text-muted-foreground mt-0.5">{requests.length} total · {unassigned.length} available</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setForMe(v => !v)}
+            className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
+              forMe
+                ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                : "bg-card border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/30"
+            }`}
+          >
+            <UserCheck className="h-3.5 w-3.5" />
+            {t("forMe")}
+          </button>
           <Button variant="outline" size="sm" className="h-8 rounded-xl gap-1.5 text-xs" onClick={downloadCsv}>
             <Download className="h-3.5 w-3.5" /> CSV
           </Button>
