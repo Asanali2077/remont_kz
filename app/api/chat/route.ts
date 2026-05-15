@@ -14,9 +14,8 @@ export async function GET(request: NextRequest) {
     const requests = await prisma.request.findMany({
       where: {
         ...(role === "CLIENT"
-          ? { clientId: userId }
+          ? { clientId: userId, companyId: { not: null } }
           : { companyId: userId }),
-        companyId: { not: null },
         messages: { some: {} },
       },
       select: {
