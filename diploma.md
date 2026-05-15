@@ -795,7 +795,7 @@ SMTP_FROM="Remont.kz <onboarding@resend.dev>"
 }
 ```
 
-- Запускается **каждый час**
+- Запускается **раз в сутки** (полночь по UTC) — ограничение Vercel Hobby плана
 - Находит все заявки со статусом `NEW` и `expiresAt < now()`
 - Переводит их в статус `CANCELLED`
 - Заявки создаются с `expiresAt = createdAt + 14 дней`

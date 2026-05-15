@@ -313,7 +313,7 @@ Password for all: `password123`
 
 ## Cron & Deployment
 
-- `vercel.json` — hourly cron for `GET /api/requests/expire`
+- `vercel.json` — daily cron (midnight) for `GET /api/requests/expire` (Hobby plan limit: once/day)
 - `Dockerfile` + `docker-compose.yml` — for containerised deployment
 - `.github/workflows/ci.yml` — lint, type-check, test, build with Postgres service
 - `next.config.js` — `output: "standalone"`, remotePatterns for images (no wildcard `**`)
