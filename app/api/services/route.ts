@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma, ServiceCategory } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireCompany, assertEmailVerified } from "@/lib/middleware";
+import { requireCompany } from "@/lib/middleware";
 import { geocodeAddress } from "@/lib/geocode";
 import { sanitizeText } from "@/lib/utils";
 
@@ -220,9 +220,6 @@ export async function POST(request: NextRequest) {
   try {
     const authResult = await requireCompany()(request);
     if ("error" in authResult) return authResult.error;
-
-    try { await assertEmailVerified(authResult.user.userId); }
-    catch { return NextResponse.json({ error: "Please verify your email before publishing services." }, { status: 403 }); }
 
     const body = await request.json();
     const validatedData = createServiceSchema.parse(body);
