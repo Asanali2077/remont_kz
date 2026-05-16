@@ -1575,7 +1575,9 @@
     "offerFailedToast": "Не удалось отправить предложение",
     "withdrawSuccessToast": "Предложение отозвано",
     "withdrawFailedToast": "Не удалось отозвать предложение",
-    "forMe": "Для меня"
+    "forMe": "Для меня",
+    "viewPhoto": "Смотреть фото",
+    "photoAlt": "Фото заявки"
   },
   "adminPromo": {
     "title": "Промокоды",

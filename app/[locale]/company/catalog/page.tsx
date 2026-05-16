@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ClipboardList, UserCheck } from "lucide-react";
+import { ClipboardList, UserCheck, ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CitySelect } from "@/components/ui/CitySelect";
 import { Label } from "@/components/ui/label";
 import { Footer } from "@/components/Footer";
@@ -23,12 +24,14 @@ function RequestCard({
   myCompanyId,
   onMakeOffer,
   onWithdrawOffer,
+  onViewPhoto,
   offerSubmitting,
 }: {
   request: RequestRecord;
   myCompanyId: string;
   onMakeOffer: (id: string) => void;
   onWithdrawOffer: (id: string) => void;
+  onViewPhoto: (url: string) => void;
   offerSubmitting: boolean;
 }) {
   const t = useTranslations("catalog");
@@ -41,7 +44,27 @@ function RequestCard({
   const myOffer = request.offers?.find((o) => o.companyId === myCompanyId);
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
+      {/* Photo strip */}
+      {request.imageUrl && (
+        <button
+          onClick={() => onViewPhoto(request.imageUrl!)}
+          className="relative w-full h-40 overflow-hidden bg-muted block group"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={request.imageUrl}
+            alt={t("photoAlt")}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+              <ImageIcon className="h-3.5 w-3.5" /> {t("viewPhoto")}
+            </span>
+          </div>
+        </button>
+      )}
+
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-center gap-2 mb-1">
           {categoryLabel && <Badge variant="secondary">{categoryLabel}</Badge>}
@@ -96,6 +119,7 @@ function CatalogContent() {
   const [offerDialogRequestId, setOfferDialogRequestId] = useState<string | null>(null);
   const [offerSubmitting, setOfferSubmitting] = useState(false);
   const [forMe, setForMe] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     void loadRequests();
@@ -227,6 +251,7 @@ function CatalogContent() {
                   myCompanyId={user?.id ?? ""}
                   onMakeOffer={setOfferDialogRequestId}
                   onWithdrawOffer={handleWithdrawOffer}
+                  onViewPhoto={setPhotoUrl}
                   offerSubmitting={offerSubmitting}
                 />
               ))}
@@ -243,6 +268,26 @@ function CatalogContent() {
         onSubmit={handleSubmitOffer}
         submitting={offerSubmitting}
       />
+
+      {/* Photo lightbox */}
+      <Dialog open={!!photoUrl} onOpenChange={(v) => { if (!v) setPhotoUrl(null); }}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-black/90 border-0">
+          <button
+            onClick={() => setPhotoUrl(null)}
+            className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          {photoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={photoUrl}
+              alt={t("photoAlt")}
+              className="w-full max-h-[80vh] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

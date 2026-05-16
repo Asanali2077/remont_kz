@@ -1575,7 +1575,9 @@
     "offerFailedToast": "Failed to send offer",
     "withdrawSuccessToast": "Offer withdrawn",
     "withdrawFailedToast": "Failed to withdraw offer",
-    "forMe": "For me"
+    "forMe": "For me",
+    "viewPhoto": "View photo",
+    "photoAlt": "Request photo"
   },
   "adminPromo": {
     "title": "Promo Codes",
