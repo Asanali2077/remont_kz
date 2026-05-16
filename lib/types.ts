@@ -62,6 +62,8 @@ export interface UserSummary {
   address?: string | null;
   isVerified?: boolean | null;
   emailVerified?: boolean;
+  avgRating?: number | null;
+  completedCount?: number;
 }
 
 export interface ServiceImageRecord {

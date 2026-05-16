@@ -204,12 +204,37 @@ export async function GET(request: NextRequest) {
       include: {
         ...requestInclude,
         offers: {
-          include: { company: { select: { id: true, name: true, email: true, phone: true } } },
+          include: { company: { select: { id: true, name: true, email: true, phone: true, avatarUrl: true, isVerified: true } } },
           orderBy: { createdAt: "asc" },
         },
       },
       orderBy: { createdAt: "desc" },
     });
+
+    // Inject avg rating + completed count into offer companies
+    const offerCompanyIds = [...new Set(requests.flatMap(r => (r.offers ?? []).map(o => o.companyId)))];
+    if (offerCompanyIds.length > 0) {
+      const [ratingStats, completedStats] = await Promise.all([
+        prisma.request.groupBy({
+          by: ["companyId"],
+          where: { companyId: { in: offerCompanyIds }, status: "COMPLETED", rating: { not: null } },
+          _avg: { rating: true },
+        }),
+        prisma.request.groupBy({
+          by: ["companyId"],
+          where: { companyId: { in: offerCompanyIds }, status: "COMPLETED" },
+          _count: { id: true },
+        }),
+      ]);
+      const ratingMap = Object.fromEntries(ratingStats.map(s => [s.companyId, s._avg.rating]));
+      const completedMap = Object.fromEntries(completedStats.map(s => [s.companyId, s._count.id]));
+      for (const req of requests) {
+        for (const offer of req.offers ?? []) {
+          (offer.company as Record<string, unknown>).avgRating = ratingMap[offer.companyId] ?? null;
+          (offer.company as Record<string, unknown>).completedCount = completedMap[offer.companyId] ?? 0;
+        }
+      }
+    }
 
     return NextResponse.json(requests);
   } catch (error) {

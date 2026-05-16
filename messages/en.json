@@ -526,7 +526,10 @@
     "finalPriceTitle": "Set final price",
     "finalPriceDesc": "Enter the exact amount agreed with the client before starting work. This amount will appear in the document.",
     "finalPricePlaceholder": "Enter amount",
-    "finalPriceStart": "Start work"
+    "finalPriceStart": "Start work",
+    "noRating": "No rating yet",
+    "completedJobs": "completed jobs",
+    "viewProfile": "Company profile"
   },
   "requestCreate": {
     "title": "New Request",

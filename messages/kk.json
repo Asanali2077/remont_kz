@@ -526,7 +526,10 @@
     "finalPriceTitle": "Соңғы соманы белгілеңіз",
     "finalPriceDesc": "Жұмысты бастамас бұрын клиентпен келісілген нақты соманы енгізіңіз. Бұл сома құжатта көрсетіледі.",
     "finalPricePlaceholder": "Соманы енгізіңіз",
-    "finalPriceStart": "Жұмысты бастау"
+    "finalPriceStart": "Жұмысты бастау",
+    "noRating": "Рейтинг жоқ",
+    "completedJobs": "орындалған тапсырыс",
+    "viewProfile": "Компания профилі"
   },
   "requestCreate": {
     "title": "Жаңа өтінім",

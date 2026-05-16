@@ -526,7 +526,10 @@
     "finalPriceTitle": "Установите финальную сумму",
     "finalPriceDesc": "Укажите точную сумму, согласованную с клиентом, до начала работ. Эта сумма отобразится в документе.",
     "finalPricePlaceholder": "Введите сумму",
-    "finalPriceStart": "Начать работу"
+    "finalPriceStart": "Начать работу",
+    "noRating": "Нет рейтинга",
+    "completedJobs": "выполненных заказов",
+    "viewProfile": "Профиль компании"
   },
   "requestCreate": {
     "title": "Новая заявка",

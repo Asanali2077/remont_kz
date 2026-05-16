@@ -105,7 +105,7 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
 
 /* ── Offer card ── */
 function OfferCard({ offer, requestId, onAccept, onReject, accepting }: {
-  offer: { id: string; companyId: string; price: number; message?: string | null; company?: { name?: string | null; email: string; phone?: string | null } };
+  offer: { id: string; companyId: string; price: number; message?: string | null; company?: { name?: string | null; email: string; phone?: string | null; avatarUrl?: string | null; isVerified?: boolean | null; avgRating?: number | null; completedCount?: number } };
   requestId: string;
   onAccept: (requestId: string, companyId: string) => Promise<void>;
   onReject: (requestId: string) => void;
@@ -114,28 +114,67 @@ function OfferCard({ offer, requestId, onAccept, onReject, accepting }: {
   const tR = useTranslations("requests");
   const tC = useTranslations("common");
   const name = offer.company?.name ?? offer.company?.email ?? tC("company");
+  const rating = offer.company?.avgRating;
+  const completed = offer.company?.completedCount ?? 0;
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-background p-3.5 hover:border-primary/30 hover:shadow-sm transition-all">
-      <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
-        {name[0].toUpperCase()}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-sm font-bold">{name}</span>
-          <span className="text-base font-black text-primary">{fmtNum(offer.price)} ₸</span>
+    <div className="rounded-xl border border-border/50 bg-background p-3.5 hover:border-primary/30 hover:shadow-sm transition-all">
+      <div className="flex items-start gap-3">
+        {/* Avatar */}
+        <Link href={`/company/${offer.companyId}` as `/company/${string}`} className="shrink-0">
+          {offer.company?.avatarUrl ? (
+            <img src={offer.company.avatarUrl} alt={name} className="h-10 w-10 rounded-xl object-cover" />
+          ) : (
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+              {name[0].toUpperCase()}
+            </div>
+          )}
+        </Link>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <Link href={`/company/${offer.companyId}` as `/company/${string}`}
+              className="text-sm font-bold hover:text-primary transition-colors">
+              {name}
+            </Link>
+            {offer.company?.isVerified && (
+              <BadgeCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+            )}
+            <span className="text-base font-black text-primary ml-auto">{fmtNum(offer.price)} ₸</span>
+          </div>
+
+          {/* Rating + completed */}
+          <div className="flex items-center gap-3 mb-1.5">
+            {typeof rating === "number" ? (
+              <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                {[1,2,3,4,5].map(s => (
+                  <Star key={s} className={`h-3 w-3 ${s <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`} />
+                ))}
+                <span className="ml-1 font-semibold text-foreground">{rating.toFixed(1)}</span>
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground">{tR("noRating")}</span>
+            )}
+            {completed > 0 && (
+              <span className="text-xs text-muted-foreground">· {completed} {tR("completedJobs")}</span>
+            )}
+          </div>
+
+          {offer.message && <p className="text-xs text-muted-foreground line-clamp-2">{offer.message}</p>}
         </div>
-        {offer.message && <p className="text-xs text-muted-foreground line-clamp-2">{offer.message}</p>}
-      </div>
-      <div className="flex flex-col gap-1.5 shrink-0">
-        <Button size="sm" className="h-8 rounded-xl text-xs gap-1 shadow-sm shadow-primary/20"
-          disabled={accepting} onClick={() => void onAccept(requestId, offer.companyId)}>
-          <CheckCircle2 className="h-3.5 w-3.5" />
-          {accepting ? "..." : tR("acceptOffer")}
-        </Button>
-        <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs text-muted-foreground"
-          onClick={() => onReject(requestId)}>
-          <X className="h-3 w-3 mr-1" /> {tR("declineOffer")}
-        </Button>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-1.5 shrink-0">
+          <Button size="sm" className="h-8 rounded-xl text-xs gap-1 shadow-sm shadow-primary/20"
+            disabled={accepting} onClick={() => void onAccept(requestId, offer.companyId)}>
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            {accepting ? "..." : tR("acceptOffer")}
+          </Button>
+          <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs text-muted-foreground"
+            onClick={() => onReject(requestId)}>
+            <X className="h-3 w-3 mr-1" /> {tR("declineOffer")}
+          </Button>
+        </div>
       </div>
     </div>
   );
