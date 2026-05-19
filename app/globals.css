@@ -80,6 +80,12 @@
   to   { transform: translateX(100%); }
 }
 
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
 /* Mobile bottom nav spacing */
 @media (max-width: 768px) {
   body {

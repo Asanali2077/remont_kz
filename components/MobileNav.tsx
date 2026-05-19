@@ -52,13 +52,18 @@ export function MobileNav() {
           const active = pathname === href || (href !== "/" && pathname.startsWith(href));
           return (
             <Link key={href} href={href}
-              className="flex flex-col items-center gap-0.5 px-3 py-1">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${active ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <span className={`text-[10px] font-semibold ${active ? "text-primary" : "text-muted-foreground"}`}>
-                {label}
-              </span>
+              className="flex flex-col items-center gap-0.5 py-1">
+              {active ? (
+                <span className="flex flex-col items-center gap-0.5 bg-primary/10 rounded-xl px-3 py-1">
+                  <Icon className="h-5 w-5 text-primary" />
+                  <span className="text-[10px] font-semibold text-primary">{label}</span>
+                </span>
+              ) : (
+                <span className="flex flex-col items-center gap-0.5 px-3 py-1">
+                  <Icon className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-[10px] font-semibold text-muted-foreground">{label}</span>
+                </span>
+              )}
             </Link>
           );
         })}

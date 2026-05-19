@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { LayoutGrid, LayoutList, CheckCircle2, Star, ClipboardList, Download, DollarSign, UserCheck } from "lucide-react";
+import { LayoutGrid, LayoutList, CheckCircle2, Star, ClipboardList, Download, DollarSign, UserCheck, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { RequestRecord, RequestStatus, SERVICE_CATEGORY_LABELS } from "@/lib/types";
@@ -378,7 +378,7 @@ function RequestCard({ req, onUpdateStatus, onStartWork, onReply }: {
                 <DollarSign className="h-3.5 w-3.5" /> {tReq("workStarted")}
               </Button>
               <Link href={`/chat/${req.id}` as `/chat/${string}`}>
-                <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5">💬 Chat</Button>
+                <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5"><MessageCircle className="h-3.5 w-3.5" /> Chat</Button>
               </Link>
             </>
           )}
@@ -388,7 +388,7 @@ function RequestCard({ req, onUpdateStatus, onStartWork, onReply }: {
                 ✓ {tReq("workCompleted")}
               </Button>
               <Link href={`/chat/${req.id}` as `/chat/${string}`}>
-                <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs">💬 Chat</Button>
+                <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5"><MessageCircle className="h-3.5 w-3.5" /> Chat</Button>
               </Link>
             </>
           )}

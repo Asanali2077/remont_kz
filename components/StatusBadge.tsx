@@ -17,7 +17,8 @@ const CONFIG: Record<StatusValue, string> = {
 export function StatusBadge({ status }: { status: StatusValue }) {
   const t = useTranslations("requests");
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${CONFIG[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${CONFIG[status]}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70 shrink-0" />
       {t(`status.${status}`)}
     </span>
   );

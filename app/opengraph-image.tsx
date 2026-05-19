@@ -50,7 +50,7 @@ export default async function Image() {
 
       {/* Features */}
       <div style={{ display: "flex", gap: "24px" }}>
-        {["🔧 10 категорий услуг", "⭐ Рейтинги и отзывы", "💬 Онлайн чат", "📍 По всему Казахстану"].map((f) => (
+        {["▪ 10 категорий услуг", "▪ Рейтинги и отзывы", "▪ Онлайн чат", "▪ По всему Казахстану"].map((f) => (
           <div key={f} style={{
             background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)",
             borderRadius: 12, padding: "12px 20px", color: "#e2e8f0", fontSize: 18,

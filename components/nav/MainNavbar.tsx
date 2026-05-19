@@ -6,6 +6,7 @@ import {
   LogOut, Menu, X, Moon, Sun, ChevronDown, ClipboardList,
   Bell, BookOpen, User, CreditCard, LayoutDashboard,
   Heart, MessageSquare, Search, ShieldCheck, History, Briefcase, Shield, Lock,
+  Car, Building2, Zap, Wrench,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -39,7 +40,7 @@ function NotificationBell({ role }: { role: "client" | "company" }) {
 
   return (
     <div className="relative" ref={ref}>
-      <Button variant="ghost" size="icon" className="h-9 w-9 relative" onClick={handleOpen}>
+      <Button variant="ghost" size="icon" className="h-9 w-9 relative transition-transform" onClick={handleOpen}>
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -228,7 +229,7 @@ export function MainNavbar() {
                   href={user.role === "admin" ? "/admin/dashboard" : dashboardHref}
                   className="flex items-center gap-2 rounded-xl border border-border/60 px-2.5 py-1.5 hover:bg-muted hover:border-border transition-all"
                 >
-                  <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold select-none shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/60 flex items-center justify-center text-primary-foreground text-sm font-bold select-none shrink-0">
                     {initials}
                   </div>
                   <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
@@ -380,14 +381,15 @@ export function MainNavbar() {
           <div className="px-4 py-3 flex flex-wrap gap-2">
             <span className="text-xs text-muted-foreground">{t("quickLinks")}</span>
             {[
-              { label: "🚗 Auto repair", q: "auto" },
-              { label: "🏠 Renovation", q: "renovation" },
-              { label: "⚡ Electrical", q: "electrical" },
-              { label: "🔧 Plumbing", q: "plumbing" },
-            ].map(({ label, q }) => (
+              { label: "Auto repair", icon: Car, q: "auto" },
+              { label: "Renovation", icon: Building2, q: "renovation" },
+              { label: "Electrical", icon: Zap, q: "electrical" },
+              { label: "Plumbing", icon: Wrench, q: "plumbing" },
+            ].map(({ label, icon: Icon, q }) => (
               <button key={q} type="button"
                 onClick={() => { const base = user?.role === "company" ? "/company/catalog" : "/repair"; router.push(`${base}?q=${q}`); setSearchOpen(false); setSearchQuery(""); }}
-                className="text-xs rounded-full border border-border/50 px-2.5 py-1 hover:bg-muted hover:border-primary/30 transition-colors">
+                className="inline-flex items-center gap-1.5 text-xs rounded-full border border-border/50 px-2.5 py-1 hover:bg-muted hover:border-primary/30 transition-colors">
+                <Icon className="h-3.5 w-3.5" />
                 {label}
               </button>
             ))}

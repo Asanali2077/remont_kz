@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
-         AlertCircle, Sparkles, Building2, X, Heart, MessageSquare,
+         AlertCircle, Sparkles, Building2, X, Heart, MessageSquare, MessageCircle,
          Loader2, Eye, EyeOff, Bell, MapPin, User as UserIcon,
          History, CalendarDays, BadgeCheck, CircleDashed, FileText,
          ClipboardList, Shield, ShieldCheck, ShieldOff, Trash2,
@@ -1344,7 +1344,7 @@ export default function MyRequestsPage() {
                                       )}
                                       <Link href={`/chat/${req.id}`}>
                                         <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs">
-                                          💬 {t("openChat")}
+                                          <MessageCircle className="h-3.5 w-3.5 inline-block" /> {t("openChat")}
                                         </Button>
                                       </Link>
                                     </div>

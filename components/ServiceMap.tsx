@@ -34,17 +34,18 @@ function jitter(coord: number, amount = 0.008): number {
   return coord + (Math.random() - 0.5) * amount;
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  automobiles: "🚗",
-  "real-estate": "🏠",
-  plumbing: "🔧",
-  electrical: "⚡",
-  painting: "🎨",
-  cleaning: "🧹",
-  renovation: "🏗️",
-  welding: "🔩",
-  roofing: "🏚️",
-  other: "🛠️",
+/* SVG icon paths for each category — used inside Leaflet divIcon HTML */
+const CATEGORY_ICON_SVG: Record<string, string> = {
+  automobiles: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17H5v-3.5L8 6h8l3 7.5V17z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>`,
+  "real-estate": `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  plumbing: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>`,
+  electrical: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  painting: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 00-3 3v12a3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3H6a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3V6a3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3h12a3 3 0 003-3 3 3 0 00-3-3z"/></svg>`,
+  cleaning: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 009 9 9 9 0 11-9-9z"/><path d="M19 3v4M21 5h-4"/></svg>`,
+  renovation: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M4 20V10l8-6 8 6v10"/><path d="M10 20v-5h4v5"/></svg>`,
+  welding: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>`,
+  roofing: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>`,
+  other: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
 };
 
 interface ServiceMapProps {
@@ -102,7 +103,7 @@ export function ServiceMap({ services, onServiceClick }: ServiceMapProps) {
         const lng = service.lng ?? jitter(cityCoords[1]);
         bounds.push([lat, lng]);
 
-        const emoji = CATEGORY_EMOJI[service.category] ?? "📍";
+        const iconSvg = CATEGORY_ICON_SVG[service.category] ?? CATEGORY_ICON_SVG.other;
         const color = service.category === "automobiles" ? "#3b82f6"
           : service.category === "real-estate" ? "#10b981"
           : service.category === "electrical" ? "#f59e0b"
@@ -116,9 +117,9 @@ export function ServiceMap({ services, onServiceClick }: ServiceMapProps) {
             width:36px;height:36px;border-radius:50% 50% 50% 0;
             background:${color};border:3px solid white;
             display:flex;align-items:center;justify-content:center;
-            font-size:14px;transform:rotate(-45deg);
+            transform:rotate(-45deg);
             box-shadow:0 2px 8px rgba(0,0,0,0.25);
-          "><span style="transform:rotate(45deg)">${emoji}</span></div>`,
+          "><span style="transform:rotate(45deg);display:flex;align-items:center;justify-content:center">${iconSvg}</span></div>`,
           className: "",
           iconSize: [36, 36],
           iconAnchor: [18, 36],
@@ -136,14 +137,14 @@ export function ServiceMap({ services, onServiceClick }: ServiceMapProps) {
             ${service.images[0]?.url
               ? `<img src="${service.images[0].url}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px" alt="${service.name}" />`
               : ""}
-            <div style="font-size:11px;color:${color};font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${emoji} ${service.category.replace("-", " ")}</div>
+            <div style="font-size:11px;color:${color};font-weight:700;text-transform:uppercase;letter-spacing:0.05em">${service.category.replace("-", " ")}</div>
             <div style="font-size:14px;font-weight:700;margin:4px 0;line-height:1.3">${service.name}</div>
             <div style="font-size:12px;color:#666">${service.company.name ?? ""}</div>
             ${ratingHtml}
             <div style="font-size:13px;font-weight:700;color:#111;margin:6px 0">
               ${fmtNum(service.priceFrom)}${service.priceTo !== service.priceFrom ? ` – ${fmtNum(service.priceTo)}` : ""} ₸
             </div>
-            ${service.city ? `<div style="font-size:11px;color:#888">📍 ${service.city}</div>` : ""}
+            ${service.city ? `<div style="font-size:11px;color:#888">&#9679; ${service.city}</div>` : ""}
             <a href="/repair/${service.id}" style="
               display:block;margin-top:10px;padding:7px 12px;
               background:${color};color:white;border-radius:8px;

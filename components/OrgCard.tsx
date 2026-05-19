@@ -68,7 +68,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
   const categoryColor = CATEGORY_COLORS[service.category] ?? CATEGORY_COLORS.other;
 
   return (
-    <article className="group flex bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-border dark:hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+    <article className="group flex bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] hover:border-border dark:hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)] hover:shadow-md transition-shadow">
 
       {/* ── Photo column ── */}
       {disableNavigation ? (
@@ -197,7 +197,7 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
             ) : (
               <span className="text-[11px] text-muted-foreground">{t("noReviews")}</span>
             )}
-            <p className="text-base font-bold text-foreground leading-tight">
+            <p className="text-base font-semibold text-foreground leading-tight">
               {fmtNum(service.priceFrom)}
               {service.priceTo !== service.priceFrom && (
                 <> – {fmtNum(service.priceTo)}</>

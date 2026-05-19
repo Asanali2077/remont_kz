@@ -584,7 +584,7 @@ export default function HomePage() {
       </section>
 
       {/* ════ BEFORE / AFTER ════ */}
-      <section id="before-after" className="min-h-screen flex flex-col justify-center py-16 overflow-hidden">
+      <section id="before-after" className="min-h-screen flex flex-col justify-center py-20 md:py-28 overflow-hidden">
 
         <div className="mx-auto max-w-6xl w-full px-4 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -682,7 +682,7 @@ export default function HomePage() {
       </section>
 
       {/* ════ CATEGORIES ════ */}
-      <section id="categories" className="min-h-screen flex flex-col justify-center px-4 py-16">
+      <section id="categories" className="min-h-screen flex flex-col justify-center px-4 py-20 md:py-28">
         <div className="mx-auto max-w-6xl w-full">
           <FadeUp>
             <div className="text-center mb-14">
@@ -725,7 +725,7 @@ export default function HomePage() {
       </section>
 
       {/* ════ FEATURED SERVICES ════ */}
-      <section id="services" className="min-h-screen flex flex-col justify-center px-4 py-16 bg-muted/20">
+      <section id="services" className="min-h-screen flex flex-col justify-center px-4 py-20 md:py-28 bg-muted/20">
         {featuredServices.length > 0 ? (
           <div className="mx-auto max-w-6xl w-full">
             <FadeUp>
@@ -774,7 +774,7 @@ export default function HomePage() {
       </section>
 
       {/* ════ HOW IT WORKS ════ */}
-      <section id="how-it-works" className="min-h-screen flex flex-col justify-center px-4 py-16">
+      <section id="how-it-works" className="min-h-screen flex flex-col justify-center px-4 py-20 md:py-28">
         <div className="mx-auto max-w-6xl w-full">
           <FadeUp>
             <div className="text-center mb-16">
@@ -795,7 +795,7 @@ export default function HomePage() {
                     <div className="h-24 w-24 rounded-3xl bg-card border-2 border-primary/20 shadow-xl flex items-center justify-center group-hover:border-primary group-hover:shadow-primary/10 transition-all duration-300">
                       <Icon className="h-10 w-10 text-primary group-hover:scale-110 transition-transform duration-300" />
                     </div>
-                    <span className="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-black shadow-lg ring-4 ring-background">
+                    <span className="absolute -top-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-black shadow-lg ring-4 ring-background ring-2 ring-primary/20 ring-offset-2">
                       {i + 1}
                     </span>
                   </div>
@@ -822,7 +822,7 @@ export default function HomePage() {
 
 
       {/* ════ WHY US ════ */}
-      <section id="why-us" className="min-h-screen flex flex-col justify-center px-4 py-16 bg-muted/20">
+      <section id="why-us" className="min-h-screen flex flex-col justify-center px-4 py-20 md:py-28 bg-muted/20">
         <div className="mx-auto max-w-6xl w-full">
           <FadeUp>
             <div className="text-center mb-14">
@@ -892,7 +892,7 @@ export default function HomePage() {
       </section>
 
       {/* ════ TESTIMONIALS ════ */}
-      <section id="testimonials" className="min-h-screen flex flex-col justify-center px-4 py-16">
+      <section id="testimonials" className="min-h-screen flex flex-col justify-center px-4 py-20 md:py-28">
         <div className="mx-auto max-w-6xl w-full">
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-14">
@@ -981,7 +981,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap gap-4 justify-center mb-10">
               <ClientLink href="/repair">
-                <Button size="lg" variant="secondary" className="h-14 px-10 font-bold rounded-xl text-base shadow-xl">
+                <Button size="lg" variant="secondary" className="h-14 px-10 font-bold rounded-xl text-base shadow-xl shadow-lg shadow-primary/25">
                   {t("viewAll")}
                 </Button>
               </ClientLink>
