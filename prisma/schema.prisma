@@ -89,8 +89,6 @@ model User {
   favorites          Favorite[]
   payments           Payment[]
   auditLogs          AuditLog[]
-  pushSubscriptions  PushSubscription[]
-
   @@index([email])
   @@index([role])
 }
@@ -294,15 +292,3 @@ model PromoCode {
   @@index([code])
 }
 
-model PushSubscription {
-  id        String   @id @default(uuid())
-  userId    String
-  endpoint  String   @unique
-  p256dh    String
-  auth      String
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}

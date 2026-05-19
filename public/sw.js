@@ -58,32 +58,3 @@ self.addEventListener("fetch", (e) => {
     })
   );
 });
-
-// ── Push Notifications ──
-self.addEventListener("push", (e) => {
-  if (!e.data) return;
-  let data = {};
-  try { data = e.data.json(); } catch { data = { title: "Remont.kz", body: e.data.text() }; }
-  const title = data.title ?? "Remont.kz";
-  const options = {
-    body: data.body ?? "",
-    icon: "/icons/icon.svg",
-    badge: "/icons/icon.svg",
-    data: { url: data.url ?? "/" },
-    vibrate: [200, 100, 200],
-  };
-  e.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener("notificationclick", (e) => {
-  e.notification.close();
-  const url = e.notification.data?.url ?? "/";
-  e.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wcs) => {
-      for (const wc of wcs) {
-        if (wc.url === url && "focus" in wc) return wc.focus();
-      }
-      return self.clients.openWindow(url);
-    })
-  );
-});

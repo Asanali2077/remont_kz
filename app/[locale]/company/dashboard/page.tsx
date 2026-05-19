@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { usePushNotifications } from "@/lib/use-push";
 
 type Tab = "overview" | "services" | "requests" | "calendar" | "notifications" | "messages" | "billing" | "profile" | "security";
 
@@ -456,60 +455,6 @@ function ProfilePanel() {
   );
 }
 
-function PushNotificationsCard() {
-  const t = useTranslations("company");
-  const { supported, permission, subscribed, subscribe, unsubscribe } = usePushNotifications();
-  const [loading, setLoading] = useState(false);
-  const { toast: toastFn } = { toast: (msg: string) => void msg }; void toastFn;
-
-  async function handleToggle() {
-    setLoading(true);
-    try {
-      if (subscribed) {
-        await unsubscribe();
-        toast.success(t("pushDisabled"));
-      } else {
-        const ok = await subscribe();
-        if (ok) toast.success(t("pushEnabled"));
-        else toast.error(t("pushDenied"));
-      }
-    } finally { setLoading(false); }
-  }
-
-  if (!supported) return null;
-
-  return (
-    <div className="bg-card border border-border/50 rounded-2xl p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${subscribed ? "bg-primary/10" : "bg-muted"}`}>
-            <Bell className={`h-5 w-5 ${subscribed ? "text-primary" : "text-muted-foreground"}`} />
-          </div>
-          <div>
-            <p className="font-semibold text-sm">{t("pushTitle")}</p>
-            <p className="text-xs text-muted-foreground">{t("pushDesc")}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {permission === "denied" && (
-            <span className="text-xs text-destructive">{t("pushBlocked")}</span>
-          )}
-          <Button
-            size="sm"
-            variant={subscribed ? "outline" : "default"}
-            className="rounded-xl"
-            disabled={loading || permission === "denied"}
-            onClick={() => void handleToggle()}
-          >
-            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-            {subscribed ? t("pushTurnOff") : t("pushTurnOn")}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function SecurityPanel() {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
@@ -708,9 +653,6 @@ function SecurityPanel() {
           </div>
         )}
       </div>
-
-      {/* Push Notifications */}
-      <PushNotificationsCard />
 
       {/* Security tips */}
       <div className="bg-card border border-border/50 rounded-2xl p-6">

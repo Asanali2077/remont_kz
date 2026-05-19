@@ -706,14 +706,6 @@
     "deleteN": "Delete {n}",
     "totalActive": "{total} total · {active} active",
     "forMe": "For me",
-    "pushTitle": "Push notifications",
-    "pushDesc": "Get notified about offers and new requests",
-    "pushEnabled": "Push notifications enabled",
-    "pushDisabled": "Push notifications disabled",
-    "pushDenied": "Permission denied by browser",
-    "pushBlocked": "Blocked",
-    "pushTurnOn": "Enable",
-    "pushTurnOff": "Disable"
   },
   "chat": {
     "title": "Messages",
@@ -1406,16 +1398,6 @@
     "newPassword": "New password",
     "passwordChanged": "Password changed successfully",
     "save": "Save",
-    "push": {
-      "title": "Push notifications",
-      "desc": "Get notified about offers and new requests",
-      "enabled": "Push notifications enabled",
-      "disabled": "Push notifications disabled",
-      "denied": "Permission denied by browser",
-      "blocked": "Blocked",
-      "turnOn": "Enable",
-      "turnOff": "Disable"
-    }
   },
   "orderSummary": {
     "title": "Order Summary",

@@ -27,7 +27,6 @@ import { formatBudget, fmtNum, timeAgo } from "@/lib/utils";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
 import { OrgCard } from "@/components/OrgCard";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { usePushNotifications } from "@/lib/use-push";
 
 /* ── Timeline stepper ── */
 
@@ -781,43 +780,8 @@ function SettingsPanel() {
     } finally { setSaving(false); }
   }
 
-  const { supported: pushSupported, subscribed: pushSubscribed, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe, permission: pushPermission } = usePushNotifications();
-  const [pushLoading, setPushLoading] = useState(false);
-
-  async function handlePushToggle() {
-    setPushLoading(true);
-    try {
-      if (pushSubscribed) { await pushUnsubscribe(); toast.success(tS("push.disabled")); }
-      else { const ok = await pushSubscribe(); if (ok) toast.success(tS("push.enabled")); else toast.error(tS("push.denied")); }
-    } finally { setPushLoading(false); }
-  }
-
   return (
     <div className="space-y-4 max-w-md">
-      {/* Push notifications card */}
-      {pushSupported && (
-        <div className="bg-card border border-border/50 rounded-2xl p-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${pushSubscribed ? "bg-primary/10" : "bg-muted"}`}>
-              <Bell className={`h-4.5 w-4.5 ${pushSubscribed ? "text-primary" : "text-muted-foreground"}`} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold">{tS("push.title")}</p>
-              <p className="text-xs text-muted-foreground">{tS("push.desc")}</p>
-            </div>
-          </div>
-          {pushPermission === "denied" ? (
-            <span className="text-xs text-destructive shrink-0">{tS("push.blocked")}</span>
-          ) : (
-            <Button size="sm" variant={pushSubscribed ? "outline" : "default"} className="rounded-xl shrink-0"
-              disabled={pushLoading} onClick={() => void handlePushToggle()}>
-              {pushLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
-              {pushSubscribed ? tS("push.turnOff") : tS("push.turnOn")}
-            </Button>
-          )}
-        </div>
-      )}
-
       {/* Password card */}
       <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-6">
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{tC("security")}</p>
