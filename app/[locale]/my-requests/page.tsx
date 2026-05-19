@@ -63,8 +63,7 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
   const active = getStepIndex(status, hasOffers);
   return (
     <div className="overflow-x-auto pb-1">
-      {/* Row 1: icons + connector lines — all perfectly aligned */}
-      <div className="flex items-center">
+      <div className="flex items-start min-w-max">
         {STEPS.map((step, i) => {
           const Icon = step.icon;
           const done    = i < active;
@@ -72,36 +71,22 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
           const isLast  = i === STEPS.length - 1;
           const s = STEP_STYLES[i];
           return (
-            <div key={step.status} className="flex items-center shrink-0">
-              <div className="relative">
-                {current && (
-                  <div className={`absolute inset-0 rounded-full animate-ping opacity-40 ${s.ping}`} />
-                )}
-                <div className={`relative flex h-7 w-7 items-center justify-center rounded-full border-2 transition-all duration-500 ${
-                  done    ? `${s.dot} text-white shadow-sm` :
-                  current ? s.active :
-                            "border-border/40 bg-background text-muted-foreground/25"
-                }`}>
-                  <Icon className="h-3.5 w-3.5" />
-                </div>
-              </div>
-              {!isLast && (
-                <div className={`h-0.5 w-8 md:w-14 mx-1 rounded-full transition-all duration-700 ${done ? s.line : "bg-border/25"}`} />
-              )}
-            </div>
-          );
-        })}
-      </div>
-      {/* Row 2: labels — separate row so date under Posted doesn't push icons */}
-      <div className="flex items-start mt-1.5">
-        {STEPS.map((step, i) => {
-          const done    = i < active;
-          const current = i === active;
-          const isLast  = i === STEPS.length - 1;
-          return (
-            <div key={step.status} className="flex items-center shrink-0">
+            <div key={step.status} className="flex items-start shrink-0">
+              {/* Icon + label stacked */}
               <div className="flex flex-col items-center">
-                <span className={`text-[10px] font-bold whitespace-nowrap leading-none text-center ${
+                <div className="relative">
+                  {current && (
+                    <div className={`absolute inset-0 rounded-full animate-ping opacity-40 ${s.ping}`} />
+                  )}
+                  <div className={`relative flex h-7 w-7 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                    done    ? `${s.dot} text-white shadow-sm` :
+                    current ? s.active :
+                              "border-border/40 bg-background text-muted-foreground/25"
+                  }`}>
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+                <span className={`mt-1.5 text-[10px] font-bold whitespace-nowrap leading-none ${
                   current ? "text-foreground" : done ? "text-muted-foreground/60" : "text-muted-foreground/25"
                 }`}>{step.label}</span>
                 {i === 0 && (
@@ -110,7 +95,10 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
                   </span>
                 )}
               </div>
-              {!isLast && <div className="w-8 md:w-14 mx-1 shrink-0" />}
+              {/* Connector — mt-[13px] centers it on the h-7 icon circle */}
+              {!isLast && (
+                <div className={`h-0.5 w-10 md:w-16 mx-1.5 mt-[13px] rounded-full transition-all duration-700 ${done ? s.line : "bg-border/25"}`} />
+              )}
             </div>
           );
         })}
