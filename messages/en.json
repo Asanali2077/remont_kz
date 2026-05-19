@@ -705,7 +705,7 @@
     "nSelected": "{n} selected",
     "deleteN": "Delete {n}",
     "totalActive": "{total} total · {active} active",
-    "forMe": "For me",
+    "forMe": "For me"
   },
   "chat": {
     "title": "Messages",
@@ -1397,7 +1397,7 @@
     "currentPassword": "Current password",
     "newPassword": "New password",
     "passwordChanged": "Password changed successfully",
-    "save": "Save",
+    "save": "Save"
   },
   "orderSummary": {
     "title": "Order Summary",

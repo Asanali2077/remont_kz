@@ -705,7 +705,7 @@
     "nSelected": "Таңдалды: {n}",
     "deleteN": "{n} жою",
     "totalActive": "{total} барлығы · {active} белсенді",
-    "forMe": "Маған арналған",
+    "forMe": "Маған арналған"
   },
   "chat": {
     "title": "Хабарламалар",
@@ -1397,7 +1397,7 @@
     "currentPassword": "Ағымдағы құпия сөз",
     "newPassword": "Жаңа құпия сөз",
     "passwordChanged": "Құпия сөз сәтті өзгертілді",
-    "save": "Сақтау",
+    "save": "Сақтау"
   },
   "orderSummary": {
     "title": "Тапсырыс қорытындысы",

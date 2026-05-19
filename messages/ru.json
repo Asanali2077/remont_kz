@@ -705,7 +705,7 @@
     "nSelected": "Выбрано: {n}",
     "deleteN": "Удалить {n}",
     "totalActive": "{total} всего · {active} активных",
-    "forMe": "Для меня",
+    "forMe": "Для меня"
   },
   "chat": {
     "title": "Сообщения",
@@ -1397,7 +1397,7 @@
     "currentPassword": "Текущий пароль",
     "newPassword": "Новый пароль",
     "passwordChanged": "Пароль успешно изменён",
-    "save": "Сохранить",
+    "save": "Сохранить"
   },
   "orderSummary": {
     "title": "Сводка заказа",
