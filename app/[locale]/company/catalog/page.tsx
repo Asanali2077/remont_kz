@@ -163,19 +163,21 @@ function CatalogContent() {
     }
   }
 
+  const TOP_TO_SERVICE: Record<string, string[]> = {
+    AUTOMOBILES: ["automobiles"],
+    REAL_ESTATE: ["real-estate", "plumbing", "electrical", "painting", "cleaning", "renovation", "roofing"],
+    OTHER: ["welding", "other"],
+  };
+
   const filtered = useMemo(() => {
     return requests.filter((r) => {
       const matchesCategory = categoryFilter.category
-        ? r.category === (categoryFilter.category === "AUTOMOBILES"
-            ? "automobiles"
-            : categoryFilter.category === "REAL_ESTATE"
-            ? "real-estate"
-            : "other")
+        ? (TOP_TO_SERVICE[categoryFilter.category] ?? []).includes(r.category ?? "")
         : true;
       const matchesCity = city ? r.city === city : true;
       return matchesCategory && matchesCity;
     });
-  }, [requests, categoryFilter, city]);
+  }, [requests, categoryFilter, city]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const offerDialogRequest = requests.find((r) => r.id === offerDialogRequestId) ?? null;
 
