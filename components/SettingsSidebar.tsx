@@ -11,8 +11,8 @@ export function SettingsSidebar({ active }: { active: ActiveId }) {
   const tCommon = useTranslations("common");
 
   const ITEMS = [
-    { id: "profile" as ActiveId,  label: tNav("profile"),    icon: User, href: "/profile" },
-    { id: "security" as ActiveId, label: tCommon("security"), icon: Lock, href: "/settings" },
+    { id: "profile" as ActiveId,  label: tNav("profile"),    icon: User, href: "/company/dashboard?tab=profile" },
+    { id: "security" as ActiveId, label: tCommon("security"), icon: Lock, href: "/company/dashboard?tab=security" },
   ];
 
   return (

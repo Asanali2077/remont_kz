@@ -14,19 +14,19 @@ export function MobileNav() {
   if (!user) return null;
 
   const CLIENT_ITEMS = [
-    { href: "/",            icon: Home,           label: t("home") },
-    { href: "/repair",      icon: Search,         label: t("catalog") },
-    { href: "/my-requests", icon: ClipboardList,  label: t("myRequests") },
-    { href: "/chat",        icon: MessageSquare,  label: t("chat") },
-    { href: "/profile",     icon: User,           label: t("profile") },
+    { href: "/",                        icon: Home,           label: t("home") },
+    { href: "/repair",                  icon: Search,         label: t("catalog") },
+    { href: "/my-requests",             icon: ClipboardList,  label: t("myRequests") },
+    { href: "/my-requests?tab=messages",icon: MessageSquare,  label: t("chat") },
+    { href: "/my-requests?tab=profile", icon: User,           label: t("profile") },
   ];
 
   const COMPANY_ITEMS = [
-    { href: "/",                    icon: Home,          label: t("home") },
-    { href: "/company/catalog",     icon: Search,        label: t("catalog") },
-    { href: "/company/dashboard",   icon: ClipboardList, label: t("dashboard") },
-    { href: "/chat",                icon: MessageSquare, label: t("chat") },
-    { href: "/profile",             icon: User,          label: t("profile") },
+    { href: "/",                                icon: Home,          label: t("home") },
+    { href: "/company/catalog",                 icon: Search,        label: t("catalog") },
+    { href: "/company/dashboard",               icon: ClipboardList, label: t("dashboard") },
+    { href: "/company/dashboard?tab=messages",  icon: MessageSquare, label: t("chat") },
+    { href: "/company/dashboard?tab=profile",   icon: User,          label: t("profile") },
   ];
 
   const items = user.role === "company" ? COMPANY_ITEMS : CLIENT_ITEMS;

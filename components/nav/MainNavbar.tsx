@@ -331,11 +331,11 @@ export function MainNavbar() {
                   </Link>
                 )}
                 {user.role === "client" && (
-                  <Link href="/favorites" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
+                  <Link href="/my-requests?tab=favorites" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
                     <Heart className="h-4 w-4 text-muted-foreground" /> {t("favorites")}
                   </Link>
                 )}
-                <Link href="/profile" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
+                <Link href={user.role === "company" ? "/company/dashboard?tab=profile" : "/my-requests?tab=profile"} className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
                   <User className="h-4 w-4 text-muted-foreground" /> {t("profile")}
                 </Link>
                 <Link href="/my-requests?tab=settings" className="flex items-center gap-3 px-2 py-2.5 text-sm rounded-lg hover:bg-muted" onClick={() => setMobileOpen(false)}>
