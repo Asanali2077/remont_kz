@@ -855,7 +855,6 @@ export default function CompanyDashboardPage() {
 
               <nav className="p-2 space-y-0.5">
                 {NAV.map(item => <NavBtn key={item.id} {...item} />)}
-                <div className="my-1 border-t border-border/30" />
                 {EXTRA.map(item => <NavBtn key={item.id} {...item} />)}
               </nav>
             </div>
