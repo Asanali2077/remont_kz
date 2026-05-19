@@ -144,7 +144,7 @@ export default function CompanyPublicPage() {
                 )}
                 <a href={`mailto:${company.email}`}>
                   <Button variant="outline" size="sm" className="gap-1.5 rounded-xl h-9">
-                    <Mail className="h-3.5 w-3.5" /> {t("emailBtn")}
+                    <Mail className="h-3.5 w-3.5" /> {company.email}
                   </Button>
                 </a>
               </div>
