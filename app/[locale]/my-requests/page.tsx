@@ -100,7 +100,7 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
           const isLast  = i === STEPS.length - 1;
           return (
             <div key={step.status} className="flex items-center shrink-0">
-              <div className="flex flex-col items-center w-7">
+              <div className="flex flex-col items-center">
                 <span className={`text-[10px] font-bold whitespace-nowrap leading-none text-center ${
                   current ? "text-foreground" : done ? "text-muted-foreground/60" : "text-muted-foreground/25"
                 }`}>{step.label}</span>
