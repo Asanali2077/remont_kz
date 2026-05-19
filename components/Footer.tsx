@@ -13,11 +13,11 @@ export function Footer() {
   const isCompany = user?.role === "company";
 
   const clientAccountLinks = [
-    { label: tNav("myRequests"), href: "/my-requests" },
-    { label: tNav("favorites"),  href: "/favorites" },
-    { label: tNav("chat"),       href: "/chat" },
-    { label: tNav("profile"),    href: "/profile" },
-    { label: tNav("settings"),   href: "/settings" },
+    { label: tNav("myRequests"),    href: "/my-requests" },
+    { label: tNav("favorites"),     href: "/my-requests?tab=favorites" },
+    { label: tNav("chat"),          href: "/my-requests?tab=messages" },
+    { label: tNav("profile"),       href: "/my-requests?tab=profile" },
+    { label: tNav("settings"),      href: "/my-requests?tab=settings" },
   ];
 
   const companyAccountLinks = [
