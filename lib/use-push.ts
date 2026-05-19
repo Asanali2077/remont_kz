@@ -19,7 +19,7 @@ export function usePushNotifications() {
   const [subscribed, setSubscribed] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && VAPID_PUBLIC) {
       setSupported(true);
       setPermission(Notification.permission);
       void checkSubscription();
