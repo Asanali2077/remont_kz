@@ -22,24 +22,41 @@ export function Footer() {
 
   const companyAccountLinks = [
     { label: tC("dashboard"),    href: "/company/dashboard" },
-    { label: tNav("chat"),       href: "/chat" },
-    { label: tNav("profile"),    href: "/profile" },
-    { label: tNav("settings"),   href: "/settings" },
+    { label: tNav("chat"),       href: "/company/dashboard?tab=messages" },
+    { label: tNav("profile"),    href: "/company/dashboard?tab=profile" },
+    { label: tNav("settings"),   href: "/company/dashboard?tab=security" },
+  ];
+
+  const clientCatalogLinks = [
+    { label: t("allServices"),   href: "/repair" },
+    { label: t("automobiles"),   href: "/repair?category=AUTOMOBILES" },
+    { label: t("realEstate"),    href: "/repair?category=REAL_ESTATE" },
+    { label: t("other"),         href: "/repair?category=OTHER" },
+  ];
+
+  const companyCatalogLinks = [
+    { label: t("allServices"),   href: "/company/catalog" },
+    { label: t("automobiles"),   href: "/company/catalog?category=AUTOMOBILES" },
+    { label: t("realEstate"),    href: "/company/catalog?category=REAL_ESTATE" },
+    { label: t("other"),         href: "/company/catalog?category=OTHER" },
+  ];
+
+  const clientPlatformLinks = [
+    { label: tNav("companies"),  href: "/companies" },
+    { label: t("howItWorks"),    href: "/#how-it-works" },
+    { label: t("helpCenter"),    href: "/guide" },
+    { label: tNav("about"),      href: "/about" },
+  ];
+
+  const companyPlatformLinks = [
+    { label: t("howItWorks"),    href: "/#how-it-works" },
+    { label: t("helpCenter"),    href: "/guide" },
+    { label: tNav("about"),      href: "/about" },
   ];
 
   const FOOTER_LINKS = {
-    catalog: [
-      { label: t("allServices"),   href: "/repair" },
-      { label: t("automobiles"),   href: "/repair?category=AUTOMOBILES" },
-      { label: t("realEstate"),    href: "/repair?category=REAL_ESTATE" },
-      { label: t("other"),         href: "/repair?category=OTHER" },
-    ],
-    platform: [
-      { label: tNav("companies"),  href: "/companies" },
-      { label: t("howItWorks"),    href: "/#how-it-works" },
-      { label: t("helpCenter"),    href: "/guide" },
-      { label: tNav("about"),      href: "/about" },
-    ],
+    catalog: isCompany ? companyCatalogLinks : clientCatalogLinks,
+    platform: isCompany ? companyPlatformLinks : clientPlatformLinks,
     account: isCompany ? companyAccountLinks : clientAccountLinks,
   };
 

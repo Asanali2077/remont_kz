@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ClipboardList, UserCheck, ImageIcon, X, Eye } from "lucide-react";
 import { toast } from "sonner";
@@ -119,9 +120,13 @@ function RequestCard({
 function CatalogContent() {
   const t = useTranslations("catalog");
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>({});
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>(() => {
+    const cat = searchParams.get("category");
+    return cat ? { category: cat as import("@/lib/categories").TopCategory } : {};
+  });
   const [city, setCity] = useState("");
   const [offerDialogRequestId, setOfferDialogRequestId] = useState<string | null>(null);
   const [offerSubmitting, setOfferSubmitting] = useState(false);
