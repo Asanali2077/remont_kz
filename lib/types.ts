@@ -171,7 +171,6 @@ export interface ProfileRecord {
   description: string | null;
   role: string;
   createdAt: string;
-  subscribedCategories?: string[];
 }
 
 export interface ReviewRecord {

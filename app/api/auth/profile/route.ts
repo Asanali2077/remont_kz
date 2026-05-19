@@ -9,7 +9,6 @@ const updateSchema = z.object({
   avatarUrl: z.string().optional().nullable(),
   address: z.string().max(200).optional().nullable(),
   description: z.string().max(1000).optional().nullable(),
-  subscribedCategories: z.array(z.string()).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: auth.user.userId },
-      select: { id: true, email: true, name: true, phone: true, avatarUrl: true, address: true, description: true, role: true, createdAt: true, subscribedCategories: true },
+      select: { id: true, email: true, name: true, phone: true, avatarUrl: true, address: true, description: true, role: true, createdAt: true },
     });
 
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -46,9 +45,8 @@ export async function PUT(request: NextRequest) {
         ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
         ...(data.address !== undefined && { address: data.address }),
         ...(data.description !== undefined && { description: data.description }),
-        ...(data.subscribedCategories !== undefined && { subscribedCategories: data.subscribedCategories }),
       },
-      select: { id: true, email: true, name: true, phone: true, avatarUrl: true, address: true, description: true, role: true, subscribedCategories: true },
+      select: { id: true, email: true, name: true, phone: true, avatarUrl: true, address: true, description: true, role: true },
     });
 
     return NextResponse.json(user);

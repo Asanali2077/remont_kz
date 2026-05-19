@@ -21,7 +21,7 @@ import {
   LayoutDashboard, Briefcase, ClipboardList, Menu, X,
   MessageSquare, CreditCard, User, Shield, ShieldCheck, ShieldOff, Bell,
   Loader2, ArrowRight, Circle, CheckCircle2, Eye, EyeOff,
-  Camera, MapPin, Smartphone, Zap, CalendarDays, Trash2, Tag,
+  Camera, MapPin, Smartphone, Zap, CalendarDays, Trash2,
 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -281,14 +281,6 @@ function ProfilePanel() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
-  const [savingSubscriptions, setSavingSubscriptions] = useState(false);
-
-  const ALL_CATEGORIES = [
-    "AUTOMOBILES", "REAL_ESTATE", "PLUMBING", "ELECTRICAL",
-    "PAINTING", "CLEANING", "RENOVATION", "WELDING", "ROOFING", "OTHER",
-  ];
-
   useEffect(() => {
     void (async () => {
       try {
@@ -297,26 +289,10 @@ function ProfilePanel() {
         setAddress(p.address ?? ""); setDescription(p.description ?? "");
         setAvatarUrl(p.avatarUrl);
         setCreatedAt(p.createdAt);
-        setSubscribedCategories(p.subscribedCategories ?? []);
       } catch { toast.error(tCommon("error")); }
       finally { setLoaded(true); }
     })();
   }, []);
-
-  async function handleSaveSubscriptions() {
-    setSavingSubscriptions(true);
-    try {
-      await api.updateProfile({ subscribedCategories });
-      toast.success(tC("categorySaved"));
-    } catch { toast.error(tCommon("error")); }
-    finally { setSavingSubscriptions(false); }
-  }
-
-  function toggleCategory(cat: string) {
-    setSubscribedCategories(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
-  }
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file) return;
@@ -437,37 +413,6 @@ function ProfilePanel() {
         )}
         <Button onClick={() => void handleSave()} disabled={saving || uploading} className="rounded-xl px-6">
           {saving ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{tC("saving")}</> : tC("saveChanges")}
-        </Button>
-      </div>
-
-      {/* Category subscriptions */}
-      <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Tag className="h-4 w-4 text-primary" />
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tC("subscribeCategories")}</h3>
-        </div>
-        <p className="text-xs text-muted-foreground">{tC("subscribeCategoriesDesc")}</p>
-        <div className="flex flex-wrap gap-2">
-          {ALL_CATEGORIES.map((cat) => {
-            const active = subscribedCategories.includes(cat);
-            return (
-              <button
-                key={cat}
-                onClick={() => toggleCategory(cat)}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
-                  active
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-muted/40 text-muted-foreground border-border/50 hover:border-primary/40 hover:text-foreground"
-                }`}
-              >
-                {cat.replace(/_/g, " ")}
-              </button>
-            );
-          })}
-        </div>
-        <Button size="sm" className="rounded-xl gap-2" onClick={() => void handleSaveSubscriptions()} disabled={savingSubscriptions}>
-          {savingSubscriptions ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-          {tC("saveChanges")}
         </Button>
       </div>
 

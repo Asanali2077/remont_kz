@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma, RequestStatus, ServiceCategory } from "@prisma/client";
-import { sendPushNotification } from "@/lib/webpush";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAuth, requireClient } from "@/lib/middleware";
@@ -298,28 +297,6 @@ export async function POST(request: NextRequest) {
       },
       include: requestInclude,
     });
-
-    // Notify subscribed companies via push (fire and forget)
-    if (createdRequest.category) {
-      void (async () => {
-        try {
-          const subs = await prisma.pushSubscription.findMany({
-            where: { user: { role: "COMPANY", subscribedCategories: { has: createdRequest.category! } } },
-          });
-          for (const sub of subs) {
-            void sendPushNotification(sub, {
-              title: "Remont.kz — Новая заявка",
-              body: `Новая заявка в категории ${createdRequest.category} · ${createdRequest.city ?? ""}`,
-              url: "/company/catalog",
-            }).catch((err: unknown) => {
-              if (err instanceof Error && (err as Error & { expired?: boolean }).expired) {
-                void prisma.pushSubscription.delete({ where: { id: sub.id } });
-              }
-            });
-          }
-        } catch { /* non-critical */ }
-      })();
-    }
 
     return NextResponse.json(createdRequest, { status: 201 });
   } catch (error) {

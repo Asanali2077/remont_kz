@@ -219,7 +219,7 @@ class ApiClient {
     return this.request("/auth/profile");
   }
 
-  async updateProfile(data: { name?: string; phone?: string | null; avatarUrl?: string | null; address?: string | null; description?: string | null; subscribedCategories?: string[] }): Promise<ProfileRecord> {
+  async updateProfile(data: { name?: string; phone?: string | null; avatarUrl?: string | null; address?: string | null; description?: string | null }): Promise<ProfileRecord> {
     return this.request("/auth/profile", { method: "PUT", body: JSON.stringify(data) });
   }
 
