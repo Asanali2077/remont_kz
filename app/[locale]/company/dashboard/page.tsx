@@ -859,7 +859,7 @@ export default function CompanyDashboardPage() {
           <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ${
             activeTab === id ? "bg-primary/20 text-primary" : "bg-destructive text-destructive-foreground"
           }`}>
-            {badge > 9 ? "9+" : badge}
+            {badge}
           </span>
         )}
       </button>
@@ -922,8 +922,8 @@ export default function CompanyDashboardPage() {
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 relative" onClick={() => setSidebarOpen(true)}>
                 <Menu className="h-5 w-5" />
                 {totalBadge > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-black">
-                    {totalBadge > 9 ? "9+" : totalBadge}
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[1rem] h-4 px-0.5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-black">
+                    {totalBadge}
                   </span>
                 )}
               </Button>
