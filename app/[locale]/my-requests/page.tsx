@@ -72,7 +72,7 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
         const s = STEP_STYLES[i];
         const label = step.label;
         return (
-          <div key={step.status} className="flex items-center shrink-0">
+          <div key={step.status} className="flex items-start shrink-0">
             <div className="flex flex-col items-center">
               <div className="relative">
                 {current && (
@@ -96,7 +96,7 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
               )}
             </div>
             {!isLast && (
-              <div className={`h-0.5 w-8 md:w-14 mx-1 mb-5 rounded-full transition-all duration-700 ${done ? s.line : "bg-border/25"}`} />
+              <div className={`h-0.5 w-8 md:w-14 mx-1 mt-[14px] rounded-full transition-all duration-700 ${done ? s.line : "bg-border/25"}`} />
             )}
           </div>
         );
