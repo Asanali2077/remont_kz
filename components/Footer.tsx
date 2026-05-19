@@ -30,11 +30,9 @@ export function Footer() {
   const FOOTER_LINKS = {
     catalog: [
       { label: t("allServices"),   href: "/repair" },
-      { label: t("automobiles"),   href: "/repair?category=automobiles" },
-      { label: t("realEstate"),    href: "/repair?category=real-estate" },
-      { label: t("plumbing"),      href: "/repair?category=plumbing" },
-      { label: t("electrical"),    href: "/repair?category=electrical" },
-      { label: t("renovation"),    href: "/repair?category=renovation" },
+      { label: t("automobiles"),   href: "/repair?category=AUTOMOBILES" },
+      { label: t("realEstate"),    href: "/repair?category=REAL_ESTATE" },
+      { label: t("other"),         href: "/repair?category=OTHER" },
     ],
     platform: [
       { label: tNav("companies"),  href: "/companies" },
