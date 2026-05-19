@@ -160,7 +160,7 @@ export default function CompanyPublicPage() {
             </div>
             <div className="flex flex-col gap-3">
               {company.services.map((s) => (
-                <OrgCard key={s.id} service={s} />
+                <OrgCard key={s.id} service={s} hideCompare />
               ))}
             </div>
           </section>

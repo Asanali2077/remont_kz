@@ -20,9 +20,10 @@ interface OrgCardProps {
   initialFavorited?: boolean;
   onUnfavorited?: (serviceId: string) => void;
   disableNavigation?: boolean;
+  hideCompare?: boolean;
 }
 
-export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavigation = false }: OrgCardProps) {
+export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavigation = false, hideCompare = false }: OrgCardProps) {
   const t = useTranslations("service");
   const tc = useTranslations("common");
   const { user } = useAuth();
@@ -208,8 +209,8 @@ export function OrgCard({ service, initialFavorited, onUnfavorited, disableNavig
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Compare — hidden for company accounts */}
-            {user?.role !== "company" && (
+            {/* Compare — hidden for company accounts and when hideCompare is set */}
+            {!hideCompare && user?.role !== "company" && (
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(service); }}
                 title={inCompare ? t("compare") : t("compare")}
