@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireCompany } from "@/lib/middleware";
 import { RequestStatus } from "@prisma/client";
 import { sendNewOfferEmail } from "@/lib/email";
+import { sendPushNotification } from "@/lib/webpush";
 import { rateLimit } from "@/lib/rate-limit";
 
 const offerSchema = z.object({
@@ -83,7 +84,7 @@ export async function POST(
     // Notify client about new offer (non-blocking)
     const reqWithClient = await prisma.request.findUnique({
       where: { id },
-      select: { client: { select: { email: true, name: true } } },
+      select: { clientId: true, client: { select: { email: true, name: true } } },
     });
     if (reqWithClient?.client?.email) {
       void sendNewOfferEmail(
@@ -93,6 +94,23 @@ export async function POST(
         price,
         "/my-requests"
       ).catch((err) => console.error("sendNewOfferEmail failed", { requestId: id, err }));
+
+      // Push notification to client
+      if (reqWithClient.clientId) {
+        void prisma.pushSubscription.findMany({ where: { userId: reqWithClient.clientId } }).then(subs => {
+          for (const sub of subs) {
+            void sendPushNotification(sub, {
+              title: "Remont.kz — Новый оффер",
+              body: `${offer.company?.name ?? "Компания"} предложила цену: ${price.toLocaleString()} ₸`,
+              url: "/my-requests",
+            }).catch((err: unknown) => {
+              if (err instanceof Error && (err as Error & { expired?: boolean }).expired) {
+                void prisma.pushSubscription.delete({ where: { id: sub.id } });
+              }
+            });
+          }
+        });
+      }
     }
 
     return NextResponse.json(offer, { status: 201 });

@@ -9,7 +9,8 @@ import { Star, Phone, Mail, CheckCircle2, Clock, Zap, PlayCircle,
          AlertCircle, Sparkles, Building2, X, Heart, MessageSquare,
          Loader2, Eye, EyeOff, Bell, MapPin, User as UserIcon,
          History, CalendarDays, BadgeCheck, CircleDashed, FileText,
-         ClipboardList, Shield, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
+         ClipboardList, Shield, ShieldCheck, ShieldOff, Trash2,
+         BarChart2, TrendingUp } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -26,6 +27,7 @@ import { formatBudget, fmtNum, timeAgo } from "@/lib/utils";
 import { RequestCreateDialog } from "@/components/RequestCreateDialog";
 import { OrgCard } from "@/components/OrgCard";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { usePushNotifications } from "@/lib/use-push";
 
 /* ── Timeline stepper ── */
 
@@ -177,6 +179,138 @@ function OfferCard({ offer, requestId, onAccept, onReject, accepting }: {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Compare Offers Dialog ── */
+function CompareOffersDialog({ request, open, onClose, onAccept, accepting }: {
+  request: RequestRecord | null;
+  open: boolean;
+  onClose: () => void;
+  onAccept: (requestId: string, companyId: string) => Promise<void>;
+  accepting: string | null;
+}) {
+  const tR = useTranslations("requests");
+  const tC = useTranslations("common");
+  if (!request) return null;
+  const offers = request.offers ?? [];
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <BarChart2 className="h-5 w-5 text-primary" />
+            {tR("compareTitle")}
+          </DialogTitle>
+          <DialogDescription>{tR("compareDesc", { count: offers.length })}</DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border/50">
+                <th className="text-left py-3 pr-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide w-36">{tC("company")}</th>
+                <th className="text-center py-3 px-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">{tR("comparePrice")}</th>
+                <th className="text-center py-3 px-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">{tR("compareRating")}</th>
+                <th className="text-center py-3 px-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">{tR("compareCompleted")}</th>
+                <th className="text-left py-3 px-3 font-semibold text-muted-foreground text-xs uppercase tracking-wide">{tR("compareMessage")}</th>
+                <th className="py-3 pl-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/30">
+              {offers.map((offer) => {
+                const name = offer.company?.name ?? offer.company?.email ?? tC("company");
+                const rating = offer.company?.avgRating;
+                const completed = offer.company?.completedCount ?? 0;
+                const minPrice = Math.min(...offers.map(o => o.price));
+                const isBest = offer.price === minPrice;
+
+                return (
+                  <tr key={offer.id} className={`hover:bg-muted/30 transition-colors ${isBest ? "bg-primary/5" : ""}`}>
+                    {/* Company */}
+                    <td className="py-4 pr-4">
+                      <Link href={`/company/${offer.companyId}` as `/company/${string}`} className="flex items-center gap-2.5 group">
+                        {offer.company?.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={offer.company.avatarUrl} alt={name} className="h-9 w-9 rounded-xl object-cover shrink-0" />
+                        ) : (
+                          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                            {name[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-sm group-hover:text-primary transition-colors truncate leading-snug">{name}</p>
+                          {offer.company?.isVerified && (
+                            <span className="flex items-center gap-0.5 text-[10px] text-primary font-semibold">
+                              <BadgeCheck className="h-3 w-3" /> Verified
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    </td>
+
+                    {/* Price */}
+                    <td className="py-4 px-3 text-center">
+                      <div className={`inline-flex flex-col items-center ${isBest ? "text-primary" : ""}`}>
+                        <span className={`text-base font-black ${isBest ? "text-primary" : ""}`}>{offer.price.toLocaleString()} ₸</span>
+                        {isBest && offers.length > 1 && (
+                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full mt-0.5">
+                            {tR("bestPrice")}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Rating */}
+                    <td className="py-4 px-3 text-center">
+                      {typeof rating === "number" ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="flex items-center gap-0.5">
+                            {[1,2,3,4,5].map(s => (
+                              <Star key={s} className={`h-3 w-3 ${s <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs font-semibold">{rating.toFixed(1)}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">{tR("noRating")}</span>
+                      )}
+                    </td>
+
+                    {/* Completed */}
+                    <td className="py-4 px-3 text-center">
+                      <span className={`text-sm font-bold ${completed > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                        {completed}
+                      </span>
+                    </td>
+
+                    {/* Message */}
+                    <td className="py-4 px-3 max-w-[200px]">
+                      {offer.message ? (
+                        <p className="text-xs text-muted-foreground line-clamp-2">{offer.message}</p>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/40">—</span>
+                      )}
+                    </td>
+
+                    {/* Accept */}
+                    <td className="py-4 pl-3">
+                      <Button size="sm" className="h-8 rounded-xl text-xs gap-1 shadow-sm shadow-primary/20 whitespace-nowrap"
+                        disabled={accepting === offer.companyId}
+                        onClick={() => void onAccept(request.id, offer.companyId)}>
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        {accepting === offer.companyId ? "..." : tR("acceptOffer")}
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -647,8 +781,43 @@ function SettingsPanel() {
     } finally { setSaving(false); }
   }
 
+  const { supported: pushSupported, subscribed: pushSubscribed, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe, permission: pushPermission } = usePushNotifications();
+  const [pushLoading, setPushLoading] = useState(false);
+
+  async function handlePushToggle() {
+    setPushLoading(true);
+    try {
+      if (pushSubscribed) { await pushUnsubscribe(); toast.success(tS("push.disabled")); }
+      else { const ok = await pushSubscribe(); if (ok) toast.success(tS("push.enabled")); else toast.error(tS("push.denied")); }
+    } finally { setPushLoading(false); }
+  }
+
   return (
     <div className="space-y-4 max-w-md">
+      {/* Push notifications card */}
+      {pushSupported && (
+        <div className="bg-card border border-border/50 rounded-2xl p-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${pushSubscribed ? "bg-primary/10" : "bg-muted"}`}>
+              <Bell className={`h-4.5 w-4.5 ${pushSubscribed ? "text-primary" : "text-muted-foreground"}`} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">{tS("push.title")}</p>
+              <p className="text-xs text-muted-foreground">{tS("push.desc")}</p>
+            </div>
+          </div>
+          {pushPermission === "denied" ? (
+            <span className="text-xs text-destructive shrink-0">{tS("push.blocked")}</span>
+          ) : (
+            <Button size="sm" variant={pushSubscribed ? "outline" : "default"} className="rounded-xl shrink-0"
+              disabled={pushLoading} onClick={() => void handlePushToggle()}>
+              {pushLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
+              {pushSubscribed ? tS("push.turnOff") : tS("push.turnOn")}
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Password card */}
       <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-6">
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{tC("security")}</p>
@@ -912,6 +1081,7 @@ export default function MyRequestsPage() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [repeatData, setRepeatData] = useState<{ description: string; city?: string; budgetFrom?: number; budgetTo?: number } | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [compareRequest, setCompareRequest] = useState<RequestRecord | null>(null);
 
   useEffect(() => { void load(); }, []);
   useEffect(() => { if (repeatData) setCreateOpen(true); }, [repeatData]);
@@ -1110,6 +1280,11 @@ export default function MyRequestsPage() {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <h3 className="font-bold text-base leading-snug">{req.service?.name || t("customRequest")}</h3>
                                     <span className="font-mono text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">#{req.id.slice(0, 8).toUpperCase()}</span>
+                                    {(req.viewCount ?? 0) > 0 && (
+                                      <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded shrink-0">
+                                        <TrendingUp className="h-3 w-3" /> {t("viewsCount", { count: req.viewCount ?? 0 })}
+                                      </span>
+                                    )}
                                   </div>
                                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
                                     {req.category && <span>{SERVICE_CATEGORY_LABELS[req.category]}</span>}
@@ -1184,6 +1359,15 @@ export default function MyRequestsPage() {
                                     <p className="text-sm font-semibold">
                                       {t("offersReceived", { count: req.offers?.length ?? 0 })}
                                     </p>
+                                    {(req.offers?.length ?? 0) >= 2 && (
+                                      <button
+                                        onClick={() => setCompareRequest(req)}
+                                        className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                                      >
+                                        <BarChart2 className="h-3.5 w-3.5" />
+                                        {t("compareOffers")}
+                                      </button>
+                                    )}
                                   </div>
                                   <div className="space-y-2">
                                     {(req.offers ?? []).map((offer) => (
@@ -1291,6 +1475,18 @@ export default function MyRequestsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Compare offers dialog */}
+      <CompareOffersDialog
+        request={compareRequest}
+        open={compareRequest !== null}
+        onClose={() => setCompareRequest(null)}
+        onAccept={async (requestId, companyId) => {
+          await handleAcceptOffer(requestId, companyId);
+          setCompareRequest(null);
+        }}
+        accepting={acceptingOfferId}
+      />
 
       {/* Review dialog */}
       <Dialog open={reviewRequest !== null} onOpenChange={(v) => { if (!v) setReviewRequest(null); }}>

@@ -529,7 +529,16 @@
     "finalPriceStart": "Жұмысты бастау",
     "noRating": "Рейтинг жоқ",
     "completedJobs": "орындалған тапсырыс",
-    "viewProfile": "Компания профилі"
+    "viewProfile": "Компания профилі",
+    "compareOffers": "Ұсыныстарды салыстыру",
+    "compareTitle": "Ұсыныстарды салыстыру",
+    "compareDesc": "{count} ұсыныс",
+    "comparePrice": "Баға",
+    "compareRating": "Рейтинг",
+    "compareCompleted": "Орындалды",
+    "compareMessage": "Хабар",
+    "bestPrice": "Үздік баға",
+    "viewsCount": "{count} қаралым"
   },
   "requestCreate": {
     "title": "Жаңа өтінім",
@@ -558,7 +567,8 @@
     "service": "Қызмет",
     "photo": "Фото",
     "attached": "✓ Тіркелді",
-    "error": "Өтінімді жасау мүмкін болмады"
+    "error": "Өтінімді жасау мүмкін болмады",
+    "savedTemplates": "Соңғы өтінімдер"
   },
   "company": {
     "dashboard": "Басқару тақтасы",
@@ -695,7 +705,18 @@
     "nSelected": "Таңдалды: {n}",
     "deleteN": "{n} жою",
     "totalActive": "{total} барлығы · {active} белсенді",
-    "forMe": "Маған арналған"
+    "forMe": "Маған арналған",
+    "subscribeCategories": "Санат жазылымдары",
+    "subscribeCategoriesDesc": "Таңдалған санаттардағы жаңа өтінімдер туралы хабарландырулар алыңыз",
+    "categorySaved": "Жазылымдар сақталды",
+    "pushTitle": "Push-хабарландырулар",
+    "pushDesc": "Ұсыныстар мен жаңа өтінімдер туралы хабарландырулар алыңыз",
+    "pushEnabled": "Push-хабарландырулар қосылды",
+    "pushDisabled": "Push-хабарландырулар өшірілді",
+    "pushDenied": "Браузер рұқсатты жоққа шығарды",
+    "pushBlocked": "Бұғатталған",
+    "pushTurnOn": "Қосу",
+    "pushTurnOff": "Өшіру"
   },
   "chat": {
     "title": "Хабарламалар",
@@ -1387,7 +1408,17 @@
     "currentPassword": "Ағымдағы құпия сөз",
     "newPassword": "Жаңа құпия сөз",
     "passwordChanged": "Құпия сөз сәтті өзгертілді",
-    "save": "Сақтау"
+    "save": "Сақтау",
+    "push": {
+      "title": "Push-хабарландырулар",
+      "desc": "Ұсыныстар мен жаңа өтінімдер туралы хабарландырулар алыңыз",
+      "enabled": "Push-хабарландырулар қосылды",
+      "disabled": "Push-хабарландырулар өшірілді",
+      "denied": "Браузер рұқсатты жоққа шығарды",
+      "blocked": "Бұғатталған",
+      "turnOn": "Қосу",
+      "turnOff": "Өшіру"
+    }
   },
   "orderSummary": {
     "title": "Тапсырыс қорытындысы",

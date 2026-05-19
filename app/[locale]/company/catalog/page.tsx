@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ClipboardList, UserCheck, ImageIcon, X } from "lucide-react";
+import { ClipboardList, UserCheck, ImageIcon, X, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
@@ -69,11 +69,18 @@ function RequestCard({
         <div className="flex flex-wrap items-center gap-2 mb-1">
           {categoryLabel && <Badge variant="secondary">{categoryLabel}</Badge>}
           {request.city && <span className="text-sm text-muted-foreground">{request.city}</span>}
-          {(request.offers?.length ?? 0) > 0 && (
-            <span className="text-xs text-muted-foreground ml-auto">
-              {t("offersCount", { n: request.offers!.length })}
-            </span>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            {(request.viewCount ?? 0) > 0 && (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Eye className="h-3 w-3" /> {request.viewCount}
+              </span>
+            )}
+            {(request.offers?.length ?? 0) > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {t("offersCount", { n: request.offers!.length })}
+              </span>
+            )}
+          </div>
         </div>
         <p className="text-sm line-clamp-3">{request.description}</p>
       </CardHeader>
@@ -251,7 +258,10 @@ function CatalogContent() {
                   key={request.id}
                   request={request}
                   myCompanyId={user?.id ?? ""}
-                  onMakeOffer={setOfferDialogRequestId}
+                  onMakeOffer={(id) => {
+          void api.viewRequest(id).catch(() => {});
+          setOfferDialogRequestId(id);
+        }}
                   onWithdrawOffer={handleWithdrawOffer}
                   onViewPhoto={setPhotoUrl}
                   offerSubmitting={offerSubmitting}

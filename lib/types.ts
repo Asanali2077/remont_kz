@@ -150,6 +150,7 @@ export interface RequestRecord {
   budgetFrom?: number | null;
   budgetTo?: number | null;
   finalPrice?: number | null;
+  viewCount?: number;
   expiresAt?: string | null;
   deadline?: string | null;
   createdAt: string;
@@ -170,6 +171,7 @@ export interface ProfileRecord {
   description: string | null;
   role: string;
   createdAt: string;
+  subscribedCategories?: string[];
 }
 
 export interface ReviewRecord {

@@ -219,7 +219,7 @@ class ApiClient {
     return this.request("/auth/profile");
   }
 
-  async updateProfile(data: { name?: string; phone?: string | null; avatarUrl?: string | null; address?: string | null; description?: string | null }): Promise<ProfileRecord> {
+  async updateProfile(data: { name?: string; phone?: string | null; avatarUrl?: string | null; address?: string | null; description?: string | null; subscribedCategories?: string[] }): Promise<ProfileRecord> {
     return this.request("/auth/profile", { method: "PUT", body: JSON.stringify(data) });
   }
 
@@ -345,6 +345,10 @@ class ApiClient {
       method: "POST",
       body: JSON.stringify(data),
     });
+  }
+
+  async viewRequest(requestId: string) {
+    return this.request<{ ok: boolean }>(`/requests/${requestId}/view`, { method: "POST" });
   }
 
   async deleteOffer(requestId: string) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -13,12 +13,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
 import {
   CheckCircle2, ChevronRight, ChevronLeft, Loader2,
-  MessageSquare, MapPin, Wallet, Camera, X,
+  MessageSquare, MapPin, Wallet, Camera, X, History,
 } from "lucide-react";
 
 const CATEGORY_MAP: Record<string, "automobiles" | "real-estate" | "other"> = {
   AUTOMOBILES: "automobiles", REAL_ESTATE: "real-estate", OTHER: "other",
 };
+
+const TEMPLATES_KEY = "requestTemplates";
+const MAX_TEMPLATES = 5;
+
+type RequestTemplate = {
+  description: string;
+  category?: string;
+  city?: string;
+  budgetFrom?: number;
+  budgetTo?: number;
+  savedAt: number;
+};
+
+function loadTemplates(): RequestTemplate[] {
+  try {
+    return JSON.parse(localStorage.getItem(TEMPLATES_KEY) ?? "[]") as RequestTemplate[];
+  } catch { return []; }
+}
+
+function saveTemplate(t: Omit<RequestTemplate, "savedAt">) {
+  const stored = loadTemplates();
+  const deduped = stored.filter(x => x.description !== t.description);
+  const updated = [{ ...t, savedAt: Date.now() }, ...deduped].slice(0, MAX_TEMPLATES);
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(updated));
+}
 
 interface Props {
   trigger: ReactNode;
@@ -41,6 +66,11 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const [step, setStep] = useState(0);
+  const [templates, setTemplates] = useState<RequestTemplate[]>([]);
+
+  useEffect(() => {
+    setTemplates(loadTemplates());
+  }, []);
 
   /* Step 1 */
   const [description, setDescription] = useState(defaultValues?.description ?? "");
@@ -89,6 +119,14 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
     setFile(null); setPreview(null);
   }
 
+  function applyTemplate(tmpl: RequestTemplate) {
+    setDescription(tmpl.description);
+    if (tmpl.category) setCategoryFilter({ category: tmpl.category as "AUTOMOBILES" | "REAL_ESTATE" | "OTHER" });
+    if (tmpl.city) setCity(tmpl.city);
+    if (tmpl.budgetFrom != null) setBudgetFrom(String(tmpl.budgetFrom));
+    if (tmpl.budgetTo != null) setBudgetTo(String(tmpl.budgetTo));
+  }
+
   function setOpen(v: boolean) {
     if (onOpenChange) onOpenChange(v);
     else setInternalOpen(v);
@@ -116,6 +154,13 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
         await api.createRequest({ description: description.trim(), category: categoryFilter.category ? CATEGORY_MAP[categoryFilter.category] : undefined, city: city.trim(), imageUrl, budgetFrom: budgetFromNum, budgetTo: budgetToNum, deadline: deadlineIso });
       }
 
+      saveTemplate({
+        description: description.trim(),
+        category: categoryFilter.category,
+        city: city.trim() || undefined,
+        budgetFrom: budgetFromNum,
+        budgetTo: budgetToNum,
+      });
       toast.success(t("success"));
       setOpen(false);
       resetAll();
@@ -168,6 +213,26 @@ export function RequestCreateDialog({ trigger, service, onCreated, defaultValues
           {/* ── Step 0: Task ── */}
           {step === 0 && (
             <div className="space-y-4">
+              {/* Saved templates */}
+              {!service && templates.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <History className="h-3.5 w-3.5 text-muted-foreground" /> {t("savedTemplates")}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {templates.map((tmpl, i) => (
+                      <button
+                        key={i}
+                        onClick={() => applyTemplate(tmpl)}
+                        className="inline-flex items-center gap-1 text-xs rounded-full border border-border/60 bg-muted/50 px-2.5 py-1 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all max-w-[200px] group"
+                      >
+                        <span className="truncate">{tmpl.description.slice(0, 40)}{tmpl.description.length > 40 ? "…" : ""}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Service preview */}
               {service ? (
                 <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/30 p-3">

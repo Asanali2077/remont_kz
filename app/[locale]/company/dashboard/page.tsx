@@ -21,10 +21,11 @@ import {
   LayoutDashboard, Briefcase, ClipboardList, Menu, X,
   MessageSquare, CreditCard, User, Shield, ShieldCheck, ShieldOff, Bell,
   Loader2, ArrowRight, Circle, CheckCircle2, Eye, EyeOff,
-  Camera, MapPin, Smartphone, Zap, CalendarDays, Trash2,
+  Camera, MapPin, Smartphone, Zap, CalendarDays, Trash2, Tag,
 } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { usePushNotifications } from "@/lib/use-push";
 
 type Tab = "overview" | "services" | "requests" | "calendar" | "notifications" | "messages" | "billing" | "profile" | "security";
 
@@ -280,6 +281,13 @@ function ProfilePanel() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
+  const [savingSubscriptions, setSavingSubscriptions] = useState(false);
+
+  const ALL_CATEGORIES = [
+    "AUTOMOBILES", "REAL_ESTATE", "PLUMBING", "ELECTRICAL",
+    "PAINTING", "CLEANING", "RENOVATION", "WELDING", "ROOFING", "OTHER",
+  ];
 
   useEffect(() => {
     void (async () => {
@@ -289,10 +297,26 @@ function ProfilePanel() {
         setAddress(p.address ?? ""); setDescription(p.description ?? "");
         setAvatarUrl(p.avatarUrl);
         setCreatedAt(p.createdAt);
+        setSubscribedCategories(p.subscribedCategories ?? []);
       } catch { toast.error(tCommon("error")); }
       finally { setLoaded(true); }
     })();
   }, []);
+
+  async function handleSaveSubscriptions() {
+    setSavingSubscriptions(true);
+    try {
+      await api.updateProfile({ subscribedCategories });
+      toast.success(tC("categorySaved"));
+    } catch { toast.error(tCommon("error")); }
+    finally { setSavingSubscriptions(false); }
+  }
+
+  function toggleCategory(cat: string) {
+    setSubscribedCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  }
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file) return;
@@ -416,6 +440,37 @@ function ProfilePanel() {
         </Button>
       </div>
 
+      {/* Category subscriptions */}
+      <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Tag className="h-4 w-4 text-primary" />
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{tC("subscribeCategories")}</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">{tC("subscribeCategoriesDesc")}</p>
+        <div className="flex flex-wrap gap-2">
+          {ALL_CATEGORIES.map((cat) => {
+            const active = subscribedCategories.includes(cat);
+            return (
+              <button
+                key={cat}
+                onClick={() => toggleCategory(cat)}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "bg-muted/40 text-muted-foreground border-border/50 hover:border-primary/40 hover:text-foreground"
+                }`}
+              >
+                {cat.replace(/_/g, " ")}
+              </button>
+            );
+          })}
+        </div>
+        <Button size="sm" className="rounded-xl gap-2" onClick={() => void handleSaveSubscriptions()} disabled={savingSubscriptions}>
+          {savingSubscriptions ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+          {tC("saveChanges")}
+        </Button>
+      </div>
+
       {/* Danger zone */}
       <div className="bg-card border border-red-200 dark:border-red-900/50 rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide mb-1">{tNav("deleteAccount")}</h2>
@@ -452,6 +507,60 @@ function ProfilePanel() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function PushNotificationsCard() {
+  const t = useTranslations("company");
+  const { supported, permission, subscribed, subscribe, unsubscribe } = usePushNotifications();
+  const [loading, setLoading] = useState(false);
+  const { toast: toastFn } = { toast: (msg: string) => void msg }; void toastFn;
+
+  async function handleToggle() {
+    setLoading(true);
+    try {
+      if (subscribed) {
+        await unsubscribe();
+        toast.success(t("pushDisabled"));
+      } else {
+        const ok = await subscribe();
+        if (ok) toast.success(t("pushEnabled"));
+        else toast.error(t("pushDenied"));
+      }
+    } finally { setLoading(false); }
+  }
+
+  if (!supported) return null;
+
+  return (
+    <div className="bg-card border border-border/50 rounded-2xl p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${subscribed ? "bg-primary/10" : "bg-muted"}`}>
+            <Bell className={`h-5 w-5 ${subscribed ? "text-primary" : "text-muted-foreground"}`} />
+          </div>
+          <div>
+            <p className="font-semibold text-sm">{t("pushTitle")}</p>
+            <p className="text-xs text-muted-foreground">{t("pushDesc")}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {permission === "denied" && (
+            <span className="text-xs text-destructive">{t("pushBlocked")}</span>
+          )}
+          <Button
+            size="sm"
+            variant={subscribed ? "outline" : "default"}
+            className="rounded-xl"
+            disabled={loading || permission === "denied"}
+            onClick={() => void handleToggle()}
+          >
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            {subscribed ? t("pushTurnOff") : t("pushTurnOn")}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -654,6 +763,9 @@ function SecurityPanel() {
           </div>
         )}
       </div>
+
+      {/* Push Notifications */}
+      <PushNotificationsCard />
 
       {/* Security tips */}
       <div className="bg-card border border-border/50 rounded-2xl p-6">

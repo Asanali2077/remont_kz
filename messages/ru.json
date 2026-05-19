@@ -529,7 +529,16 @@
     "finalPriceStart": "Начать работу",
     "noRating": "Нет рейтинга",
     "completedJobs": "выполненных заказов",
-    "viewProfile": "Профиль компании"
+    "viewProfile": "Профиль компании",
+    "compareOffers": "Сравнить офферы",
+    "compareTitle": "Сравнение офферов",
+    "compareDesc": "{count, plural, one {# оффер} few {# оффера} many {# офферов} other {# оффера}}",
+    "comparePrice": "Цена",
+    "compareRating": "Рейтинг",
+    "compareCompleted": "Выполнено",
+    "compareMessage": "Сообщение",
+    "bestPrice": "Лучшая цена",
+    "viewsCount": "{count, plural, one {# просмотр} few {# просмотра} many {# просмотров} other {# просмотра}}"
   },
   "requestCreate": {
     "title": "Новая заявка",
@@ -558,7 +567,8 @@
     "service": "Услуга",
     "photo": "Фото",
     "attached": "✓ Прикреплено",
-    "error": "Не удалось создать заявку"
+    "error": "Не удалось создать заявку",
+    "savedTemplates": "Последние заявки"
   },
   "company": {
     "dashboard": "Дашборд",
@@ -695,7 +705,18 @@
     "nSelected": "Выбрано: {n}",
     "deleteN": "Удалить {n}",
     "totalActive": "{total} всего · {active} активных",
-    "forMe": "Для меня"
+    "forMe": "Для меня",
+    "subscribeCategories": "Подписки на категории",
+    "subscribeCategoriesDesc": "Получайте push-уведомления при новых заявках в выбранных категориях",
+    "categorySaved": "Подписки сохранены",
+    "pushTitle": "Push-уведомления",
+    "pushDesc": "Получайте уведомления об офферах и новых заявках",
+    "pushEnabled": "Push-уведомления включены",
+    "pushDisabled": "Push-уведомления отключены",
+    "pushDenied": "Разрешение отклонено браузером",
+    "pushBlocked": "Заблокировано",
+    "pushTurnOn": "Включить",
+    "pushTurnOff": "Выключить"
   },
   "chat": {
     "title": "Сообщения",
@@ -1387,7 +1408,17 @@
     "currentPassword": "Текущий пароль",
     "newPassword": "Новый пароль",
     "passwordChanged": "Пароль успешно изменён",
-    "save": "Сохранить"
+    "save": "Сохранить",
+    "push": {
+      "title": "Push-уведомления",
+      "desc": "Получайте уведомления об офферах и новых заявках",
+      "enabled": "Push-уведомления включены",
+      "disabled": "Push-уведомления отключены",
+      "denied": "Разрешение отклонено браузером",
+      "blocked": "Заблокировано",
+      "turnOn": "Включить",
+      "turnOff": "Выключить"
+    }
   },
   "orderSummary": {
     "title": "Сводка заказа",
