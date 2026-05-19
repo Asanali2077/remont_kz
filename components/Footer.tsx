@@ -3,10 +3,29 @@
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { Wrench } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav");
+  const tC = useTranslations("company");
+  const { user } = useAuth();
+  const isCompany = user?.role === "company";
+
+  const clientAccountLinks = [
+    { label: tNav("myRequests"), href: "/my-requests" },
+    { label: tNav("favorites"),  href: "/favorites" },
+    { label: tNav("chat"),       href: "/chat" },
+    { label: tNav("profile"),    href: "/profile" },
+    { label: tNav("settings"),   href: "/settings" },
+  ];
+
+  const companyAccountLinks = [
+    { label: tC("dashboard"),    href: "/company/dashboard" },
+    { label: tNav("chat"),       href: "/chat" },
+    { label: tNav("profile"),    href: "/profile" },
+    { label: tNav("settings"),   href: "/settings" },
+  ];
 
   const FOOTER_LINKS = {
     catalog: [
@@ -23,13 +42,7 @@ export function Footer() {
       { label: t("helpCenter"),    href: "/guide" },
       { label: tNav("about"),      href: "/about" },
     ],
-    account: [
-      { label: tNav("myRequests"), href: "/my-requests" },
-      { label: tNav("favorites"),  href: "/favorites" },
-      { label: tNav("chat"),       href: "/chat" },
-      { label: tNav("profile"),    href: "/profile" },
-      { label: tNav("settings"),   href: "/settings" },
-    ],
+    account: isCompany ? companyAccountLinks : clientAccountLinks,
   };
 
   return (
