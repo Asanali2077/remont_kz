@@ -62,7 +62,7 @@ function RequestTimeline({ status, hasOffers, offerCount, createdAt }: {
   ];
   const active = getStepIndex(status, hasOffers);
   return (
-    <div className="overflow-x-auto pt-2 pb-2">
+    <div className="overflow-x-auto pt-4 pb-2">
       <div className="flex items-start min-w-max">
         {STEPS.map((step, i) => {
           const Icon = step.icon;
