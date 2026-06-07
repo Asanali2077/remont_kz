@@ -1583,6 +1583,7 @@
     "offerFailedToast": "Не удалось отправить предложение",
     "withdrawSuccessToast": "Предложение отозвано",
     "withdrawFailedToast": "Не удалось отозвать предложение",
+    "searchPlaceholder": "Поиск заявок...",
     "forMe": "Для меня",
     "viewPhoto": "Смотреть фото",
     "photoAlt": "Фото заявки"

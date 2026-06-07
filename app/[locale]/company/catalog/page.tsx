@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ClipboardList, UserCheck, ImageIcon, X, Eye } from "lucide-react";
+import { ClipboardList, UserCheck, ImageIcon, X, Eye, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/company/ProtectedRoute";
 import { CategoryFilter, type CategoryFilterValue } from "@/components/filters/CategoryFilter";
@@ -123,6 +124,7 @@ function CatalogContent() {
   const searchParams = useSearchParams();
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilterValue>(() => {
     const cat = searchParams.get("category");
     return cat ? { category: cat as import("@/lib/categories").TopCategory } : {};
@@ -182,14 +184,16 @@ function CatalogContent() {
   };
 
   const filtered = useMemo(() => {
+    const q = query.toLowerCase().trim();
     return requests.filter((r) => {
       const matchesCategory = categoryFilter.category
         ? (TOP_TO_SERVICE[categoryFilter.category] ?? []).includes(r.category ?? "")
         : true;
       const matchesCity = city ? r.city === city : true;
-      return matchesCategory && matchesCity;
+      const matchesQuery = q ? r.description.toLowerCase().includes(q) : true;
+      return matchesCategory && matchesCity && matchesQuery;
     });
-  }, [requests, categoryFilter, city]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [requests, categoryFilter, city, query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const offerDialogRequest = requests.find((r) => r.id === offerDialogRequestId) ?? null;
 
@@ -216,6 +220,20 @@ function CatalogContent() {
 
         <Card className="mb-6">
           <CardContent className="pt-4 pb-4">
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder={t("searchPlaceholder")}
+                className="pl-9"
+              />
+              {query && (
+                <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label>{t("category")}</Label>
@@ -226,9 +244,9 @@ function CatalogContent() {
                 <CitySelect value={city} onChange={setCity} allowAny />
               </div>
             </div>
-            {(categoryFilter.category || city) && (
+            {(categoryFilter.category || city || query) && (
               <div className="mt-3">
-                <Button variant="ghost" size="sm" onClick={() => { setCategoryFilter({}); setCity(""); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setCategoryFilter({}); setCity(""); setQuery(""); }}>
                   {t("resetFilters")}
                 </Button>
               </div>

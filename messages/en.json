@@ -1583,6 +1583,7 @@
     "offerFailedToast": "Failed to send offer",
     "withdrawSuccessToast": "Offer withdrawn",
     "withdrawFailedToast": "Failed to withdraw offer",
+    "searchPlaceholder": "Search requests...",
     "forMe": "For me",
     "viewPhoto": "View photo",
     "photoAlt": "Request photo"

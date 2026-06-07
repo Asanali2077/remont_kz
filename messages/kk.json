@@ -1583,6 +1583,7 @@
     "offerFailedToast": "Ұсынысты жіберу сәтсіз болды",
     "withdrawSuccessToast": "Ұсыныс кері алынды",
     "withdrawFailedToast": "Ұсынысты кері алу сәтсіз болды",
+    "searchPlaceholder": "Өтінімдерді іздеу...",
     "forMe": "Маған арналған",
     "viewPhoto": "Суретті қарау",
     "photoAlt": "Өтінім суреті"
