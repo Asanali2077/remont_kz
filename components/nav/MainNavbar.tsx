@@ -5,17 +5,15 @@ import { useTheme } from "next-themes";
 import {
   LogOut, Menu, X, Moon, Sun, ChevronDown, ClipboardList,
   Bell, BookOpen, User, CreditCard, LayoutDashboard,
-  Heart, MessageSquare, Search, ShieldCheck, History, Briefcase, Shield, Lock,
-  Car, Building2, Zap, Wrench,
+  Heart, MessageSquare, ShieldCheck, History, Briefcase, Shield, Lock,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useNotifications } from "@/lib/use-notifications";
 import { timeAgo } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 /* ── Notification bell ── */
@@ -83,36 +81,10 @@ export function MainNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
 
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setSearchOpen(true); }
-      if (e.key === "Escape") setSearchOpen(false);
-    }
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, []);
-
-  useEffect(() => {
-    if (searchOpen) setTimeout(() => searchRef.current?.focus(), 50);
-  }, [searchOpen]);
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    const base = user?.role === "company" ? "/company/catalog" : "/repair";
-    router.push(`${base}?q=${encodeURIComponent(searchQuery.trim())}`);
-    setSearchOpen(false);
-    setSearchQuery("");
-  }
 
   const catalogHref = user?.role === "company" ? "/company/catalog" : "/repair";
   const dashboardHref = user?.role === "company" ? "/company/dashboard" : "/my-requests";
@@ -194,16 +166,6 @@ export function MainNavbar() {
 
         {/* Right — desktop */}
         <div className="hidden md:flex items-center gap-1">
-          {/* Global search button */}
-          <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)}
-            className="h-10 gap-2.5 px-4 rounded-xl border border-primary/40 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/60 transition-colors hidden lg:flex">
-            <Search className="h-4 w-4" />
-            <span className="text-sm font-medium">{t("searchBtn")}</span>
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} className="h-9 w-9 lg:hidden">
-            <Search className="h-4 w-4" />
-          </Button>
-
           {/* Theme toggle */}
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 relative">
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -356,53 +318,6 @@ export function MainNavbar() {
       )}
     </header>
 
-    {/* ── Global search overlay ── */}
-    {searchOpen && (
-      <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4"
-        onClick={() => setSearchOpen(false)}>
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
-        <form onSubmit={handleSearch}
-          className="relative w-full max-w-lg bg-card border border-border/50 rounded-2xl shadow-2xl overflow-hidden"
-          onClick={e => e.stopPropagation()}>
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border/40">
-            <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-            <Input
-              ref={searchRef}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder={t("searchPlaceholder")}
-              className="border-0 shadow-none focus-visible:ring-0 text-base bg-transparent px-0 h-auto"
-            />
-            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-lg"
-              onClick={() => setSearchOpen(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="px-4 py-3 flex flex-wrap gap-2">
-            <span className="text-xs text-muted-foreground">{t("quickLinks")}</span>
-            {[
-              { label: "Auto repair", icon: Car, q: "auto" },
-              { label: "Renovation", icon: Building2, q: "renovation" },
-              { label: "Electrical", icon: Zap, q: "electrical" },
-              { label: "Plumbing", icon: Wrench, q: "plumbing" },
-            ].map(({ label, icon: Icon, q }) => (
-              <button key={q} type="button"
-                onClick={() => { const base = user?.role === "company" ? "/company/catalog" : "/repair"; router.push(`${base}?q=${q}`); setSearchOpen(false); setSearchQuery(""); }}
-                className="inline-flex items-center gap-1.5 text-xs rounded-full border border-border/50 px-2.5 py-1 hover:bg-muted hover:border-primary/30 transition-colors">
-                <Icon className="h-3.5 w-3.5" />
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="px-4 pb-3 flex justify-between items-center text-xs text-muted-foreground">
-            <span>{t("pressEnter")}</span>
-            <Button type="submit" size="sm" className="rounded-xl h-7 text-xs" disabled={!searchQuery.trim()}>
-              {t("searchButton")}
-            </Button>
-          </div>
-        </form>
-      </div>
-    )}
 
 </>
   );
