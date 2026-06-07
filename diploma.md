@@ -1,235 +1,272 @@
-# Дипломная работа — Remont.kz
-## Маркетплейс ремонтных услуг Казахстана
+# Diploma Project — Remont.kz
+## Repair Services Marketplace for Kazakhstan
 
 ---
 
-## 1. ОБЩИЕ СВЕДЕНИЯ О ПРОЕКТЕ
+## 1. PROJECT OVERVIEW
 
-**Название:** Remont.kz — веб-платформа для поиска и заказа ремонтных и строительных услуг в Казахстане
+**Title:** Remont.kz — a web platform for searching and ordering repair and construction services in Kazakhstan
 
-**Тип:** Полнофункциональное веб-приложение (Full-stack web application)
+**Type:** Full-stack web application
 
-**Год:** 2026
+**Year:** 2026
 
-**Технологии:** Next.js 14, TypeScript, PostgreSQL, Prisma 7, Tailwind CSS, Framer Motion, next-intl
+**Stack:** Next.js 14 · TypeScript · PostgreSQL · Prisma 7 · Tailwind CSS · shadcn/ui · Framer Motion · next-intl
 
-**Ссылка на репозиторий:** https://github.com/Asanali2077/remont_kz
-
----
-
-## 2. АКТУАЛЬНОСТЬ ТЕМЫ
-
-Рынок ремонтных и строительных услуг в Казахстане обладает рядом системных проблем:
-
-- **Отсутствие прозрачности:** клиенты не имеют доступа к достоверным отзывам и рейтингам подрядчиков
-- **Информационная асимметрия:** поиск исполнителей происходит через сарафанное радио, объявления в мессенджерах, что неэффективно и ненадёжно
-- **Нет конкурентного механизма ценообразования:** клиент не может сравнить предложения нескольких компаний на один запрос
-- **Языковой барьер:** большинство цифровых платформ не адаптированы для казахоязычной аудитории
-- **Отсутствие контроля статуса:** нет инструментов отслеживания хода выполнения заказа
-
-Remont.kz решает эти проблемы, предоставляя единую цифровую площадку с системой тендерных заявок, рейтингами, чатом и многоязычным интерфейсом.
+**Repository:** https://github.com/Asanali2077/remont_kz
 
 ---
 
-## 3. ЦЕЛИ И ЗАДАЧИ
+## 2. RELEVANCE
 
-### Цель
-Разработать веб-платформу, которая автоматизирует процесс поиска, выбора и взаимодействия между клиентами и поставщиками ремонтных услуг в Казахстане.
+The repair and construction services market in Kazakhstan has several systemic problems:
 
-### Задачи
-1. Спроектировать реляционную базу данных для хранения пользователей, услуг, заявок и коммуникаций
-2. Реализовать систему аутентификации с JWT, верификацией email и двухфакторной аутентификацией
-3. Разработать механизм тендерных заявок (клиент публикует → компании делают оферты → клиент выбирает)
-4. Реализовать real-time чат между клиентом и исполнителем
-5. Построить систему рейтингов и отзывов для объективной оценки компаний
-6. Обеспечить многоязычность (русский, казахский, английский)
-7. Разработать административную панель для управления платформой
-8. Настроить CI/CD и контейнеризацию для production-деплоя
+- **Lack of transparency:** clients cannot access reliable reviews and contractor ratings
+- **Information asymmetry:** finding contractors happens through word-of-mouth and messenger ads — inefficient and unreliable
+- **No competitive pricing mechanism:** clients cannot compare offers from multiple companies on the same request
+- **Language barrier:** most digital platforms are not adapted for Kazakh-speaking audiences
+- **No status tracking:** no tools to track order progress
+
+Remont.kz solves these problems by providing a unified digital marketplace with a tender-based request system, ratings, real-time chat, and a multilingual interface.
 
 ---
 
-## 4. АНАЛИЗ СУЩЕСТВУЮЩИХ РЕШЕНИЙ
+## 3. GOALS AND OBJECTIVES
 
-| Платформа | Страна | Недостатки для KZ |
-|-----------|--------|--------------------|
-| Profi.ru | Россия | Ориентирован на РФ, нет казахского языка, нет тенге |
-| YouDo | Россия | Нет локализации, не адаптирован к казахскому рынку |
-| Kolesa.kz / Krisha.kz | KZ | Узкая специализация (авто / недвижимость), нет ремонтных услуг |
-| WhatsApp-объявления | — | Нет рейтингов, нет структуры, нет безопасности сделки |
+### Goal
+Develop a web platform that automates the process of searching, selecting, and interacting between clients and repair service providers in Kazakhstan.
 
-**Вывод:** На казахстанском рынке отсутствует универсальный маркетплейс ремонтных услуг с полным циклом — от публикации заявки до оценки результата.
+### Objectives
+1. Design a relational database for users, services, requests, and communications
+2. Implement a JWT-based authentication system with email verification and two-factor authentication
+3. Develop a tender-based request mechanism (client publishes → companies make offers → client selects)
+4. Implement real-time chat between client and contractor
+5. Build a rating and review system for objective company evaluation
+6. Support multilingualism (Russian, Kazakh, English)
+7. Develop an administrative panel for platform management
+8. Set up CI/CD and containerization for production deployment
 
 ---
 
-## 5. ТЕХНОЛОГИЧЕСКИЙ СТЕК И ОБОСНОВАНИЕ ВЫБОРА
+## 4. ANALYSIS OF EXISTING SOLUTIONS
+
+| Platform | Country | Drawbacks for KZ |
+|----------|---------|-----------------|
+| Profi.ru | Russia | Russia-focused, no Kazakh language, no tenge |
+| YouDo | Russia | No localization, not adapted to the Kazakh market |
+| Kolesa.kz / Krisha.kz | KZ | Narrow specialization (cars / real estate), no repair services |
+| WhatsApp ads | — | No ratings, no structure, no transaction security |
+
+**Conclusion:** The Kazakh market lacks a universal repair services marketplace covering the full cycle — from publishing a request to rating the result.
+
+---
+
+## 5. TECHNOLOGY STACK AND RATIONALE
 
 ### 5.1 Frontend + Backend — Next.js 14 (App Router)
 
-**Обоснование:**
-- Единая кодовая база для клиентской и серверной логики (монорепо)
-- Server-Side Rendering (SSR) обеспечивает SEO-оптимизацию каталога услуг
-- App Router с React Server Components снижает объём JS, отправляемого клиенту
-- API Routes в том же проекте устраняют необходимость отдельного backend-сервера
-- Широкая экосистема, активная поддержка Vercel
+**Rationale:**
+- Single codebase for client and server logic (monorepo)
+- Server-Side Rendering (SSR) provides SEO optimization for the service catalog
+- App Router with React Server Components reduces JS sent to the client
+- API Routes in the same project eliminate the need for a separate backend server
+- Wide ecosystem, active Vercel support
 
 ### 5.2 TypeScript
 
-**Обоснование:**
-- Статическая типизация выявляет ошибки на этапе компиляции
-- Облегчает рефакторинг в крупной кодовой базе
-- Автодополнение снижает количество опечаток в именах полей
+**Rationale:**
+- Static typing catches errors at compile time
+- Facilitates refactoring in a large codebase
+- Autocomplete reduces typos in field names
 
 ### 5.3 PostgreSQL + Prisma 7
 
-**Обоснование:**
-- PostgreSQL: надёжная реляционная СУБД с поддержкой JSONB, индексов, каскадного удаления
-- Prisma: типобезопасный ORM, автогенерация клиента из схемы, удобные миграции
-- `@prisma/adapter-pg` — pool-based адаптер вместо стандартного движка: критично для Vercel Serverless Functions, где каждый вызов создаёт новый Node.js процесс; пул переиспользует соединения
+**Rationale:**
+- PostgreSQL: reliable relational DBMS with JSONB, indexes, cascade deletion support
+- Prisma: type-safe ORM with auto-generated client from schema, convenient migrations
+- `@prisma/adapter-pg` — pool-based adapter instead of the default engine: critical for Vercel Serverless Functions where each invocation creates a new Node.js process; the pool reuses connections
 
 ### 5.4 Tailwind CSS + shadcn/ui
 
-**Обоснование:**
-- Utility-first CSS: нет конфликтов имён, лёгкое переопределение стилей
-- shadcn/ui — компоненты копируются в проект (не зависимость), поэтому легко кастомизируются
-- Radix UI в основе shadcn обеспечивает доступность (ARIA)
+**Rationale:**
+- Utility-first CSS: no name conflicts, easy style overrides
+- shadcn/ui — components are copied into the project (not a dependency), so they are easily customized
+- Radix UI under shadcn ensures accessibility (ARIA)
 
 ### 5.5 Framer Motion
 
-**Обоснование:**
-- Декларативные анимации (не CSS keyframes): логика анимаций в JSX рядом с компонентом
-- Поддержка `AnimatePresence` для анимаций монтирования/размонтирования
-- Используется на landing page, about page, in modal transitions
+**Rationale:**
+- Declarative animations (not CSS keyframes): animation logic in JSX alongside the component
+- `AnimatePresence` support for mount/unmount animations
+- Used on the landing page, about page, and modal transitions
 
 ### 5.6 next-intl
 
-**Обоснование:**
-- Встроенная поддержка App Router (не устаревший pages router)
-- Маршрутизация по локали через `app/[locale]/` — каждая страница доступна на 3 языках
-- ICU message format для правильного склонения чисел
+**Rationale:**
+- Built-in App Router support (not the deprecated pages router)
+- Locale routing via `app/[locale]/` — each page is available in 3 languages
+- ICU message format for correct number inflection
 
-### 5.7 JWT + bcrypt (статeless аутентификация)
+### 5.7 JWT + bcrypt (stateless authentication)
 
-**Обоснование:**
-- Stateless: серверу не нужно хранить сессии, что совместимо с serverless-деплоем
-- bcrypt с 12 раундами соления — стандарт индустрии для хранения паролей
-- Токен в `localStorage` с проверкой на каждый API-запрос через `Authorization: Bearer`
+**Rationale:**
+- Stateless: the server does not need to store sessions, compatible with serverless deployment
+- bcrypt with 12 salt rounds — industry standard for password storage
+- Token in `localStorage` checked on every API request via `Authorization: Bearer`
 
 ### 5.8 Resend (Email)
 
-**Обоснование:**
-- HTTP SDK, а не SMTP — SMTP использует TCP-соединения, которые заблокированы в Vercel Serverless Functions
-- Надёжная доставка, webhook-подтверждения, встроенная аналитика
+**Rationale:**
+- HTTP SDK instead of SMTP — SMTP uses TCP connections blocked in Vercel Serverless Functions; Resend works over HTTPS
+- Reliable delivery, webhook confirmations, built-in analytics
 
-### 5.9 Server-Sent Events (SSE) для чата
+### 5.9 Server-Sent Events (SSE) for Chat
 
-**Обоснование:**
-- WebSockets требуют persistent-соединения, несовместимых с Vercel Serverless
-- SSE работает поверх обычного HTTP GET, Vercel поддерживает streaming responses
-- Однонаправленный канал (сервер → клиент) достаточен: клиент отправляет через REST POST
+**Rationale:**
+- WebSockets require persistent connections, incompatible with Vercel Serverless
+- SSE works over a regular HTTP GET; Vercel supports streaming responses
+- One-directional channel (server → client) is sufficient: the client sends via REST POST
 
-### 5.10 reCAPTCHA v3
+### 5.10 speakeasy + qrcode (Two-Factor Authentication)
 
-**Обоснование:**
-- Защита форм регистрации и логина от bot-атак без UI-прерывания пользователя (v3 — невидимый)
-- Серверная верификация токена в `lib/recaptcha.ts`
+**Rationale:**
+- TOTP (RFC 6238) is the industry standard for 2FA — compatible with Google Authenticator, Authy
+- QR code generated server-side in base64, sent to client for scanning
+- Secret stored per-user in the database
+
+### 5.11 Leaflet + react-leaflet (Map View)
+
+**Rationale:**
+- Open-source interactive maps — no API key required for basic tile display
+- Allows displaying service locations in the catalog with geographic coordinates
+- `ServiceMap.tsx` component renders pins for services with lat/lng
+
+### 5.12 Recharts (Charts)
+
+**Rationale:**
+- Composable React charting library built on D3
+- Used in the company dashboard: revenue bar charts, category pie charts, overview trend lines
+
+### 5.13 Web Push (PWA Notifications)
+
+**Rationale:**
+- `web-push` package enables browser push notifications without the app being open
+- `PWAInstallPrompt.tsx` invites users to install the app to their home screen
+- Works alongside the in-app notification polling for maximum reach
+
+### 5.14 reCAPTCHA v3
+
+**Rationale:**
+- Protection of registration and login forms from bot attacks without UI interruption (v3 — invisible)
+- Server-side token verification in `lib/recaptcha.ts`
+- Infrastructure is ready; rate limiting is the active bot protection
 
 ---
 
-## 6. АРХИТЕКТУРА СИСТЕМЫ
+## 6. SYSTEM ARCHITECTURE
 
-### 6.1 Общая схема
+### 6.1 Overview
 
 ```
 ┌─────────────────────────────────────────────────┐
-│                  КЛИЕНТ (браузер)               │
+│               CLIENT (Browser)                  │
 │  React 18 + Next.js 14 App Router               │
 │  Tailwind CSS, shadcn/ui, Framer Motion         │
 │  next-intl (ru / en / kk)                       │
 └──────────────────────┬──────────────────────────┘
                        │ HTTP / SSE
 ┌──────────────────────▼──────────────────────────┐
-│              NEXT.JS SERVER (API Routes)        │
-│  /api/* — 50+ маршрутов                         │
+│           NEXT.JS SERVER (API Routes)           │
+│  /api/* — 50+ routes                            │
 │  JWT middleware (lib/middleware.ts)             │
 │  Zod validation, rate limiting                  │
-│  Email: Resend SDK                              │
+│  Email: Resend SDK   Push: web-push             │
 │  File uploads: Cloudinary / local disk          │
 └──────────────────────┬──────────────────────────┘
                        │ Prisma 7 + @prisma/adapter-pg
 ┌──────────────────────▼──────────────────────────┐
 │              PostgreSQL                         │
-│  10 моделей, индексы, каскадное удаление        │
+│  10 models, indexes, cascade deletion           │
 └─────────────────────────────────────────────────┘
 ```
 
-### 6.2 Структура директорий
+### 6.2 Directory Structure
 
 ```
 remont_kz/
 ├── app/
-│   ├── [locale]/            # Все страницы с i18n-маршрутизацией
-│   │   ├── page.tsx         # Landing page
-│   │   ├── repair/          # Каталог услуг + детальная страница
-│   │   ├── company/         # Профиль + дашборд компании
-│   │   ├── companies/       # Справочник компаний
-│   │   ├── my-requests/     # Дашборд клиента
-│   │   ├── chat/            # Чат (список + тред)
-│   │   ├── favorites/       # Избранное
-│   │   ├── compare/         # Сравнение услуг
-│   │   ├── profile/         # Профиль пользователя
-│   │   ├── settings/        # Безопасность (пароль, 2FA)
-│   │   ├── billing/         # Биллинг (только для компаний)
-│   │   ├── guide/           # FAQ / Помощь
-│   │   ├── about/           # О проекте
-│   │   ├── admin/           # Административная панель
-│   │   └── payment/         # Оплата (только для компаний)
-│   └── api/                 # 50+ API-маршрутов
-├── components/              # React-компоненты
-│   ├── auth/                # AuthProvider, AuthModal
-│   ├── company/             # Kanban, статистика, управление услугами
-│   ├── nav/                 # Navbar, MobileNav
-│   └── filters/             # FilterBar
-├── lib/                     # Утилиты
-│   ├── api.ts               # API-клиент (singleton)
-│   ├── auth.ts              # JWT + bcrypt
-│   ├── db.ts                # Prisma singleton (кэш на globalThis)
-│   ├── email.ts             # Email-шаблоны (6 типов)
-│   ├── middleware.ts         # Охранники маршрутов
-│   ├── types.ts             # TypeScript-типы фронтенда
-│   ├── utils.ts             # cn(), fmtNum(), timeAgo()
-│   ├── upload.ts            # Загрузка файлов
-│   └── use-notifications.ts # Хук для нотификаций
+│   ├── [locale]/              # All pages with i18n routing
+│   │   ├── page.tsx           # Landing page
+│   │   ├── repair/            # Service catalog + detail page
+│   │   ├── company/           # Profile, dashboard, catalog, report
+│   │   ├── companies/         # Company directory
+│   │   ├── my-requests/       # Client personal cabinet (tab-based)
+│   │   ├── my-payments/       # Client payment history
+│   │   ├── chat/              # Chat inbox + thread
+│   │   ├── compare/           # Service comparison
+│   │   ├── order-summary/[id] # Order summary view
+│   │   ├── billing/           # Billing (companies only)
+│   │   ├── guide/             # FAQ / Help center
+│   │   ├── about/             # About the project
+│   │   ├── admin/             # Admin panel (split into sub-pages)
+│   │   └── payment/           # Payment flow (companies only)
+│   └── api/                   # 50+ API routes
+├── components/
+│   ├── auth/                  # AuthProvider, AuthModal
+│   ├── company/               # Kanban, statistics, calendar, onboarding
+│   ├── admin/                 # Sidebar, tables, dialogs
+│   ├── filters/               # FilterBar, CategoryFilter
+│   ├── nav/                   # MainNavbar
+│   ├── payment/               # PaymentStatusBadge
+│   └── ui/                    # shadcn/ui base components
+├── lib/                       # Utilities and singletons
+│   ├── api.ts                 # API client singleton
+│   ├── auth.ts                # JWT + bcrypt
+│   ├── audit.ts               # Audit log helpers
+│   ├── categories.ts          # Category hierarchy
+│   ├── cities.ts              # Kazakhstan cities list
+│   ├── db.ts                  # Prisma singleton (globalThis cache)
+│   ├── email.ts               # Email templates (6 types)
+│   ├── geocode.ts             # Geocoding helpers
+│   ├── middleware.ts          # Route guards
+│   ├── rate-limit.ts          # In-memory rate limiter
+│   ├── recaptcha.ts           # reCAPTCHA v3 server verification
+│   ├── typing-store.ts        # Chat typing indicator store
+│   ├── types.ts               # Frontend TypeScript types
+│   ├── upload.ts              # File upload (magic-byte validation)
+│   ├── use-notifications.ts   # Notification polling hook
+│   └── utils.ts               # cn(), fmtNum(), timeAgo(), sanitizeText()
 ├── prisma/
-│   ├── schema.prisma        # 10 моделей БД
-│   └── seed.ts              # Демо-данные
-├── messages/                # i18n: ru.json, en.json, kk.json
-├── i18n/                    # Конфигурация next-intl
-├── public/                  # Статика (изображения, иконки)
-├── vercel.json              # Cron задачи
-├── Dockerfile               # Контейнеризация
-└── .github/workflows/ci.yml # CI/CD пайплайн
+│   ├── schema.prisma          # 10 DB models
+│   └── seed.ts                # Demo data
+├── messages/                  # i18n: ru.json, en.json, kk.json (~650 keys each)
+├── i18n/                      # next-intl configuration
+├── public/                    # Static assets (images, icons, slides)
+├── vercel.json                # Cron jobs
+├── Dockerfile                 # Multi-stage container build
+└── .github/workflows/ci.yml   # CI/CD pipeline
 ```
 
-### 6.3 Роли пользователей
+### 6.3 User Roles
 
-| Роль | Описание | Доступные функции |
-|------|----------|-------------------|
-| `CLIENT` | Заказчик | Публиковать заявки, выбирать оферты, чат, оценки, избранное |
-| `COMPANY` | Исполнитель | Управлять услугами, делать оферты, Kanban, экспорт, биллинг |
-| `ADMIN` | Администратор | Управление пользователями, модерация, аудит, промокоды |
+| Role | Description | Available Features |
+|------|-------------|-------------------|
+| `CLIENT` | Customer | Publish requests, select offers, chat, ratings, favorites |
+| `COMPANY` | Contractor | Manage services, submit offers, Kanban, export, billing |
+| `ADMIN` | Administrator | User management, moderation, audit log, promo codes |
 
 ---
 
-## 7. СХЕМА БАЗЫ ДАННЫХ
+## 7. DATABASE SCHEMA
 
-### 7.1 Диаграмма связей (ERD — краткая)
+### 7.1 Entity Relationship Diagram (abbreviated)
 
 ```
 User ──< Service ──< ServiceImage
  │           │
  │           └──< Favorite
  │
- ├──< Request (как клиент) ──< RequestOffer ──< User (как компания)
+ ├──< Request (as client) ──< RequestOffer ──< User (as company)
  │        │
  │        ├──< Message
  │        └── Payment ──> PromoCode
@@ -238,152 +275,157 @@ User ──< Service ──< ServiceImage
  └──< Payment
 ```
 
-### 7.2 Описание всех 10 моделей
+### 7.2 All 10 Models
 
 #### User
-Центральная модель. Объединяет клиентов, компании и администраторов.
+Central model. Combines clients, companies, and administrators.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `id` | UUID | Первичный ключ |
-| `email` | String @unique | Логин |
-| `password` | String | bcrypt-хэш (12 раундов) |
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Primary key |
+| `email` | String @unique | Login |
+| `password` | String | bcrypt hash (12 rounds) |
 | `role` | UserRole | CLIENT / COMPANY / ADMIN |
-| `name` | String? | Имя / название компании |
-| `phone` | String? | Телефон |
-| `avatarUrl` | String? | URL аватара |
-| `address` | String? | Адрес |
-| `description` | Text? | Описание компании |
-| `lastActiveAt` | DateTime? | Последняя активность |
-| `emailVerified` | Boolean | Подтверждён ли email |
-| `emailVerifyToken` | String? @unique | Токен для верификации email |
-| `resetToken` | String? @unique | Токен сброса пароля |
-| `resetTokenExpiresAt` | DateTime? | Срок действия токена сброса |
-| `isBlocked` | Boolean | Заблокирован ли пользователь |
-| `blockReason` | String? | Причина блокировки |
-| `isVerified` | Boolean | Верифицирована ли компания администратором |
-| `twoFactorSecret` | String? | Секрет TOTP для 2FA |
-| `twoFactorEnabled` | Boolean | Включена ли двухфакторная аутентификация |
+| `name` | String? | Name / company name |
+| `phone` | String? | Phone number |
+| `avatarUrl` | String? | Avatar URL |
+| `address` | String? | Address |
+| `description` | Text? | Company description |
+| `lastActiveAt` | DateTime? | Last activity timestamp |
+| `emailVerified` | Boolean | Whether email is confirmed |
+| `emailVerifyToken` | String? @unique | Email verification token |
+| `resetToken` | String? @unique | Password reset token |
+| `resetTokenExpiresAt` | DateTime? | Reset token expiry |
+| `isBlocked` | Boolean | Whether user is blocked |
+| `blockReason` | String? | Reason for block |
+| `isVerified` | Boolean | Whether company is admin-verified |
+| `twoFactorSecret` | String? | TOTP secret for 2FA |
+| `twoFactorEnabled` | Boolean | Whether 2FA is enabled |
 
-**Индексы:** `email`, `role`
+**Indexes:** `email`, `role`
 
 #### Service
-Объявление компании об услуге.
+A company's service listing.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `id` | UUID | Первичный ключ |
-| `name` | String | Название услуги |
-| `category` | ServiceCategory | Категория (10 значений) |
-| `description` | Text | Описание |
-| `priceFrom` | Float | Цена от (тенге) |
-| `priceTo` | Float | Цена до (тенге) |
-| `active` | Boolean | Показывать в каталоге |
-| `city` | String? | Город |
-| `rating` | Float? | Средний рейтинг (вычисляется) |
-| `licensed` | Boolean | Наличие лицензии |
-| `tags` | String[] | Теги для поиска |
-| `address` | String? | Адрес |
-| `lat` / `lng` | Float? | Координаты для карты |
-| `companyId` | FK → User | Владелец |
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Primary key |
+| `name` | String | Service name |
+| `category` | ServiceCategory | Category (10 values) |
+| `description` | Text | Description |
+| `priceFrom` | Float | Price from (tenge) |
+| `priceTo` | Float | Price to (tenge) |
+| `active` | Boolean | Show in catalog |
+| `city` | String? | City |
+| `rating` | Float? | Average rating (computed) |
+| `licensed` | Boolean | Has a license |
+| `tags` | String[] | Search tags |
+| `customAttributes` | Json? | Flexible key-value pairs |
+| `address` | String? | Address |
+| `lat` / `lng` | Float? | Coordinates for map |
+| `startDate` / `endDate` | DateTime? | Service availability window |
+| `schedule` | String? | Working schedule description |
+| `companyId` | FK → User | Owner |
 
-**Индексы:** `companyId`, `category`, `city`, `active`
+**Indexes:** `companyId`, `category`, `city`, `active`
 
 #### ServiceImage
-До 10 изображений на услугу с порядком сортировки.
+Up to 10 images per service with sort order.
 
 #### Request
-Заявка клиента на выполнение работы.
+A client's job request.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `id` | UUID | Первичный ключ |
-| `clientId` | FK → User | Заказчик |
-| `serviceId` | FK → Service? | Привязка к конкретной услуге (опционально) |
-| `companyId` | FK → User? | Назначенная компания (после принятия оферты) |
-| `description` | Text | Описание проблемы |
-| `category` | ServiceCategory? | Категория |
-| `city` | String? | Город |
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Primary key |
+| `clientId` | FK → User | Customer |
+| `serviceId` | FK → Service? | Linked to a specific service (optional) |
+| `companyId` | FK → User? | Assigned company (after offer accepted) |
+| `description` | Text | Problem description |
+| `category` | ServiceCategory? | Category |
+| `city` | String? | City |
+| `imageUrl` | String? | Attached photo |
 | `status` | RequestStatus | NEW / ACCEPTED / IN_PROGRESS / COMPLETED / CANCELLED |
-| `rating` | Int? | Оценка клиента (1–5) |
-| `review` | Text? | Текст отзыва |
-| `companyReply` | Text? | Ответ компании на отзыв |
-| `budgetFrom` / `budgetTo` | Float? | Ожидаемый бюджет |
-| `finalPrice` | Int? | Итоговая согласованная цена |
-| `expiresAt` | DateTime? | Срок действия заявки (14 дней) |
-| `deadline` | DateTime? | Желаемый срок выполнения |
+| `rating` | Int? | Client rating (1–5) |
+| `review` | Text? | Review text |
+| `companyReply` | Text? | Company reply to review |
+| `budgetFrom` / `budgetTo` | Float? | Expected budget range |
+| `finalPrice` | Int? | Final agreed price |
+| `viewCount` | Int | Number of views |
+| `expiresAt` | DateTime? | Request expiry (14 days) |
+| `deadline` | DateTime? | Desired completion date |
 
-**Индексы:** `clientId`, `companyId`, `serviceId`, `status`, `category`, `city`, `expiresAt`, составной `(category, city, status)`
+**Indexes:** `clientId`, `companyId`, `serviceId`, `status`, `category`, `city`, `expiresAt`, composite `(category, city, status)`
 
 #### RequestOffer
-Предложение (оферта) компании на заявку клиента.
+A company's bid on a client request.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `requestId` | FK → Request | Заявка |
-| `companyId` | FK → User | Компания |
-| `price` | Int | Предложенная цена (тенге) |
-| `message` | String? | Сопроводительное сообщение |
+| Field | Type | Description |
+|-------|------|-------------|
+| `requestId` | FK → Request | The request |
+| `companyId` | FK → User | The company |
+| `price` | Int | Offered price (tenge) |
+| `message` | String? | Cover message |
 | `status` | OfferStatus | PENDING / ACCEPTED / REJECTED |
 
-**Ограничение:** `@@unique([requestId, companyId])` — одна компания может подать одну оферту на заявку.
+**Constraint:** `@@unique([requestId, companyId])` — one company can submit one offer per request.
 
 #### Message
-Сообщение в чате (привязано к заявке).
+A chat message (linked to a request).
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `requestId` | FK → Request? | Контекст разговора |
-| `senderId` | FK → User | Отправитель |
-| `receiverId` | FK → User | Получатель |
-| `content` | Text | Текст или описание |
+| Field | Type | Description |
+|-------|------|-------------|
+| `requestId` | FK → Request? | Conversation context |
+| `senderId` | FK → User | Sender |
+| `receiverId` | FK → User | Recipient |
+| `content` | Text | Text or description |
 | `type` | MessageType | TEXT / IMAGE / AUDIO |
-| `imageUrl` | String? | URL изображения |
-| `audioUrl` | String? | URL голосового сообщения |
-| `read` | Boolean | Прочитано ли |
+| `imageUrl` | String? | Image URL |
+| `audioUrl` | String? | Voice message URL |
+| `read` | Boolean | Whether it has been read |
 
 #### Favorite
-Избранные услуги клиента. `@@unique([userId, serviceId])` — без дублей.
+Client's saved services. `@@unique([userId, serviceId])` — no duplicates.
 
 #### Payment
-Платёж, привязанный к заявке. Поддерживает промокоды и Kaspi.
+Payment linked to a request. Supports promo codes and Kaspi.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `requestId` | FK → Request @unique | Одна оплата на заявку |
-| `clientId` | FK → User | Плательщик |
-| `amount` | Float | Сумма |
+| Field | Type | Description |
+|-------|------|-------------|
+| `requestId` | FK → Request @unique | One payment per request |
+| `clientId` | FK → User | Payer |
+| `amount` | Float | Amount |
 | `status` | PaymentStatus | PENDING / PAID / FAILED / REFUNDED |
 | `method` | String | card / kaspi |
-| `discountAmount` | Float | Скидка по промокоду |
-| `promoCodeId` | FK → PromoCode? | Применённый промокод |
-| `kaspiOrderId` | String? | ID заказа Kaspi Pay |
-| `paidAt` | DateTime? | Время оплаты |
+| `discountAmount` | Float | Promo code discount |
+| `promoCodeId` | FK → PromoCode? | Applied promo code |
+| `kaspiOrderId` | String? | Kaspi Pay order ID |
+| `paidAt` | DateTime? | Payment timestamp |
 
 #### AuditLog
-Журнал действий администратора.
+Administrator action journal.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `actorId` | FK → User | Кто совершил действие |
-| `action` | String | Код действия (USER_BLOCKED, SERVICE_DELETED…) |
-| `entity` | String | Тип сущности |
-| `entityId` | String | ID сущности |
-| `metadata` | Json? | Дополнительные данные |
+| Field | Type | Description |
+|-------|------|-------------|
+| `actorId` | FK → User | Who performed the action |
+| `action` | String | Action code (USER_BLOCKED, SERVICE_DELETED…) |
+| `entity` | String | Entity type |
+| `entityId` | String | Entity ID |
+| `metadata` | Json? | Additional data |
 
 #### PromoCode
-Промокоды со скидкой в процентах.
+Discount codes with percentage values.
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `code` | String @unique | Код |
-| `discount` | Float | Скидка 0–100% |
-| `maxUses` | Int? | Максимум использований (null = безлимит) |
-| `usedCount` | Int | Текущее количество использований |
-| `expiresAt` | DateTime? | Срок действия |
-| `isActive` | Boolean | Активен ли |
+| Field | Type | Description |
+|-------|------|-------------|
+| `code` | String @unique | The code |
+| `discount` | Float | Discount 0–100% |
+| `maxUses` | Int? | Maximum uses (null = unlimited) |
+| `usedCount` | Int | Current usage count |
+| `expiresAt` | DateTime? | Expiry date |
+| `isActive` | Boolean | Whether active |
 
-### 7.3 Перечисления (Enums)
+### 7.3 Enumerations
 
 ```
 UserRole:        CLIENT | COMPANY | ADMIN
@@ -397,393 +439,445 @@ PaymentStatus:   PENDING | PAID | FAILED | REFUNDED
 
 ---
 
-## 8. ЖИЗНЕННЫЙ ЦИКЛ ЗАЯВКИ
+## 8. REQUEST LIFECYCLE
 
 ```
-1. Клиент публикует заявку (статус: NEW)
-   → Заявка действует 14 дней (expiresAt = createdAt + 14 days)
-   → Cron-задача каждый час переводит истёкшие заявки в CANCELLED
+1. Client publishes a request (status: NEW)
+   → Request lives for 14 days (expiresAt = createdAt + 14 days)
+   → Cron job marks expired NEW requests as CANCELLED daily at midnight UTC
 
-2. Компании видят заявки, соответствующие их категории и городу
-   → Компания подаёт оферту (RequestOffer, статус: PENDING)
-   → Клиент получает email-уведомление о новой оферте
+2. Companies see requests matching their category and city
+   → Company submits an offer (RequestOffer, status: PENDING)
+   → Client receives email notification about the new offer
 
-3. Клиент выбирает лучшую оферту (статус заявки: ACCEPTED)
-   → Принятая оферта → ACCEPTED
-   → Все остальные оферты → REJECTED
-   → Компания получает email-уведомление о принятии
-   → Открывается чат между клиентом и компанией
+3. Client selects the best offer (request status: ACCEPTED)
+   → Accepted offer → ACCEPTED
+   → All other offers → REJECTED
+   → Company receives email notification
+   → Chat opens between client and company
 
-4. Компания ведёт работу:
+4. Company progresses through statuses:
    ACCEPTED → IN_PROGRESS → COMPLETED
 
-5. Клиент оставляет оценку (1–5 звёзд) + текст отзыва
-   → Средний рейтинг компании пересчитывается по всем её услугам
-   → Компания может ответить на отзыв (companyReply)
+5. Client leaves a rating (1–5 stars) + review text
+   → Company's average rating is recalculated across all its services
+   → Company can reply to the review (companyReply)
 ```
 
 ---
 
-## 9. API МАРШРУТЫ (полный список)
+## 9. ALL PAGES
 
-### Аутентификация
-| Маршрут | Метод | Доступ | Описание |
-|---------|-------|--------|----------|
-| `/api/auth/register` | POST | — | Регистрация (Zod, reCAPTCHA, rate-limit 5/час) |
-| `/api/auth/login` | POST | — | Вход (rate-limit 10/15мин), возвращает emailVerified |
-| `/api/auth/me` | GET / DELETE | Любой | Текущий пользователь / удаление аккаунта |
-| `/api/auth/profile` | GET / PUT | Любой | Просмотр/обновление профиля |
-| `/api/auth/password` | PUT | Любой | Смена пароля |
-| `/api/auth/verify-email` | GET | — | Верификация email по токену |
-| `/api/auth/forgot-password` | POST | — | Отправка письма сброса |
-| `/api/auth/reset-password` | POST | — | Установка нового пароля |
-| `/api/auth/2fa` | GET / POST / DELETE | Любой | Управление двухфакторной аутентификацией |
+| URL | File | Notes |
+|-----|------|-------|
+| `/` | `page.tsx` | Landing page with before/after slider, stats, categories, how-it-works, reviews |
+| `/repair` | `repair/page.tsx` | Service catalog with filters, search, grid/list/map view |
+| `/repair/[id]` | `repair/[id]/page.tsx` | Service detail, gallery, reviews, similar services |
+| `/companies` | `companies/page.tsx` | Company directory |
+| `/company/[id]` | `company/[id]/page.tsx` | Company public profile |
+| `/company/dashboard` | `company/dashboard/page.tsx` | Company dashboard (Kanban, stats, services) |
+| `/company/catalog` | `company/catalog/page.tsx` | Company service catalog view |
+| `/company/report` | `company/report/page.tsx` | Printable company performance report |
+| `/my-requests` | `my-requests/page.tsx` | Client personal cabinet (tab-based routing) |
+| `/my-payments` | `my-payments/page.tsx` | Client payment history |
+| `/chat` | `chat/page.tsx` | Chat inbox |
+| `/chat/[requestId]` | `chat/[requestId]/page.tsx` | Chat thread with SSE |
+| `/compare` | `compare/page.tsx` | Side-by-side service comparison (up to 3) |
+| `/order-summary/[id]` | `order-summary/[id]/page.tsx` | Completed order summary |
+| `/billing` | `billing/page.tsx` | Billing / plans (companies only) |
+| `/guide` | `guide/page.tsx` | FAQ / Help center |
+| `/about` | `about/page.tsx` | About page with architecture diagram |
+| `/verify-email` | `verify-email/page.tsx` | Email verification result |
+| `/forgot-password` | `forgot-password/page.tsx` | Password reset request |
+| `/reset-password` | `reset-password/page.tsx` | Set new password |
+| `/payment/[requestId]` | `payment/[requestId]/page.tsx` | Payment flow (companies only) |
+| `/admin` | `admin/page.tsx` | Admin panel overview |
+| `/admin/dashboard` | `admin/dashboard/page.tsx` | Admin statistics dashboard |
+| `/admin/users` | `admin/users/page.tsx` | User management |
+| `/admin/services` | `admin/services/page.tsx` | Service moderation |
+| `/admin/requests` | `admin/requests/page.tsx` | All platform requests |
+| `/admin/promo` | `admin/promo/page.tsx` | Promo code management |
+| `/admin/audit` | `admin/audit/page.tsx` | Audit log |
 
-### Услуги
-| Маршрут | Метод | Доступ | Описание |
-|---------|-------|--------|----------|
-| `/api/services` | GET / POST | POST=Компания | Список/создание услуг |
-| `/api/services/[id]` | GET / PUT / DELETE | PUT/DELETE=Компания | CRUD услуги |
-| `/api/services/[id]/reviews` | GET | — | Отзывы на услугу |
-| `/api/services/[id]/similar` | GET | — | Похожие услуги |
-| `/api/services/[id]/images` | GET / POST | POST=Компания | Изображения услуги |
-| `/api/services/[id]/images/[imageId]` | DELETE | Компания | Удаление изображения |
+### Client Personal Cabinet — Tab Structure (`/my-requests`)
 
-### Заявки
-| Маршрут | Метод | Доступ | Описание |
-|---------|-------|--------|----------|
-| `/api/requests` | GET / POST | POST=Клиент | Список/создание заявок |
-| `/api/requests/[id]` | GET / PUT / DELETE | — | Детали/обновление/отмена |
-| `/api/requests/[id]/offer` | POST / DELETE | Компания | Подать/отозвать оферту |
-| `/api/requests/[id]/accept-offer` | POST | Клиент | Принять оферту |
-| `/api/requests/[id]/rate` | POST | Клиент | Оценить выполненную заявку |
-| `/api/requests/[id]/reply` | PUT | Компания | Ответить на отзыв |
-| `/api/requests/expire` | GET | — | Пометить истёкшие (Vercel cron) |
+The client cabinet uses a single-page tab-based layout via `ClientSidebar`:
 
-### Чат и сообщения
-| Маршрут | Метод | Доступ | Описание |
-|---------|-------|--------|----------|
-| `/api/messages` | GET / POST | Любой | Сообщения чата |
-| `/api/messages/upload` | POST | Любой | Загрузка изображения/аудио |
-| `/api/messages/mark-read` | POST | Любой | Пометить прочитанными |
-| `/api/chat` | GET | Любой | Список чатов (inbox) |
-| `/api/chat/[requestId]/stream` | GET | Любой | SSE — real-time чат |
-| `/api/chat/[requestId]/typing` | POST | Любой | Индикатор печати |
-
-### Компании и статистика
-| Маршрут | Метод | Доступ | Описание |
-|---------|-------|--------|----------|
-| `/api/companies` | GET | — | Список компаний |
-| `/api/company/[id]` | GET | — | Публичный профиль компании |
-| `/api/company/stats` | GET | Компания | Статистика дашборда |
-| `/api/company/export` | GET | Компания | Экспорт CSV |
-| `/api/stats` | GET | — | Общая статистика платформы |
-
-### Прочее
-| Маршрут | Метод | Доступ | Описание |
-|---------|-------|--------|----------|
-| `/api/favorites` | GET / POST | Клиент | Список/добавление в избранное |
-| `/api/favorites/[serviceId]` | DELETE | Клиент | Удаление из избранного |
-| `/api/notifications/count` | GET | Любой | Количество непрочитанных |
-| `/api/payments/[requestId]` | GET / POST | Любой | Платёж |
-| `/api/payments/[requestId]/confirm` | POST | Любой | Подтверждение платежа |
-| `/api/promo/validate` | POST | Клиент | Валидация промокода |
-| `/api/health` | GET | — | Проверка состояния БД |
-| `/api/files/[...path]` | GET | — | Отдача загруженных файлов |
-
-### Администрирование (`/api/admin/*`)
-| Маршрут | Метод | Описание |
-|---------|-------|----------|
-| `/api/admin/users` | GET | Список пользователей |
-| `/api/admin/users/[id]` | GET / PUT / DELETE | Управление пользователем (блокировка, верификация) |
-| `/api/admin/services` | GET | Все услуги |
-| `/api/admin/services/[id]` | DELETE | Удаление услуги |
-| `/api/admin/requests` | GET | Все заявки |
-| `/api/admin/audit` | GET | Журнал действий |
-| `/api/admin/stats` | GET | Сводная статистика |
-| `/api/admin/promo` | GET / POST | Управление промокодами |
-| `/api/admin/promo/[id]` | PUT / DELETE | Редактирование промокода |
+| Tab | Description |
+|-----|-------------|
+| `requests` | My Requests — list with offers, timeline, acceptance |
+| `messages` | Chat inbox |
+| `favorites` | Saved services |
+| `notifications` | Activity notifications |
+| `history` | Order history |
+| `profile` | Edit profile (name, phone, address, avatar) |
+| `settings` | Security settings (password, 2FA) |
 
 ---
 
-## 10. АУТЕНТИФИКАЦИЯ И БЕЗОПАСНОСТЬ
+## 10. API ROUTES (complete list)
 
-### 10.1 JWT (JSON Web Token)
+### Authentication
+| Route | Method | Auth | Description |
+|-------|--------|------|-------------|
+| `/api/auth/register` | POST | — | Register (Zod, reCAPTCHA, rate-limit 5/hr) |
+| `/api/auth/login` | POST | — | Login (rate-limit 10/15min), returns emailVerified |
+| `/api/auth/me` | GET / DELETE | Any | Current user / delete account (password confirm) |
+| `/api/auth/profile` | GET / PUT | Any | View/update profile |
+| `/api/auth/password` | PUT | Any | Change password |
+| `/api/auth/verify-email` | GET | — | Email verification via token |
+| `/api/auth/forgot-password` | POST | — | Send reset email |
+| `/api/auth/reset-password` | POST | — | Set new password (token required) |
+| `/api/auth/2fa` | GET / POST / DELETE | Any | Manage two-factor authentication |
 
-- Алгоритм подписи: HS256
-- Срок действия токена: 7 дней
-- Токен хранится в `localStorage` под ключом `session:user` в формате `{ token, id, email, role, name, phone }`
-- Передаётся через заголовок `Authorization: Bearer <token>`
-- `lib/auth.ts`: функции `signToken()`, `verifyToken()`, `hashPassword()`, `verifyPassword()`
+### Services
+| Route | Method | Auth | Description |
+|-------|--------|------|-------------|
+| `/api/services` | GET / POST | POST=Company | List/create services |
+| `/api/services/[id]` | GET / PUT / DELETE | PUT/DELETE=Company | Service CRUD |
+| `/api/services/[id]/reviews` | GET | — | Service reviews |
+| `/api/services/[id]/similar` | GET | — | Similar services |
+| `/api/services/[id]/images` | GET / POST | POST=Company | Manage service images |
+| `/api/services/[id]/images/[imageId]` | DELETE | Company | Delete service image |
 
-### 10.2 Охранники маршрутов (`lib/middleware.ts`)
+### Requests
+| Route | Method | Auth | Description |
+|-------|--------|------|-------------|
+| `/api/requests` | GET / POST | POST=Client | List/create requests |
+| `/api/requests/[id]` | GET / PUT / DELETE | — | Request detail/update/cancel |
+| `/api/requests/[id]/offer` | POST / DELETE | Company | Submit/withdraw offer |
+| `/api/requests/[id]/accept-offer` | POST | Client | Accept company offer |
+| `/api/requests/[id]/rate` | POST | Client | Rate completed request (1–5 stars) |
+| `/api/requests/[id]/reply` | PUT | Company | Reply to review |
+| `/api/requests/expire` | GET | — | Mark expired requests (Vercel cron) |
+
+### Chat & Messages
+| Route | Method | Auth | Description |
+|-------|--------|------|-------------|
+| `/api/messages` | GET / POST | Any | Chat messages |
+| `/api/messages/upload` | POST | Any | Upload image/audio for chat |
+| `/api/messages/mark-read` | POST | Any | Mark messages as read |
+| `/api/chat` | GET | Any | Chat inbox list |
+| `/api/chat/[requestId]/stream` | GET | Any | SSE real-time chat (3s polling) |
+| `/api/chat/[requestId]/typing` | POST | Any | Typing indicator |
+
+### Companies & Statistics
+| Route | Method | Auth | Description |
+|-------|--------|------|-------------|
+| `/api/companies` | GET | — | List all companies |
+| `/api/company/[id]` | GET | — | Company public profile |
+| `/api/company/stats` | GET | Company | Dashboard statistics |
+| `/api/company/export` | GET | Company | CSV export |
+| `/api/stats` | GET | — | Platform-wide statistics |
+
+### Misc
+| Route | Method | Auth | Description |
+|-------|--------|------|-------------|
+| `/api/favorites` | GET / POST | Client | List/add favorites |
+| `/api/favorites/[serviceId]` | DELETE | Client | Remove favorite |
+| `/api/notifications/count` | GET | Any | Unread notification count |
+| `/api/payments/[requestId]` | GET / POST | Any | Get/create payment |
+| `/api/payments/[requestId]/confirm` | POST | Any | Confirm payment |
+| `/api/promo/validate` | POST | Client | Validate promo code |
+| `/api/health` | GET | — | DB health check |
+| `/api/files/[...path]` | GET | — | Serve uploaded files |
+
+### Admin (`/api/admin/*`)
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/admin/users` | GET | List all users |
+| `/api/admin/users/[id]` | GET / PUT / DELETE | User management (block, verify) |
+| `/api/admin/services` | GET | All services |
+| `/api/admin/services/[id]` | DELETE | Delete service |
+| `/api/admin/requests` | GET | All requests |
+| `/api/admin/audit` | GET | Audit log |
+| `/api/admin/stats` | GET | Summary statistics |
+| `/api/admin/promo` | GET / POST | Promo code management |
+| `/api/admin/promo/[id]` | PUT / DELETE | Edit promo code |
+
+---
+
+## 11. AUTHENTICATION AND SECURITY
+
+### 11.1 JWT (JSON Web Token)
+
+- Signing algorithm: HS256
+- Token expiry: 7 days
+- Stored in `localStorage` under the key `session:user` as `{ token, id, email, role, name, phone }`
+- Sent via `Authorization: Bearer <token>` header
+- `lib/auth.ts`: functions `signToken()`, `verifyToken()`, `hashPassword()`, `verifyPassword()`
+
+### 11.2 Route Guards (`lib/middleware.ts`)
 
 ```typescript
-requireAuth()        // любой авторизованный пользователь
-requireClient()      // только роль CLIENT
-requireCompany()     // только роль COMPANY
-requireAdmin()       // только роль ADMIN
-assertEmailVerified()// email должен быть подтверждён
+requireAuth()          // any authenticated user
+requireClient()        // CLIENT role only
+requireCompany()       // COMPANY role only
+requireAdmin()         // ADMIN role only
+assertEmailVerified()  // email must be verified
 ```
 
-### 10.3 Верификация email
+### 11.3 Email Verification
 
-1. При регистрации генерируется уникальный `emailVerifyToken` (UUID)
-2. Ссылка `{BASE_URL}/verify-email?token=...` отправляется через Resend
-3. При переходе по ссылке: токен ищется в БД, поле `emailVerified` устанавливается в `true`, токен обнуляется
-4. Создание услуги и подача оферты требуют `emailVerified = true`
+1. On registration a unique `emailVerifyToken` (UUID) is generated
+2. Link `{BASE_URL}/verify-email?token=...` is sent via Resend
+3. On link click: token is looked up in DB, `emailVerified` is set to `true`, token is cleared
+4. Service creation and offer submission require `emailVerified = true`
 
-### 10.4 Двухфакторная аутентификация (2FA)
+### 11.4 Two-Factor Authentication (2FA)
 
-- TOTP (Time-based One-Time Password) по стандарту RFC 6238
-- Библиотека: `speakeasy`
-- Секрет генерируется на сервере, QR-код возвращается в base64 для сканирования приложением (Google Authenticator, Authy)
-- После включения 2FA: при логине требуется 6-значный код вместе с паролем
-- Секрет хранится в поле `twoFactorSecret` в БД
+- TOTP (Time-based One-Time Password) per RFC 6238
+- Library: `speakeasy`
+- Secret generated server-side; QR code returned as base64 for scanning (Google Authenticator, Authy)
+- Once 2FA is enabled: login requires a 6-digit code alongside the password
+- Secret stored in `twoFactorSecret` field in DB
 
-### 10.5 Сброс пароля
+### 11.5 Password Reset
 
-1. Клиент запрашивает сброс → генерируется `resetToken` (UUID) со сроком 1 час
-2. Ссылка отправляется на email
-3. Клиент переходит по ссылке, вводит новый пароль
-4. Сервер проверяет токен и срок → обновляет хэш пароля, обнуляет токен
+1. Client requests reset → `resetToken` (UUID) is generated with 1-hour expiry
+2. Link is sent to email
+3. Client opens link, enters new password
+4. Server checks token and expiry → updates password hash, clears token
 
-### 10.6 Rate Limiting
+### 11.6 Rate Limiting
 
-- Реализован в памяти (`Map`) в `lib/rate-limit.ts`
-- Регистрация: 5 запросов/час с одного IP
-- Логин: 10 запросов/15 минут с одного IP
-- Очистка: автоматически каждые 5 минут
+- In-memory (`Map`) in `lib/rate-limit.ts`
+- Registration: 5 requests/hour per IP
+- Login: 10 requests/15 minutes per IP
+- Cleanup: automatically every 5 minutes
 
-### 10.7 Валидация данных (Zod)
+### 11.7 Input Validation (Zod)
 
-- Все входящие данные API-маршрутов валидируются через Zod-схемы
-- Пример: схема регистрации проверяет email, пароль (мин. 8 символов + 1 цифра), имя
+- All incoming API route data is validated with Zod schemas
+- Example: registration schema checks email, password (min 8 chars + 1 digit), name
 
-### 10.8 Защита от XSS
+### 11.8 XSS Protection
 
-- `sanitizeText()` в `lib/utils.ts` удаляет HTML-теги из всего пользовательского ввода
-- Вызывается перед сохранением описаний, отзывов и сообщений в БД
+- `sanitizeText()` in `lib/utils.ts` strips HTML tags from all user input
+- Called before saving descriptions, reviews, and messages to DB
 
-### 10.9 reCAPTCHA v3 (инфраструктура готова, не подключена)
+### 11.9 reCAPTCHA v3 (infrastructure ready, not wired)
 
-- Серверный верификатор реализован в `lib/recaptcha.ts`
-- Библиотека `react-google-recaptcha-v3` присутствует в `package.json`
-- **Фактически не интегрирована:** ни `AuthModal`, ни API-маршруты `/auth/register` и `/auth/login` не вызывают reCAPTCHA
-- Защиту от ботов обеспечивает rate limiting (`lib/rate-limit.ts`)
-
----
-
-## 11. ФУНКЦИОНАЛЬНОСТЬ ПО РОЛЯМ
-
-### 11.1 Клиент (CLIENT)
-
-**Каталог услуг (`/repair`)**
-- Фильтрация по категории (10), городу, цене (range slider), рейтингу, тегам
-- Переключение вид: сетка / список / карта (Leaflet)
-- Поиск по названию и описанию (debounce 300мс)
-- Сортировка: по рейтингу, цене, дате
-
-**Детальная страница услуги (`/repair/[id]`)**
-- Галерея изображений
-- Рейтинг и отзывы с пагинацией
-- Похожие услуги
-- Кнопка «Оставить заявку» → диалог создания заявки
-- Добавить в избранное / сравнение
-
-**Мои заявки (`/my-requests`)**
-- Список всех заявок с фильтрацией по статусу
-- Таймлайн статусов для каждой заявки
-- Список полученных оферт с ценами
-- Кнопка принятия оферты
-- Просмотр чата для принятой заявки
-
-**Чат (`/chat`, `/chat/[requestId]`)**
-- Список активных диалогов с последним сообщением и счётчиком непрочитанных
-- Real-time обновление через SSE (Server-Sent Events)
-- Отправка текста, изображений, голосовых сообщений
-- Индикатор прочтения
-
-**Избранное (`/favorites`)**
-- Сохранённые услуги
-- Быстрый переход к услуге или созданию заявки
-
-**Сравнение (`/compare`)**
-- До 3 услуг одновременно
-- Сравнение характеристик: цена, рейтинг, категория, город, описание
-
-**Профиль и настройки**
-- Редактирование имени, телефона, адреса, аватара
-- Смена пароля (требует ввода текущего)
-- Управление 2FA (QR-код + верификация)
-
-### 11.2 Компания (COMPANY)
-
-**Дашборд (`/company/dashboard`)**
-- Kanban-доска заявок: NEW / ACCEPTED / IN_PROGRESS / COMPLETED
-- Перетаскивание карточек (drag-and-drop) для смены статуса
-- Статистика: доход, количество заявок по статусам, рейтинг, новые клиенты
-- Графики (Recharts): бар-чарт дохода, pie-чарт по категориям
-
-**Управление услугами**
-- CRUD: создание, редактирование, удаление услуг
-- Загрузка до 10 изображений
-- Активация/деактивация услуги
-
-**Оферты**
-- Просмотр заявок подходящих по категории и городу
-- Подача оферты с ценой и сопроводительным сообщением
-- Отзыв оферты до принятия
-
-**Экспорт**
-- Экспорт данных по заявкам в CSV (`/api/company/export`)
-
-**Биллинг (`/billing`)**
-- Просмотр тарифных планов (страница только для компаний)
-
-### 11.3 Администратор (ADMIN)
-
-**Панель администратора (`/admin/*`)**
-- Управление пользователями: блокировка, верификация, просмотр профиля
-- Модерация услуг: просмотр, удаление нарушающих правила
-- Просмотр всех заявок
-- Журнал аудита: все административные действия с метаданными
-- Управление промокодами: создание, редактирование, деактивация
+- Server-side verifier implemented in `lib/recaptcha.ts`
+- Library `react-google-recaptcha-v3` present in `package.json`
+- **Not integrated:** neither `AuthModal` nor `/auth/register` and `/auth/login` API routes call reCAPTCHA
+- Bot protection is provided by rate limiting (`lib/rate-limit.ts`)
 
 ---
 
-## 12. ИНТЕРНАЦИОНАЛИЗАЦИЯ (i18n)
+## 12. FEATURES BY ROLE
 
-### Реализация
-- Библиотека: `next-intl` v4
-- Маршрутизация: `app/[locale]/` — каждая страница доступна по `/ru/...`, `/en/...`, `/kk/...`
-- Локали: **ru** (русский, по умолчанию), **en** (английский), **kk** (казахский)
+### 12.1 Client (CLIENT)
 
-### Файлы переводов
+**Personal Cabinet (`/my-requests`) — tab-based layout**
+
+The client accesses all account features through a single page with a sidebar (desktop) or tab navigation (mobile). Tabs:
+
+- **My Requests** — list of all requests with status filter, status timeline for each request, list of received offers with prices, offer acceptance button, link to chat
+- **Chat** — active conversations with last message and unread count, real-time updates via SSE
+- **Favorites** — saved services with quick access to detail or request creation
+- **Notifications** — new offers, status changes, new messages
+- **Order History** — completed and cancelled requests with reviews
+- **Profile** — edit name, phone, address, avatar
+- **Settings** — change password (requires current), manage 2FA (QR code + verification)
+
+**Service Catalog (`/repair`)**
+- Filter by category (10), city, price range (range slider), rating, tags
+- View modes: grid / list / map (Leaflet)
+- Search by name and description (300ms debounce)
+- Sort by rating, price, date
+
+**Service Detail (`/repair/[id]`)**
+- Image gallery
+- Ratings and reviews with pagination
+- Similar services
+- "Submit Request" button → request creation dialog
+- Add to favorites / comparison
+
+**Service Comparison (`/compare`)**
+- Up to 3 services simultaneously
+- Compare: price, rating, category, city, description
+- Radar chart comparison (`CompareRadar`)
+
+### 12.2 Company (COMPANY)
+
+**Dashboard (`/company/dashboard`)**
+- Kanban board: NEW / ACCEPTED / IN_PROGRESS / COMPLETED
+- Drag-and-drop cards to change status
+- Statistics: revenue, request counts by status, rating, new clients
+- Charts (Recharts): revenue bar chart, category pie chart, trend line
+- Calendar view (`CompanyCalendar`) showing scheduled work
+- Onboarding checklist for new companies (`OnboardingChecklist`)
+
+**Service Management**
+- CRUD: create, edit, delete services
+- Upload up to 10 images per service
+- Activate / deactivate services
+- Map location (`lat`/`lng`) for catalog map view
+
+**Offers**
+- View requests matching category and city
+- Submit an offer with price and cover message
+- Withdraw offer before acceptance
+
+**Export**
+- Export request data as CSV (`/api/company/export`)
+- Printable report at `/company/report`
+
+**Billing (`/billing`)**
+- View subscription plans (page for companies only)
+
+### 12.3 Administrator (ADMIN)
+
+**Admin Panel (`/admin/*`)**
+- **Dashboard** — platform-wide statistics
+- **Users** — search, filter by role, block with reason, verify company
+- **Services** — view all services, delete violating ones
+- **Requests** — monitor all platform requests
+- **Audit** — log of all admin actions (actor, action, entity, timestamp, metadata)
+- **Promo Codes** — CRUD: code, discount %, usage limit, expiry date
+
+---
+
+## 13. INTERNATIONALIZATION (i18n)
+
+### Implementation
+- Library: `next-intl` v4
+- Routing: `app/[locale]/` — each page available at `/ru/...`, `/en/...`, `/kk/...`
+- Locales: **ru** (Russian, default), **en** (English), **kk** (Kazakh)
+
+### Translation Files
 ```
 messages/
-├── ru.json  ~650 ключей
-├── en.json  ~650 ключей
-└── kk.json  ~650 ключей
+├── ru.json  ~650 keys
+├── en.json  ~650 keys
+└── kk.json  ~650 keys
 ```
 
-### Конфигурация
+### Configuration
 ```
-i18n/routing.ts    # Определение локалей и defaultLocale
-i18n/request.ts    # Загрузка сообщений per-request
-i18n/config.ts     # Экспорт констант
+i18n/routing.ts    # Locale definitions and defaultLocale
+i18n/request.ts    # Per-request message loading
+i18n/config.ts     # Exported constants
 ```
 
-### Переключатель языков
-- В Navbar: кликабельные флаги/коды языков
-- Сохраняется в URL — поисковики индексируют отдельные версии
+### Language Switcher
+- In Navbar: clickable language codes
+- Persisted in URL — search engines index separate versions
 
 ---
 
-## 13. REAL-TIME ЧАТ
+## 14. REAL-TIME CHAT
 
-### Архитектура (Server-Sent Events)
+### Architecture (Server-Sent Events)
 
 ```
-Клиент                            Сервер
-  │                                   │
-  ├── GET /api/chat/[id]/stream ─────►│
-  │   (открывает SSE-соединение)      │
-  │                                   │
-  │◄──── data: {...messages} ─────────│ (каждые 3 сек)
-  │◄──── data: {...messages} ─────────│
-  │                                   │
-  ├── POST /api/messages ────────────►│ (отправить сообщение)
-  │                                   │
-  │◄──── data: {newMessage} ──────────│ (следующий poll)
+Client                             Server
+  │                                    │
+  ├── GET /api/chat/[id]/stream ──────►│
+  │   (opens SSE connection)           │
+  │                                    │
+  │◄──── data: {...messages} ──────────│ (every 3 sec)
+  │◄──── data: {...messages} ──────────│
+  │                                    │
+  ├── POST /api/messages ─────────────►│ (send message)
+  │                                    │
+  │◄──── data: {newMessage} ───────────│ (next poll)
 ```
 
-### Детали реализации
-- Сервер опрашивает БД каждые 3 секунды для новых сообщений с `createdAt > lastTimestamp`
-- Соединение автоматически закрывается по `request.signal` (пользователь покинул страницу)
-- Новые полученные сообщения автоматически помечаются как прочитанные
+### Implementation Details
+- Server polls DB every 3 seconds for messages with `createdAt > lastTimestamp`
+- Connection closes automatically on `request.signal` (user leaves the page)
+- Received messages are auto-marked as read
 - `Content-Type: text/event-stream`, `Cache-Control: no-cache`
+- Typing indicator supported via `POST /api/chat/[requestId]/typing` and `lib/typing-store.ts`
 
-### Типы сообщений
-- **TEXT** — текст
-- **IMAGE** — изображение (загружается через `/api/messages/upload`)
-- **AUDIO** — голосовое сообщение (Web Audio API на клиенте)
+### Message Types
+- **TEXT** — plain text
+- **IMAGE** — image (uploaded via `/api/messages/upload`)
+- **AUDIO** — voice message (recorded via Web Audio API on the client)
 
 ---
 
-## 14. EMAIL УВЕДОМЛЕНИЯ
+## 15. EMAIL NOTIFICATIONS
 
-### Провайдер
-**Resend** (HTTP SDK) — выбран вместо Nodemailer SMTP, так как Vercel Serverless Functions блокируют TCP-соединения, а Resend работает через HTTPS.
+### Provider
+**Resend** (HTTP SDK) — chosen over Nodemailer SMTP because Vercel Serverless Functions block TCP connections; Resend works over HTTPS.
 
-### 6 шаблонов
-| Функция | Триггер |
-|---------|---------|
-| `sendVerificationEmail` | Регистрация нового пользователя |
-| `sendPasswordResetEmail` | Запрос сброса пароля |
-| `sendWelcomeEmail` | Успешная верификация email |
-| `sendNewOfferEmail` | Компания подала оферту → клиент |
-| `sendRequestAcceptedEmail` | Клиент принял оферту → компания |
-| `sendJobCompletedEmail` | Работа завершена → клиент (с просьбой оставить отзыв) |
+### 6 Templates
+| Function | Trigger |
+|----------|---------|
+| `sendVerificationEmail` | New user registration |
+| `sendPasswordResetEmail` | Password reset request |
+| `sendWelcomeEmail` | Successful email verification |
+| `sendNewOfferEmail` | Company submits offer → client |
+| `sendRequestAcceptedEmail` | Client accepts offer → company |
+| `sendJobCompletedEmail` | Job completed → client (prompt to leave review) |
 
-### Конфигурация
+### Configuration
 ```env
-SMTP_PASS=re_xxxxxxxx       # Resend API ключ (название переменной устарело)
+SMTP_PASS=re_xxxxxxxx        # Resend API key (legacy env var name kept)
 SMTP_FROM="Remont.kz <onboarding@resend.dev>"
 ```
-Если `SMTP_PASS` не задан — письма выводятся в `console.log` (удобно в dev-среде).
+If `SMTP_PASS` is unset, emails are printed to `console.log` (dev convenience).
 
 ---
 
-## 15. ЗАГРУЗКА ФАЙЛОВ
+## 16. FILE UPLOADS
 
-### Поддерживаемые типы
-- **Изображения**: JPEG, PNG, WebP, GIF (magic-byte валидация — не только расширение)
-- **Аудио**: MP3, WAV, OGG, WebM
+### Supported Types
+- **Images**: JPEG, PNG, WebP, GIF (magic-byte validation — not just extension)
+- **Audio**: MP3, WAV, OGG, WebM
 
-### Хранилище
-- **Локальная разработка**: `public/uploads/images/` и `public/uploads/audio/`
-  - Файлы отдаются через `/api/files/[...path]`
-- **Production (Vercel)**: Cloudinary или S3-совместимое хранилище (переменные `S3_*`)
-  - Vercel Serverless имеет эфемерную файловую систему — локальные файлы теряются при перезапуске
+### Storage
+- **Local development**: `public/uploads/images/` and `public/uploads/audio/`
+  - Files served via `/api/files/[...path]`
+- **Production (Vercel)**: Cloudinary or S3-compatible storage (via `S3_*` env vars)
+  - Vercel Serverless has an ephemeral filesystem — local files are lost on restart
 
-### Безопасность
-- Magic-byte проверка: первые байты файла проверяются по сигнатуре типа
-- Ограничение размера: изображения до 10 МБ, аудио до 25 МБ
-- Уникальные имена файлов: UUID + оригинальное расширение
-
----
-
-## 16. УВЕДОМЛЕНИЯ В ИНТЕРФЕЙСЕ
-
-### Механизм
-- Хук `lib/use-notifications.ts` опрашивает `/api/requests` каждые 30 секунд
-- Строит список уведомлений: новые оферты, изменения статусов, новые сообщения
-- `/api/notifications/count` — быстрый endpoint только для счётчика (бейдж на иконке)
-
-### Защита от 401-петли
-- Хук проверяет `localStorage.getItem("session:user")` перед запросом
-- 300 мс задержка на первой загрузке (даёт AuthProvider время записать токен)
+### Security
+- Magic-byte check: first bytes of the file are verified against type signature
+- Size limits: images up to 10 MB, audio up to 25 MB
+- Unique filenames: UUID + original extension
 
 ---
 
-## 17. АДМИНИСТРАТИВНАЯ ПАНЕЛЬ
+## 17. IN-APP NOTIFICATIONS
 
-### Доступ
-- Маршруты: `/admin/*`
-- Авторизация: только роль `ADMIN`, нет ссылки в UI для обычных пользователей
-- Все действия логируются в `AuditLog`
+### Mechanism
+- Hook `lib/use-notifications.ts` polls `/api/requests` every 30 seconds
+- Builds a notification list: new offers, status changes, new messages
+- `/api/notifications/count` — fast endpoint for badge count (navbar)
 
-### Функции
-1. **Пользователи** — поиск, фильтр по роли, блокировка с указанием причины, верификация компании
-2. **Услуги** — просмотр всех услуг, удаление нарушающих правила
-3. **Заявки** — мониторинг всех заявок на платформе
-4. **Аудит** — лог всех административных действий (актор, действие, сущность, время)
-5. **Промокоды** — CRUD промокодов: код, скидка %, лимит использований, срок действия
+### 401 Loop Protection
+- Hook checks `localStorage.getItem("session:user")` before firing
+- 300ms delay on first load (allows AuthProvider time to write the token)
+
+### Push Notifications (PWA)
+- `web-push` package enables browser push notifications when the app is in the background
+- `PWAInstallPrompt.tsx` invites users to install the PWA to their home screen
+- `app/manifest.ts` provides the PWA manifest (icon, name, theme color)
 
 ---
 
-## 18. CRON-ЗАДАЧА: ЭКСПИРАЦИЯ ЗАЯВОК
+## 18. ADMIN PANEL
+
+### Access
+- Routes: `/admin/*`
+- Auth: `ADMIN` role only; no UI link for regular users
+- All actions logged in `AuditLog` via `lib/audit.ts`
+
+### Features
+1. **Dashboard** — platform stats: total users, services, requests, revenue
+2. **Users** — search, filter by role, block with reason, company verification
+3. **Services** — view all services, delete violating ones
+4. **Requests** — monitor all platform requests with status filters
+5. **Audit Log** — all admin actions (actor, action, entity, timestamp, metadata)
+6. **Promo Codes** — CRUD: code, discount %, usage limit, expiry date
+
+---
+
+## 19. CRON JOB: REQUEST EXPIRATION
 
 ```json
 // vercel.json
@@ -794,28 +888,28 @@ SMTP_FROM="Remont.kz <onboarding@resend.dev>"
 }
 ```
 
-- Запускается **раз в сутки** (полночь по UTC) — ограничение Vercel Hobby плана
-- Находит все заявки со статусом `NEW` и `expiresAt < now()`
-- Переводит их в статус `CANCELLED`
-- Заявки создаются с `expiresAt = createdAt + 14 дней`
+- Runs **once daily** at midnight UTC — Vercel Hobby plan limitation
+- Finds all `NEW` requests with `expiresAt < now()`
+- Sets their status to `CANCELLED`
+- Requests are created with `expiresAt = createdAt + 14 days`
 
 ---
 
-## 19. ДЕПЛОЙ И ИНФРАСТРУКТУРА
+## 20. DEPLOYMENT AND INFRASTRUCTURE
 
-### 19.1 Контейнеризация
+### 20.1 Containerization
 
 **Dockerfile** (multi-stage build):
-1. `deps` — установка только production-зависимостей
-2. `builder` — сборка Next.js (`output: "standalone"`)
-3. `runner` — минимальный образ с standalone-сборкой
+1. `deps` — install production dependencies only
+2. `builder` — build Next.js (`output: "standalone"`)
+3. `runner` — minimal image with standalone build
 
 **docker-compose.yml**:
-- Сервис `app` (Next.js)
-- Сервис `db` (PostgreSQL 15)
-- Сеть между сервисами
+- `app` service (Next.js)
+- `db` service (PostgreSQL 15)
+- Network between services
 
-### 19.2 CI/CD (GitHub Actions)
+### 20.2 CI/CD (GitHub Actions)
 
 ```yaml
 # .github/workflows/ci.yml
@@ -824,7 +918,6 @@ jobs:
     services:
       postgres:
         image: postgres:15
-        # ...
     steps:
       - npm ci
       - npm run lint
@@ -834,102 +927,106 @@ jobs:
       - npm run build
 ```
 
-Пайплайн на каждый push и pull request:
-1. Установка зависимостей
-2. Линтинг (ESLint)
-3. Проверка типов (TypeScript)
-4. Синхронизация схемы БД
-5. Unit-тесты (Vitest)
-6. Сборка production
+Pipeline runs on every push and pull request:
+1. Install dependencies
+2. Linting (ESLint)
+3. Type checking (TypeScript)
+4. Sync DB schema
+5. Unit tests (Vitest)
+6. Production build
 
-### 19.3 Vercel (production)
+### 20.3 Vercel (production)
 
-- Автодеплой при push в `main`
-- Serverless Functions для API-маршрутов
-- Edge Network для статики
-- Встроенные cron-задачи через `vercel.json`
+- Auto-deploy on push to `main`
+- Serverless Functions for API routes
+- Edge Network for static assets
+- Built-in cron jobs via `vercel.json`
 
-### 19.4 Переменные окружения (production)
+### 20.4 Environment Variables (production)
 
 ```env
-DATABASE_URL             # PostgreSQL connection string
-JWT_SECRET               # Секрет для подписи JWT
-NEXT_PUBLIC_APP_URL      # Публичный URL приложения
-SMTP_PASS                # Resend API ключ
-SMTP_FROM                # From-адрес писем
+DATABASE_URL                    # PostgreSQL connection string
+JWT_SECRET                      # JWT signing secret
+NEXT_PUBLIC_APP_URL             # Public app URL
+SMTP_PASS                       # Resend API key
+SMTP_FROM                       # Email from address
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 RECAPTCHA_SECRET_KEY
-# Cloudinary / S3 для файлов (если не локально):
+# Cloudinary / S3 for production file uploads:
 CLOUDINARY_CLOUD_NAME
 CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
+# Web Push (PWA):
+NEXT_PUBLIC_VAPID_PUBLIC_KEY
+VAPID_PRIVATE_KEY
 ```
 
 ---
 
-## 20. ТЕСТИРОВАНИЕ
+## 21. TESTING
 
-### Unit-тесты (Vitest)
-- Фреймворк: Vitest (совместим с Jest API, быстрее за счёт Vite)
-- Запуск: `npm run test`
+### Unit Tests (Vitest)
+- Framework: Vitest (Jest-compatible API, faster via Vite)
+- Run: `npm run test`
 
-### Ручное тестирование
-- 16 демо-аккаунтов (10 компаний, 6 клиентов) с seed-данными
-- 20 услуг во всех категориях
-- 30 заявок в разных статусах
-- 11 оферт на открытые заявки
+### Manual Testing
+- 16 demo accounts (10 companies, 6 clients) with seed data
+- 20 services across all categories
+- 30 requests in various statuses
+- 11 offers on open requests
 
-### Проверка типов
-- `npm run type-check` — полная проверка TypeScript без сборки
-- Обязательна перед коммитом (прописана в CI)
+### Type Checking
+- `npm run type-check` — full TypeScript check without building
+- Required before commits (enforced in CI)
 
 ---
 
-## 21. UX И ИНТЕРФЕЙС
+## 22. UX AND INTERFACE
 
-### Дизайн-система
-- **Тема**: светлая/тёмная (next-themes, системные предпочтения)
-- **Цветовая схема**: синий (#3b82f6) основной, нейтральные серые
-- **Типография**: системный шрифт, чёткая иерархия размеров
-- **Анимации**: Framer Motion — FadeUp, FadeLeft, FadeRight, ScaleIn на всех ключевых блоках
+### Design System
+- **Theme**: light/dark (next-themes, follows system preference)
+- **Color scheme**: blue (#3b82f6) primary, neutral grays
+- **Typography**: system font, clear size hierarchy
+- **Animations**: Framer Motion — FadeUp, FadeLeft, FadeRight, ScaleIn on all key blocks
 
-### Адаптивность
-- Mobile-first подход
+### Responsiveness
+- Mobile-first approach
 - Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
-- Мобильная навигация: нижний фиксированный navbar (`MobileNav.tsx`)
-- Боковое меню на десктопе для клиента и настроек
+- Mobile navigation: fixed bottom navbar (`MobileNav.tsx`)
+- Sidebar navigation on desktop for client cabinet and settings
 
-### Ключевые UX-решения
-- **Before/After слайдер** на главной: 5 пар «до/после» с автопрокруткой каждые 5 сек
-- **Сравнение услуг**: плавающая CompareBar при выборе ≥2 услуг
-- **Kanban для компаний**: визуальное управление статусами перетаскиванием
-- **Cmd+K поиск**: глобальный поиск из любой точки приложения
-- **Оффлайн-тост**: OfflineToast уведомляет о потере соединения
-- **Skeleton loading**: заглушки вместо пустых экранов при загрузке
+### Key UX Decisions
+- **Before/After slider** on the landing page: 5 "before/after" pairs with 5s auto-cycle
+- **Service comparison**: floating `CompareBar` when ≥2 services are selected; `CompareRadar` for visual comparison
+- **Kanban for companies**: visual status management via drag-and-drop
+- **Cmd+K search**: global search from anywhere in the app
+- **Offline toast**: `OfflineToast` notifies about connection loss
+- **Skeleton loading**: placeholder skeletons instead of empty screens during load
+- **PWA install prompt**: `PWAInstallPrompt` invites mobile users to add to home screen
 
-### Доступность
-- Radix UI компоненты — полная поддержка ARIA
+### Accessibility
+- Radix UI components — full ARIA support
 - Keyboard navigation
-- Контраст цветов по WCAG 2.1 AA
+- Color contrast per WCAG 2.1 AA
 
 ---
 
-## 22. МЕТАДАННЫЕ И SEO
+## 23. METADATA AND SEO
 
-- Динамические `metadata` объекты в каждой странице (Next.js 14 Metadata API)
-- `app/sitemap.ts` — автогенерация карты сайта с реальными URL услуг и компаний
-- `app/manifest.ts` — PWA manifest (иконка, название, цвет темы)
-- `app/icon.png` — favicon (логотип Remont.kz, обрабатывается автоматически Next.js)
-- Open Graph теги для корректного отображения при шеринге
+- Dynamic `metadata` objects on each page (Next.js 14 Metadata API)
+- `app/sitemap.ts` — auto-generates sitemap with real service and company URLs
+- `app/manifest.ts` — PWA manifest (icon, name, theme color)
+- `app/opengraph-image.tsx` — OG image generated via Next.js Image Response
+- Open Graph tags for correct social sharing display
 
 ---
 
-## 23. МАППИНГ ENUM (критически важная деталь)
+## 24. ENUM MAPPING (critical detail)
 
-Prisma хранит категории в SCREAMING_SNAKE_CASE, фронтенд использует kebab-case:
+Prisma stores categories in SCREAMING_SNAKE_CASE; the frontend uses kebab-case:
 
-| БД (Prisma) | Фронтенд |
-|-------------|----------|
+| DB (Prisma) | Frontend |
+|-------------|---------|
 | `AUTOMOBILES` | `"automobiles"` |
 | `REAL_ESTATE` | `"real-estate"` |
 | `PLUMBING` | `"plumbing"` |
@@ -941,31 +1038,31 @@ Prisma хранит категории в SCREAMING_SNAKE_CASE, фронтенд
 | `ROOFING` | `"roofing"` |
 | `OTHER` | `"other"` |
 
-Конвертация: функция `fromDbCategory()` в `lib/api.ts`. При добавлении новой категории необходимо обновить все три `categoryMap` объекта в маршрутах услуг и заявок.
+Conversion: `fromDbCategory()` in `lib/api.ts`. When adding a new category, update all three `categoryMap` objects in the service and request routes.
 
 ---
 
-## 24. ДЕМО-ДАННЫЕ (seed)
+## 25. DEMO DATA (seed)
 
-После `npm run db:seed` (пароль для всех: `password123`):
+After `npm run db:seed` (password for all accounts: `password123`):
 
-### Компании
-| Email | Название | Категория | Город |
-|-------|----------|-----------|-------|
-| stroymast@remont.kz | StroiMaster | REAL_ESTATE | Алматы |
-| autocity@remont.kz | AutoCity KZ | AUTOMOBILES | Астана |
-| electroserv@remont.kz | ElectroServ | ELECTRICAL | Алматы |
-| plumbing@remont.kz | PlumbingKZ | PLUMBING | Астана |
-| cleanpro@remont.kz | CleanPro | CLEANING | Алматы |
-| kazweld@remont.kz | KazWeld | WELDING | Алматы |
-| roofpro@remont.kz | RoofPro KZ | ROOFING | Астана |
-| paintmaster@remont.kz | PaintMaster | PAINTING | Алматы |
-| renovkz@remont.kz | RenovKZ | RENOVATION | Шымкент |
-| techmaster@remont.kz | TechMaster KZ | OTHER | Алматы |
+### Companies
+| Email | Name | Category | City |
+|-------|------|----------|------|
+| stroymast@remont.kz | StroiMaster | REAL_ESTATE | Almaty |
+| autocity@remont.kz | AutoCity KZ | AUTOMOBILES | Astana |
+| electroserv@remont.kz | ElectroServ | ELECTRICAL | Almaty |
+| plumbing@remont.kz | PlumbingKZ | PLUMBING | Astana |
+| cleanpro@remont.kz | CleanPro | CLEANING | Almaty |
+| kazweld@remont.kz | KazWeld | WELDING | Almaty |
+| roofpro@remont.kz | RoofPro KZ | ROOFING | Astana |
+| paintmaster@remont.kz | PaintMaster | PAINTING | Almaty |
+| renovkz@remont.kz | RenovKZ | RENOVATION | Shymkent |
+| techmaster@remont.kz | TechMaster KZ | OTHER | Almaty |
 
-### Клиенты
-| Email | Имя |
-|-------|-----|
+### Clients
+| Email | Name |
+|-------|------|
 | asel@remont.kz | Asel M. |
 | dmitry@remont.kz | Dmitry K. |
 | zarina@remont.kz | Zarina T. |
@@ -973,89 +1070,129 @@ Prisma хранит категории в SCREAMING_SNAKE_CASE, фронтенд
 | aibek@remont.kz | Aibek N. |
 | nurgul@remont.kz | Nurgul B. |
 
-### Данные
-- **20 услуг** — по 2 на каждую категорию
-- **30 заявок** — 13 COMPLETED (с отзывами), 4 IN_PROGRESS, 3 ACCEPTED, 10 NEW
-- **11 оферт** — на открытые заявки
-- **Сообщения в чате** — для принятых заявок
+### Seed Data
+- **20 services** — 2 per category
+- **30 requests** — 13 COMPLETED (with reviews), 4 IN_PROGRESS, 3 ACCEPTED, 10 NEW
+- **11 offers** — on open requests
+- **Chat messages** — for accepted requests
 
 ---
 
-## 25. ИЗВЕСТНЫЕ ОГРАНИЧЕНИЯ И РЕШЕНИЯ
+## 26. KNOWN CONSTRAINTS AND SOLUTIONS
 
-| Проблема | Решение |
-|----------|---------|
-| Vercel Serverless: SMTP TCP заблокирован | Resend HTTP SDK вместо Nodemailer |
-| Vercel Serverless: нет персистентных WebSocket | SSE (Server-Sent Events) для real-time чата |
-| Vercel Serverless: эфемерная файловая система | Cloudinary / S3 для production загрузок |
-| Prisma + Serverless: connection pooling | `@prisma/adapter-pg` с `Pool` из пакета `pg` |
-| Framer Motion + z-index: стекирующие контексты | CSS `mask-image` для визуального эффекта «под карточкой» |
-
----
-
-## 26. УДАЛЁННЫЕ ФУНКЦИИ (намеренно)
-
-| Функция | Причина |
+| Problem | Solution |
 |---------|---------|
-| AI-чатбот (`AiRequestBot.tsx`) | OpenRouter free tier нестабилен, rate limits в production |
-| AI-резюме услуг | Та же причина |
-| `PortfolioPhoto` модель | Модель существовала в схеме, но UI/API никогда не реализованы |
-| reCAPTCHA v3 в UI | Инфраструктура (`lib/recaptcha.ts`) есть, но не подключена к формам — защиту обеспечивает rate limiting |
-| Оплата для клиентов | Remont.kz бесплатен для клиентов |
-| Биллинг в сайдбаре клиента | Та же причина |
+| Vercel Serverless: SMTP TCP blocked | Resend HTTP SDK instead of Nodemailer |
+| Vercel Serverless: no persistent WebSockets | SSE (Server-Sent Events) for real-time chat |
+| Vercel Serverless: ephemeral filesystem | Cloudinary / S3 for production uploads |
+| Prisma + Serverless: connection pooling | `@prisma/adapter-pg` with `Pool` from the `pg` package |
+| Framer Motion + z-index: stacking contexts | CSS `mask-image` for the visual "under card" effect |
 
 ---
 
-## 27. МЕТРИКИ ПРОЕКТА
+## 27. INTENTIONALLY REMOVED FEATURES
 
-| Метрика | Значение |
-|---------|----------|
-| Страниц в приложении | 30+ |
-| API-маршрутов | 50+ |
-| Моделей базы данных | 10 |
-| Категорий услуг | 10 |
-| Языков интерфейса | 3 (ru / en / kk) |
-| Email-шаблонов | 6 |
-| Компонентов React | 50+ |
-| Демо-аккаунтов | 16 (10 компаний + 6 клиентов) |
-| Демо-услуг | 20 |
-| Демо-заявок | 30 |
-| Строк TypeScript | ~15 000 |
+| Feature | Reason |
+|---------|--------|
+| AI chatbot (`AiRequestBot.tsx`) | OpenRouter free tier unstable; rate limits in production |
+| AI service summary | Same reason |
+| `PortfolioPhoto` model | Model existed in schema but no UI/API was ever built |
+| reCAPTCHA v3 in UI | Infrastructure (`lib/recaptcha.ts`) ready but not wired to forms — rate limiting covers bot protection |
 
 ---
 
-## 28. ДИАГРАММЫ
+## 28. PROJECT METRICS
 
-> Все диаграммы написаны в формате **Mermaid** (воспроизводятся в GitHub, VS Code с расширением «Mermaid», Notion, draw.io через плагин).
-> BPMN-процессы дополнительно описаны в XML-формате BPMN 2.0 для импорта в **bpmn.io** или **Camunda Modeler**.
+| Metric | Value |
+|--------|-------|
+| Application pages | 28+ |
+| Client cabinet tabs | 7 (tab-based, single URL) |
+| API routes | 50+ |
+| Database models | 10 |
+| Service categories | 10 |
+| Interface languages | 3 (ru / en / kk) |
+| Email templates | 6 |
+| React components | 60+ |
+| Demo accounts | 16 (10 companies + 6 clients) |
+| Demo services | 20 |
+| Demo requests | 30 |
+| TypeScript lines | ~15 000 |
 
 ---
 
-### 28.1 ER-диаграмма (Mermaid)
+## 29. KEY COMPONENTS
 
-Воспроизвести: вставить в [mermaid.live](https://mermaid.live) или в блок ```mermaid в GitHub/Notion.
+| File | Purpose |
+|------|---------|
+| `components/auth/AuthProvider.tsx` | React context, `useAuth()`, session persistence |
+| `components/auth/AuthModal.tsx` | Login/register modal with email verify screen |
+| `components/nav/MainNavbar.tsx` | Sticky navbar: search (Cmd+K), theme, i18n, notifications, user dropdown |
+| `components/MobileNav.tsx` | Fixed bottom nav for mobile |
+| `components/ClientSidebar.tsx` | Client cabinet sidebar (7 tabs) |
+| `components/SettingsSidebar.tsx` | Settings sidebar (Profile, Security only — no billing for clients) |
+| `components/Footer.tsx` | 4-column footer with all page links |
+| `components/OrgCard.tsx` | Service card (favorite, compare, request button) |
+| `components/RequestCreateDialog.tsx` | Multi-step request creation dialog |
+| `components/CompareContext.tsx` + `CompareBar.tsx` | Compare up to 3 services |
+| `components/CompareRadar.tsx` | Radar chart for service comparison |
+| `components/filters/FilterBar.tsx` | Full filter panel (category, city, price, rating) |
+| `components/company/KanbanBoard.tsx` | Kanban for company request management |
+| `components/company/ServicesManagement.tsx` | Service CRUD in dashboard |
+| `components/company/ServiceEditModal.tsx` | Service create/edit form |
+| `components/company/CompanyStatistics.tsx` | Charts and stats |
+| `components/company/CompanyCalendar.tsx` | Calendar view of scheduled work |
+| `components/company/OnboardingChecklist.tsx` | New company setup checklist |
+| `components/company/RequestsManagement.tsx` | Requests list with filters |
+| `components/company/CompanyOverview.tsx` | Company profile overview |
+| `components/StatusBadge.tsx` | Unified request status badge |
+| `components/OfferDialog.tsx` | Offer submission dialog |
+| `components/OfflineToast.tsx` | Network status indicator |
+| `components/ServiceMap.tsx` | Leaflet map showing service locations |
+| `components/PWAInstallPrompt.tsx` | PWA install invitation |
+| `components/Currency.tsx` | Formatted currency display (tenge) |
+| `components/Stars.tsx` | Star rating display component |
+| `components/admin/AdminSidebar.tsx` | Admin panel navigation |
+| `components/admin/UserTable.tsx` | User list with block/verify actions |
+| `components/admin/ServiceTable.tsx` | Service moderation table |
+| `components/admin/RequestTable.tsx` | Request monitoring table |
+| `components/admin/StatsCard.tsx` | Admin statistics card |
+| `components/admin/BlockUserDialog.tsx` | User block dialog with reason |
+| `components/payment/PaymentStatusBadge.tsx` | Payment status indicator |
+
+---
+
+## 30. DIAGRAMS
+
+> All diagrams are written in **Mermaid** format (rendered in GitHub, VS Code with the Mermaid extension, Notion, draw.io via plugin).
+> BPMN processes are additionally described in BPMN 2.0 XML format for import into **bpmn.io** or **Camunda Modeler**.
+
+---
+
+### 30.1 ER Diagram (Mermaid)
+
+Render by pasting into [mermaid.live](https://mermaid.live) or a ```mermaid block in GitHub/Notion.
 
 ```mermaid
 erDiagram
-    User ||--o{ Service : "владеет"
-    User ||--o{ Request : "создаёт (CLIENT)"
-    User ||--o{ Request : "получает (COMPANY)"
-    User ||--o{ RequestOffer : "подаёт"
-    User ||--o{ Message : "отправляет"
-    User ||--o{ Message : "получает"
-    User ||--o{ Favorite : "сохраняет"
-    User ||--o{ Payment : "платит"
-    User ||--o{ AuditLog : "создаёт"
+    User ||--o{ Service : "owns"
+    User ||--o{ Request : "creates (CLIENT)"
+    User ||--o{ Request : "receives (COMPANY)"
+    User ||--o{ RequestOffer : "submits"
+    User ||--o{ Message : "sends"
+    User ||--o{ Message : "receives"
+    User ||--o{ Favorite : "saves"
+    User ||--o{ Payment : "pays"
+    User ||--o{ AuditLog : "creates"
 
-    Service ||--o{ ServiceImage : "содержит"
-    Service ||--o{ Request : "упоминается в"
-    Service ||--o{ Favorite : "сохраняется в"
+    Service ||--o{ ServiceImage : "contains"
+    Service ||--o{ Request : "referenced in"
+    Service ||--o{ Favorite : "saved in"
 
-    Request ||--o{ RequestOffer : "получает офертs"
-    Request ||--o{ Message : "контекст для"
-    Request ||--o| Payment : "имеет платёж"
+    Request ||--o{ RequestOffer : "receives offers"
+    Request ||--o{ Message : "context for"
+    Request ||--o| Payment : "has payment"
 
-    Payment }o--o| PromoCode : "применяет"
+    Payment }o--o| PromoCode : "applies"
 
     User {
         string id PK
@@ -1127,60 +1264,60 @@ erDiagram
 
 ---
 
-### 28.2 Диаграмма состояний заявки (Mermaid)
+### 30.2 Request State Machine (Mermaid)
 
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> NEW : Клиент создаёт заявку
+    [*] --> NEW : Client creates request
 
-    NEW --> CANCELLED : Cron — expiresAt истёк\n(каждые сутки в полночь)
-    NEW --> ACCEPTED : Клиент принял оферту\nОстальные оферты → REJECTED
+    NEW --> CANCELLED : Cron — expiresAt expired\n(daily at midnight UTC)
+    NEW --> ACCEPTED : Client accepts offer\nOther offers → REJECTED
 
-    ACCEPTED --> IN_PROGRESS : Компания начала работу
+    ACCEPTED --> IN_PROGRESS : Company starts work
 
-    IN_PROGRESS --> COMPLETED : Компания отметила завершение
+    IN_PROGRESS --> COMPLETED : Company marks complete
 
-    COMPLETED --> COMPLETED : Клиент оставил отзыв\n(rating + review)
+    COMPLETED --> COMPLETED : Client leaves review\n(rating + review text)
 
     COMPLETED --> [*]
     CANCELLED --> [*]
 
     note right of NEW
-        expiresAt = createdAt + 14 дней
-        Компании видят только NEW-заявки
-        по своей категории + городу
+        expiresAt = createdAt + 14 days
+        Companies see only NEW requests
+        matching their category + city
     end note
 
     note right of ACCEPTED
-        companyId устанавливается
-        Открывается чат
+        companyId is set
+        Chat opens
     end note
 ```
 
 ---
 
-### 28.3 Схема архитектуры (Mermaid)
+### 30.3 Architecture Diagram (Mermaid)
 
 ```mermaid
 graph TB
-    subgraph Browser["🌐 Браузер"]
+    subgraph Browser["Browser"]
         UI["React 18 + Next.js 14\nTailwind · Framer Motion\nnext-intl (ru/en/kk)"]
     end
 
-    subgraph Vercel["▲ Vercel Platform"]
-        CDN["Edge CDN\nСтатика / SSR"]
+    subgraph Vercel["Vercel Platform"]
+        CDN["Edge CDN\nStatic / SSR"]
         SF["Serverless Functions\n50+ API Routes"]
         CRON["Cron Job\n0 0 * * *\n/api/requests/expire"]
     end
 
-    subgraph Data["💾 Данные"]
-        PG[("PostgreSQL\n10 моделей")]
+    subgraph Data["Data"]
+        PG[("PostgreSQL\n10 models")]
     end
 
-    subgraph External["🔌 Внешние сервисы"]
+    subgraph External["External Services"]
         RS["Resend\nEmail API"]
-        CL["Cloudinary\nФайловое хранилище"]
+        CL["Cloudinary\nFile Storage"]
     end
 
     UI -->|"HTTP / SSE"| CDN
@@ -1198,44 +1335,44 @@ graph TB
 
 ---
 
-### 28.4 Последовательность входа (Mermaid Sequence)
+### 30.4 Login Sequence (Mermaid)
 
 ```mermaid
 sequenceDiagram
-    actor U as 👤 Пользователь
+    actor U as User
     participant F as Frontend
     participant API as POST /api/auth/login
     participant RL as Rate Limiter
     participant DB as PostgreSQL
 
-    U->>F: Вводит email + пароль
+    U->>F: Enters email + password
     F->>API: POST { email, password }
 
     API->>RL: checkLimit(ip, "login", 10/15min)
-    alt Лимит превышен
+    alt Limit exceeded
         RL-->>API: 429 Too Many Requests
         API-->>F: { error: "Too many attempts" }
-        F-->>U: ❌ Попробуйте позже
+        F-->>U: Try again later
     end
 
     API->>DB: SELECT * FROM User WHERE email = ?
-    alt Пользователь не найден
+    alt User not found
         DB-->>API: null
         API-->>F: 401 Unauthorized
-        F-->>U: ❌ Неверные данные
+        F-->>U: Invalid credentials
     end
 
     DB-->>API: User record
     API->>API: bcrypt.compare(password, hash)
-    alt Пароль неверный
+    alt Wrong password
         API-->>F: 401 Unauthorized
-        F-->>U: ❌ Неверные данные
+        F-->>U: Invalid credentials
     end
 
-    alt 2FA включена
+    alt 2FA enabled
         API-->>F: { requires2FA: true }
-        F-->>U: Запрос TOTP-кода
-        U->>F: Вводит 6-значный код
+        F-->>U: Request TOTP code
+        U->>F: Enters 6-digit code
         F->>API: POST { email, password, totpCode }
         API->>API: speakeasy.verify(secret, code)
     end
@@ -1243,17 +1380,17 @@ sequenceDiagram
     API->>API: JWT signToken({ id, email, role })
     API-->>F: { token, user, emailVerified }
     F->>F: localStorage.setItem("session:user", ...)
-    F-->>U: ✅ Успешный вход → редирект
+    F-->>U: Successful login → redirect
 ```
 
 ---
 
-### 28.5 Последовательность подачи и принятия оферты (Mermaid Sequence)
+### 30.5 Offer Submission and Acceptance Sequence (Mermaid)
 
 ```mermaid
 sequenceDiagram
-    actor C as 👤 Клиент
-    actor Co as 🏢 Компания
+    actor C as Client
+    actor Co as Company
     participant DB as PostgreSQL
     participant Email as Resend
 
@@ -1263,66 +1400,66 @@ sequenceDiagram
 
     DB->>DB: SELECT client email
     DB->>Email: sendNewOfferEmail(clientEmail, ...)
-    Email-->>C: 📧 "Новая оферта от {компания}"
+    Email-->>C: "New offer from {company}"
 
-    C->>DB: GET /api/requests/{id}\n(просматривает оферты)
+    C->>DB: GET /api/requests/{id}\n(views offers)
     DB-->>C: Request + offers[]
 
     C->>DB: POST /api/requests/{id}/accept-offer\n{ offerId }
     DB->>DB: UPDATE Request SET status=ACCEPTED, companyId=...
-    DB->>DB: UPDATE RequestOffer SET status=ACCEPTED (одна)
-    DB->>DB: UPDATE RequestOffer SET status=REJECTED (остальные)
+    DB->>DB: UPDATE RequestOffer SET status=ACCEPTED (one)
+    DB->>DB: UPDATE RequestOffer SET status=REJECTED (rest)
     DB-->>C: 200 OK
 
     DB->>Email: sendRequestAcceptedEmail(companyEmail, ...)
-    Email-->>Co: 📧 "Ваша оферта принята!"
+    Email-->>Co: "Your offer was accepted!"
 
-    Note over C,Co: Чат открыт — можно общаться через SSE
+    Note over C,Co: Chat is now open — communicate via SSE
 ```
 
 ---
 
-### 28.6 Real-time чат через SSE (Mermaid Sequence)
+### 30.6 Real-Time Chat via SSE (Mermaid)
 
 ```mermaid
 sequenceDiagram
-    participant FC as Frontend (Клиент)
-    participant FCo as Frontend (Компания)
+    participant FC as Frontend (Client)
+    participant FCo as Frontend (Company)
     participant SSE as GET /api/chat/{id}/stream
     participant MAPI as POST /api/messages
     participant DB as PostgreSQL
 
-    FC->>SSE: EventSource подключается
-    FCo->>SSE: EventSource подключается
+    FC->>SSE: EventSource connects
+    FCo->>SSE: EventSource connects
 
-    loop Каждые 3 секунды
+    loop Every 3 seconds
         SSE->>DB: SELECT * FROM Message\nWHERE requestId=? AND createdAt > lastTs
-        DB-->>SSE: [] или [newMessages]
+        DB-->>SSE: [] or [newMessages]
         SSE-->>FC: data: { messages: [...] }
         SSE-->>FCo: data: { messages: [...] }
     end
 
-    Note over FC: Клиент отправляет сообщение
+    Note over FC: Client sends a message
 
     FC->>MAPI: POST { content, type: "TEXT" }
     MAPI->>DB: INSERT Message (read: false)
     DB-->>MAPI: Message record
     MAPI-->>FC: 201 Created
 
-    Note over SSE,DB: Следующий poll (≤3с) доставит сообщение компании
+    Note over SSE,DB: Next poll (≤3s) delivers message to company
 
-    SSE->>DB: SELECT новые сообщения
-    DB-->>SSE: [новое сообщение]
-    SSE-->>FCo: data: { messages: [новое] }
+    SSE->>DB: SELECT new messages
+    DB-->>SSE: [new message]
+    SSE-->>FCo: data: { messages: [new] }
 
-    Note over DB: Auto mark-read: receiverId видит → read=true
+    Note over DB: Auto mark-read: receiverId sees it → read=true
 ```
 
 ---
 
-### 28.7 BPMN — Основной бизнес-процесс (описание для bpmn.io)
+### 30.7 BPMN — Core Business Process (for bpmn.io)
 
-> Скопируйте XML ниже в **https://bpmn.io** (File → Open from XML) для получения визуальной BPMN-диаграммы.
+> Paste the XML below into **https://bpmn.io** (File → Open from XML) to get a visual BPMN diagram.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1331,121 +1468,79 @@ sequenceDiagram
              targetNamespace="http://remont.kz/bpmn">
 
   <collaboration id="Collaboration_RemontKZ">
+    <participant id="Pool_Client"  name="Client"              processRef="Process_Client"/>
+    <participant id="Pool_Company" name="Company"             processRef="Process_Company"/>
+    <participant id="Pool_System"  name="System (Remont.kz)"  processRef="Process_System"/>
 
-    <!-- ═══ POOL: КЛИЕНТ ═══ -->
-    <participant id="Pool_Client" name="Клиент" processRef="Process_Client"/>
-
-    <!-- ═══ POOL: КОМПАНИЯ ═══ -->
-    <participant id="Pool_Company" name="Компания" processRef="Process_Company"/>
-
-    <!-- ═══ POOL: СИСТЕМА ═══ -->
-    <participant id="Pool_System" name="Система (Remont.kz)" processRef="Process_System"/>
-
-    <!-- Message Flows между пулами -->
-    <messageFlow id="MF_OfferNotify"   sourceRef="Task_SendOffer"     targetRef="Task_ViewOffer"/>
-    <messageFlow id="MF_AcceptNotify"  sourceRef="Task_AcceptOffer"   targetRef="Task_ReceiveAccept"/>
-    <messageFlow id="MF_CompleteNotify" sourceRef="Task_MarkComplete" targetRef="Task_RateJob"/>
+    <messageFlow id="MF_OfferNotify"    sourceRef="Task_SendOffer"     targetRef="Task_ViewOffer"/>
+    <messageFlow id="MF_AcceptNotify"   sourceRef="Task_AcceptOffer"   targetRef="Task_ReceiveAccept"/>
+    <messageFlow id="MF_CompleteNotify" sourceRef="Task_MarkComplete"  targetRef="Task_RateJob"/>
   </collaboration>
 
-  <!-- ════════════════════════════════════════════
-       ПРОЦЕСС КЛИЕНТА
-  ════════════════════════════════════════════ -->
+  <!-- CLIENT PROCESS -->
   <process id="Process_Client" isExecutable="false">
-
-    <startEvent id="Start_Client" name="Нужна услуга"/>
-
-    <userTask id="Task_CreateRequest" name="Создать заявку&#10;(категория, описание, бюджет)"/>
-
-    <intermediateCatchEvent id="Timer_Wait" name="Ожидание оферт">
-      <timerEventDefinition>
-        <timeDuration>P14D</timeDuration><!-- 14 дней -->
-      </timerEventDefinition>
+    <startEvent id="Start_Client" name="Needs a service"/>
+    <userTask id="Task_CreateRequest" name="Create request&#10;(category, description, budget)"/>
+    <intermediateCatchEvent id="Timer_Wait" name="Waiting for offers">
+      <timerEventDefinition><timeDuration>P14D</timeDuration></timerEventDefinition>
     </intermediateCatchEvent>
+    <exclusiveGateway id="GW_OffersReceived" name="Offers received?"/>
+    <userTask id="Task_ViewOffer"    name="View offers&#10;and compare prices"/>
+    <userTask id="Task_AcceptOffer"  name="Accept best offer"/>
+    <userTask id="Task_ChatWithCompany" name="Discuss details&#10;in chat"/>
+    <userTask id="Task_RateJob"      name="Leave review&#10;and rating (1–5 stars)"/>
+    <endEvent id="End_Client_OK"      name="Order complete"/>
+    <endEvent id="End_Client_Expired" name="Request expired"/>
 
-    <exclusiveGateway id="GW_OffersReceived" name="Есть оферты?"/>
-
-    <userTask id="Task_ViewOffer" name="Просмотреть оферты&#10;и сравнить цены"/>
-
-    <userTask id="Task_AcceptOffer" name="Принять лучшую&#10;оферту"/>
-
-    <userTask id="Task_ChatWithCompany" name="Обсудить детали&#10;в чате"/>
-
-    <userTask id="Task_RateJob" name="Оставить отзыв&#10;и рейтинг (1–5 ⭐)"/>
-
-    <endEvent id="End_Client_OK" name="Заказ выполнен"/>
-    <endEvent id="End_Client_Expired" name="Заявка истекла"/>
-
-    <!-- Потоки -->
     <sequenceFlow sourceRef="Start_Client"         targetRef="Task_CreateRequest"/>
     <sequenceFlow sourceRef="Task_CreateRequest"   targetRef="Timer_Wait"/>
     <sequenceFlow sourceRef="Timer_Wait"           targetRef="GW_OffersReceived"/>
-    <sequenceFlow sourceRef="GW_OffersReceived"    targetRef="Task_ViewOffer"      name="Да"/>
-    <sequenceFlow sourceRef="GW_OffersReceived"    targetRef="End_Client_Expired"  name="Нет (14 дней)"/>
+    <sequenceFlow sourceRef="GW_OffersReceived"    targetRef="Task_ViewOffer"      name="Yes"/>
+    <sequenceFlow sourceRef="GW_OffersReceived"    targetRef="End_Client_Expired"  name="No (14 days)"/>
     <sequenceFlow sourceRef="Task_ViewOffer"       targetRef="Task_AcceptOffer"/>
     <sequenceFlow sourceRef="Task_AcceptOffer"     targetRef="Task_ChatWithCompany"/>
     <sequenceFlow sourceRef="Task_ChatWithCompany" targetRef="Task_RateJob"/>
     <sequenceFlow sourceRef="Task_RateJob"         targetRef="End_Client_OK"/>
   </process>
 
-  <!-- ════════════════════════════════════════════
-       ПРОЦЕСС КОМПАНИИ
-  ════════════════════════════════════════════ -->
+  <!-- COMPANY PROCESS -->
   <process id="Process_Company" isExecutable="false">
-
-    <startEvent id="Start_Company" name="Новая заявка&#10;в категории"/>
-
-    <userTask id="Task_ReviewRequest" name="Изучить заявку&#10;клиента"/>
-
-    <exclusiveGateway id="GW_Interested" name="Интересно?"/>
-
-    <userTask id="Task_SendOffer" name="Подать оферту&#10;(цена + сообщение)"/>
-
-    <intermediateCatchEvent id="Catch_Decision" name="Ожидание решения&#10;клиента">
+    <startEvent id="Start_Company" name="New request&#10;in category"/>
+    <userTask id="Task_ReviewRequest" name="Review client request"/>
+    <exclusiveGateway id="GW_Interested" name="Interested?"/>
+    <userTask id="Task_SendOffer" name="Submit offer&#10;(price + message)"/>
+    <intermediateCatchEvent id="Catch_Decision" name="Waiting for&#10;client decision">
       <messageEventDefinition/>
     </intermediateCatchEvent>
+    <exclusiveGateway id="GW_OfferAccepted" name="Offer accepted?"/>
+    <userTask id="Task_ReceiveAccept"      name="Receive acceptance&#10;notification"/>
+    <userTask id="Task_DoWork_InProgress"  name="Start work&#10;(IN_PROGRESS)"/>
+    <userTask id="Task_MarkComplete"       name="Mark complete&#10;(COMPLETED)"/>
+    <endEvent id="End_Company_Done"     name="Order complete"/>
+    <endEvent id="End_Company_Rejected" name="Offer rejected"/>
+    <endEvent id="End_Company_Skip"     name="Not interested"/>
 
-    <exclusiveGateway id="GW_OfferAccepted" name="Оферта принята?"/>
-
-    <userTask id="Task_ReceiveAccept" name="Получить уведомление&#10;о принятии"/>
-
-    <userTask id="Task_DoWork_InProgress" name="Начать работу&#10;(IN_PROGRESS)"/>
-
-    <userTask id="Task_MarkComplete" name="Отметить&#10;завершение (COMPLETED)"/>
-
-    <endEvent id="End_Company_Done" name="Заказ выполнен"/>
-    <endEvent id="End_Company_Rejected" name="Оферта отклонена"/>
-    <endEvent id="End_Company_Skip" name="Не интересно"/>
-
-    <!-- Потоки -->
     <sequenceFlow sourceRef="Start_Company"          targetRef="Task_ReviewRequest"/>
     <sequenceFlow sourceRef="Task_ReviewRequest"     targetRef="GW_Interested"/>
-    <sequenceFlow sourceRef="GW_Interested"          targetRef="Task_SendOffer"          name="Да"/>
-    <sequenceFlow sourceRef="GW_Interested"          targetRef="End_Company_Skip"        name="Нет"/>
+    <sequenceFlow sourceRef="GW_Interested"          targetRef="Task_SendOffer"         name="Yes"/>
+    <sequenceFlow sourceRef="GW_Interested"          targetRef="End_Company_Skip"       name="No"/>
     <sequenceFlow sourceRef="Task_SendOffer"         targetRef="Catch_Decision"/>
     <sequenceFlow sourceRef="Catch_Decision"         targetRef="GW_OfferAccepted"/>
-    <sequenceFlow sourceRef="GW_OfferAccepted"       targetRef="Task_ReceiveAccept"      name="Принята"/>
-    <sequenceFlow sourceRef="GW_OfferAccepted"       targetRef="End_Company_Rejected"    name="Отклонена"/>
+    <sequenceFlow sourceRef="GW_OfferAccepted"       targetRef="Task_ReceiveAccept"     name="Accepted"/>
+    <sequenceFlow sourceRef="GW_OfferAccepted"       targetRef="End_Company_Rejected"   name="Rejected"/>
     <sequenceFlow sourceRef="Task_ReceiveAccept"     targetRef="Task_DoWork_InProgress"/>
     <sequenceFlow sourceRef="Task_DoWork_InProgress" targetRef="Task_MarkComplete"/>
     <sequenceFlow sourceRef="Task_MarkComplete"      targetRef="End_Company_Done"/>
   </process>
 
-  <!-- ════════════════════════════════════════════
-       ПРОЦЕСС СИСТЕМЫ
-  ════════════════════════════════════════════ -->
+  <!-- SYSTEM PROCESS -->
   <process id="Process_System" isExecutable="false">
-
     <startEvent id="Start_Cron" name="Cron 00:00 UTC">
-      <timerEventDefinition>
-        <timeCycle>0 0 * * *</timeCycle>
-      </timerEventDefinition>
+      <timerEventDefinition><timeCycle>0 0 * * *</timeCycle></timerEventDefinition>
     </startEvent>
-
-    <serviceTask id="Task_CheckExpired" name="Найти заявки со статусом NEW&#10;и expiresAt &lt; now()"/>
-
+    <serviceTask id="Task_CheckExpired" name="Find NEW requests&#10;with expiresAt &lt; now()"/>
     <serviceTask id="Task_SetCancelled" name="UPDATE status = CANCELLED"/>
-
-    <endEvent id="End_Cron" name="Готово"/>
+    <endEvent id="End_Cron" name="Done"/>
 
     <sequenceFlow sourceRef="Start_Cron"       targetRef="Task_CheckExpired"/>
     <sequenceFlow sourceRef="Task_CheckExpired" targetRef="Task_SetCancelled"/>
@@ -1457,7 +1552,7 @@ sequenceDiagram
 
 ---
 
-### 28.8 BPMN — Процесс аутентификации (описание для bpmn.io)
+### 30.8 BPMN — Authentication Process (for bpmn.io)
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1465,64 +1560,58 @@ sequenceDiagram
              targetNamespace="http://remont.kz/bpmn/auth">
 
   <collaboration id="Collaboration_Auth">
-    <participant id="Pool_User"   name="Пользователь" processRef="Process_User"/>
-    <participant id="Pool_Server" name="Сервер (API)"  processRef="Process_Server"/>
+    <participant id="Pool_User"   name="User"         processRef="Process_User"/>
+    <participant id="Pool_Server" name="Server (API)" processRef="Process_Server"/>
   </collaboration>
 
-  <!-- ПОЛЬЗОВАТЕЛЬ -->
+  <!-- USER -->
   <process id="Process_User" isExecutable="false">
-    <startEvent id="S_User" name="Открыл страницу входа"/>
-    <userTask   id="T_FillForm"  name="Заполнил email + пароль"/>
-    <userTask   id="T_Fill2FA"   name="Ввёл TOTP-код (6 цифр)"/>
-    <endEvent   id="E_LoggedIn"  name="В системе"/>
-    <endEvent   id="E_Failed"    name="Ошибка входа"/>
+    <startEvent id="S_User"    name="Opened login page"/>
+    <userTask   id="T_FillForm" name="Entered email + password"/>
+    <userTask   id="T_Fill2FA"  name="Entered TOTP code (6 digits)"/>
+    <endEvent   id="E_LoggedIn" name="Logged in"/>
+    <endEvent   id="E_Failed"   name="Login failed"/>
 
-    <sequenceFlow sourceRef="S_User"    targetRef="T_FillForm"/>
-    <sequenceFlow sourceRef="T_FillForm" targetRef="E_LoggedIn" name="Успех без 2FA"/>
-    <sequenceFlow sourceRef="T_FillForm" targetRef="T_Fill2FA"  name="2FA включена"/>
-    <sequenceFlow sourceRef="T_Fill2FA"  targetRef="E_LoggedIn" name="Код верный"/>
-    <sequenceFlow sourceRef="T_Fill2FA"  targetRef="E_Failed"   name="Код неверный"/>
+    <sequenceFlow sourceRef="S_User"     targetRef="T_FillForm"/>
+    <sequenceFlow sourceRef="T_FillForm" targetRef="E_LoggedIn" name="Success (no 2FA)"/>
+    <sequenceFlow sourceRef="T_FillForm" targetRef="T_Fill2FA"  name="2FA enabled"/>
+    <sequenceFlow sourceRef="T_Fill2FA"  targetRef="E_LoggedIn" name="Code correct"/>
+    <sequenceFlow sourceRef="T_Fill2FA"  targetRef="E_Failed"   name="Code wrong"/>
   </process>
 
-  <!-- СЕРВЕР -->
+  <!-- SERVER -->
   <process id="Process_Server" isExecutable="false">
-    <startEvent id="S_Srv" name="POST /api/auth/login"/>
-
-    <serviceTask id="T_RateLimit"  name="Rate limit: 10 req / 15 min по IP"/>
-    <exclusiveGateway id="GW_Limit" name="Лимит?"/>
-
-    <serviceTask id="T_FindUser"   name="SELECT User WHERE email=?"/>
-    <exclusiveGateway id="GW_User" name="Найден?"/>
-
-    <serviceTask id="T_BcryptCmp"  name="bcrypt.compare(pass, hash)"/>
-    <exclusiveGateway id="GW_Pass" name="Пароль верный?"/>
-
-    <exclusiveGateway id="GW_2FA"  name="2FA включена?"/>
-    <serviceTask id="T_Verify2FA"  name="speakeasy.verify(secret, code)"/>
-    <exclusiveGateway id="GW_2FAOk" name="Код верный?"/>
-
-    <serviceTask id="T_SignJWT"    name="JWT signToken(id, email, role)&#10;→ expires 7d"/>
-    <serviceTask id="T_StoreLS"    name="localStorage: session:user = {token,...}"/>
-
+    <startEvent id="S_Srv"     name="POST /api/auth/login"/>
+    <serviceTask id="T_RateLimit" name="Rate limit: 10 req / 15 min per IP"/>
+    <exclusiveGateway id="GW_Limit" name="Limit?"/>
+    <serviceTask id="T_FindUser"  name="SELECT User WHERE email=?"/>
+    <exclusiveGateway id="GW_User" name="Found?"/>
+    <serviceTask id="T_BcryptCmp" name="bcrypt.compare(pass, hash)"/>
+    <exclusiveGateway id="GW_Pass" name="Password correct?"/>
+    <exclusiveGateway id="GW_2FA"  name="2FA enabled?"/>
+    <serviceTask id="T_Verify2FA" name="speakeasy.verify(secret, code)"/>
+    <exclusiveGateway id="GW_2FAOk" name="Code correct?"/>
+    <serviceTask id="T_SignJWT"   name="JWT signToken(id, email, role)&#10;→ expires 7d"/>
+    <serviceTask id="T_StoreLS"   name="localStorage: session:user = {token,...}"/>
     <endEvent id="E_200" name="200 OK + token"/>
     <endEvent id="E_401" name="401 Unauthorized"/>
     <endEvent id="E_429" name="429 Too Many Requests"/>
 
     <sequenceFlow sourceRef="S_Srv"       targetRef="T_RateLimit"/>
     <sequenceFlow sourceRef="T_RateLimit" targetRef="GW_Limit"/>
-    <sequenceFlow sourceRef="GW_Limit"    targetRef="E_429"       name="Превышен"/>
+    <sequenceFlow sourceRef="GW_Limit"    targetRef="E_429"       name="Exceeded"/>
     <sequenceFlow sourceRef="GW_Limit"    targetRef="T_FindUser"  name="OK"/>
     <sequenceFlow sourceRef="T_FindUser"  targetRef="GW_User"/>
-    <sequenceFlow sourceRef="GW_User"     targetRef="E_401"       name="Нет"/>
-    <sequenceFlow sourceRef="GW_User"     targetRef="T_BcryptCmp" name="Да"/>
+    <sequenceFlow sourceRef="GW_User"     targetRef="E_401"       name="No"/>
+    <sequenceFlow sourceRef="GW_User"     targetRef="T_BcryptCmp" name="Yes"/>
     <sequenceFlow sourceRef="T_BcryptCmp" targetRef="GW_Pass"/>
-    <sequenceFlow sourceRef="GW_Pass"     targetRef="E_401"       name="Нет"/>
-    <sequenceFlow sourceRef="GW_Pass"     targetRef="GW_2FA"      name="Да"/>
-    <sequenceFlow sourceRef="GW_2FA"      targetRef="T_Verify2FA" name="Включена"/>
-    <sequenceFlow sourceRef="GW_2FA"      targetRef="T_SignJWT"   name="Выключена"/>
+    <sequenceFlow sourceRef="GW_Pass"     targetRef="E_401"       name="No"/>
+    <sequenceFlow sourceRef="GW_Pass"     targetRef="GW_2FA"      name="Yes"/>
+    <sequenceFlow sourceRef="GW_2FA"      targetRef="T_Verify2FA" name="Enabled"/>
+    <sequenceFlow sourceRef="GW_2FA"      targetRef="T_SignJWT"   name="Disabled"/>
     <sequenceFlow sourceRef="T_Verify2FA" targetRef="GW_2FAOk"/>
-    <sequenceFlow sourceRef="GW_2FAOk"   targetRef="E_401"       name="Нет"/>
-    <sequenceFlow sourceRef="GW_2FAOk"   targetRef="T_SignJWT"   name="Да"/>
+    <sequenceFlow sourceRef="GW_2FAOk"   targetRef="E_401"       name="No"/>
+    <sequenceFlow sourceRef="GW_2FAOk"   targetRef="T_SignJWT"   name="Yes"/>
     <sequenceFlow sourceRef="T_SignJWT"   targetRef="T_StoreLS"/>
     <sequenceFlow sourceRef="T_StoreLS"   targetRef="E_200"/>
   </process>
@@ -1532,24 +1621,24 @@ sequenceDiagram
 
 ---
 
-### 28.9 Flowchart жизненного цикла заявки (Mermaid — для презентации)
+### 30.9 Request Lifecycle Flowchart (Mermaid — for presentation)
 
 ```mermaid
 flowchart TD
-    A([🟢 Клиент создаёт заявку]) --> B["status: **NEW**\nexpiresAt = now + 14 дней"]
-    B --> C{Компании подают оферты}
+    A([Client creates request]) --> B["status: NEW\nexpiresAt = now + 14 days"]
+    B --> C{Companies submit offers}
 
-    C -->|"Нет оферт\n14 дней истекло"| EXP["Cron 00:00\nstatus: **CANCELLED**"]
-    EXP --> Z([🔴 Конец])
+    C -->|"No offers\n14 days expired"| EXP["Cron 00:00\nstatus: CANCELLED"]
+    EXP --> Z([End])
 
-    C -->|"Есть оферты"| D["Клиент просматривает\nоферты + цены"]
-    D --> E["Клиент выбирает лучшую\nstatus: **ACCEPTED**"]
-    E --> F["Остальные оферты → REJECTED\nОткрывается чат"]
-    F --> G["Компания начинает\nstatus: **IN_PROGRESS**"]
-    G --> H["Компания завершает\nstatus: **COMPLETED**"]
-    H --> I["Клиент оценивает 1–5 ⭐\n+ текст отзыва"]
-    I --> J["Средний рейтинг\nкомпании пересчитывается"]
-    J --> K([✅ Готово])
+    C -->|"Offers received"| D["Client views\noffers + prices"]
+    D --> E["Client selects best offer\nstatus: ACCEPTED"]
+    E --> F["Other offers → REJECTED\nChat opens"]
+    F --> G["Company starts work\nstatus: IN_PROGRESS"]
+    G --> H["Company marks complete\nstatus: COMPLETED"]
+    H --> I["Client rates 1–5 stars\n+ review text"]
+    I --> J["Company average rating\nrecalculated"]
+    J --> K([Done])
 
     style A fill:#16a34a,color:#fff
     style EXP fill:#dc2626,color:#fff
@@ -1561,40 +1650,42 @@ flowchart TD
 
 ---
 
-### 28.10 Структура компонентов фронтенда (Mermaid)
+### 30.10 Frontend Component Structure (Mermaid)
 
 ```mermaid
 graph TD
-    subgraph Layout["_layout.tsx (корневой)"]
-        AP["AuthProvider\n(контекст useAuth)"]
+    subgraph Layout["_layout.tsx (root)"]
+        AP["AuthProvider\n(useAuth context)"]
         RCP["GoogleReCaptchaProvider"]
-        TH["ThemeProvider\n(тёмная/светлая тема)"]
+        TH["ThemeProvider\n(dark/light theme)"]
         INT["IntlProvider\n(next-intl)"]
     end
 
-    subgraph Nav["Навигация"]
-        MN["MainNavbar\n(поиск, нотификации, язык, профиль)"]
-        MOB["MobileNav\n(нижняя панель)"]
+    subgraph Nav["Navigation"]
+        MN["MainNavbar\n(search, notifications, language, profile)"]
+        MOB["MobileNav\n(bottom bar)"]
     end
 
-    subgraph Pages["Страницы"]
+    subgraph Pages["Pages"]
         LP["Landing /"]
-        CAT["Каталог /repair"]
-        DET["Детали /repair/[id]"]
-        MR["Мои заявки /my-requests"]
-        CH["Чат /chat/[requestId]"]
-        DASH["Дашборд /company/dashboard"]
-        ADM["Админ /admin/*"]
+        CAT["Catalog /repair"]
+        DET["Detail /repair/[id]"]
+        MR["My Cabinet /my-requests"]
+        CH["Chat /chat/[requestId]"]
+        DASH["Dashboard /company/dashboard"]
+        ADM["Admin /admin/*"]
     end
 
-    subgraph Shared["Общие компоненты"]
-        OC["OrgCard\n(карточка услуги)"]
-        RCD["RequestCreateDialog\n(создание заявки)"]
-        OD["OfferDialog\n(подача оферты)"]
-        FB["FilterBar\n(фильтры каталога)"]
-        KB["KanbanBoard\n(дашборд компании)"]
+    subgraph Shared["Shared Components"]
+        OC["OrgCard\n(service card)"]
+        RCD["RequestCreateDialog"]
+        OD["OfferDialog"]
+        FB["FilterBar"]
+        KB["KanbanBoard"]
         CC["CompareContext + CompareBar"]
         SB["StatusBadge"]
+        SM["ServiceMap\n(Leaflet)"]
+        CR["CompareRadar"]
     end
 
     Layout --> Nav
@@ -1603,7 +1694,9 @@ graph TD
 
     CAT --> OC
     CAT --> FB
+    CAT --> SM
     DET --> RCD
+    DET --> CR
     DASH --> KB
     DASH --> OD
     MR --> RCD
@@ -1611,25 +1704,25 @@ graph TD
 
 ---
 
-### 28.11 Схема деплоя (Mermaid — для раздела «Инфраструктура»)
+### 30.11 Deployment Diagram (Mermaid)
 
 ```mermaid
 graph LR
-    subgraph Dev["Разработка"]
+    subgraph Dev["Development"]
         GH["GitHub\nmain branch"]
         CI["GitHub Actions CI\nlint + typecheck + build"]
     end
 
     subgraph Prod["Production"]
-        VR["Vercel\nАвтодеплой из main"]
+        VR["Vercel\nAuto-deploy from main"]
         SF["Serverless Functions\nAPI Routes"]
-        EDG["Edge CDN\nСтатика + SSR"]
+        EDG["Edge CDN\nStatic + SSR"]
     end
 
-    subgraph Infra["Инфраструктура"]
-        PG[("PostgreSQL\n(Vercel Postgres\nили Supabase)")]
+    subgraph Infra["Infrastructure"]
+        PG[("PostgreSQL\n(Vercel Postgres\nor Supabase)")]
         RS["Resend\nEmail API"]
-        CL["Cloudinary\nФото + Аудио"]
+        CL["Cloudinary\nPhotos + Audio"]
     end
 
     GH -->|"push → trigger"| CI
@@ -1647,50 +1740,50 @@ graph LR
 
 ---
 
-### 28.12 Use Case диаграмма (PlantUML)
+### 30.12 Use Case Diagram (PlantUML)
 
-> Воспроизвести: вставить в **https://plantuml.com/plantuml** или расширение PlantUML в VS Code.
+> Render by pasting into **https://plantuml.com/plantuml** or the PlantUML extension in VS Code.
 
 ```plantuml
 @startuml
 left to right direction
 skinparam packageStyle rectangle
 
-actor "Клиент" as C
-actor "Компания" as Co
-actor "Администратор" as A
-actor "Система (Cron)" as S
+actor "Client" as C
+actor "Company" as Co
+actor "Administrator" as A
+actor "System (Cron)" as S
 
 rectangle "Remont.kz" {
-  ' Клиент
-  usecase "Зарегистрироваться / войти" as UC1
-  usecase "Подтвердить email" as UC2
-  usecase "Просмотреть каталог услуг" as UC3
-  usecase "Фильтровать по категории/городу" as UC4
-  usecase "Добавить в избранное" as UC5
-  usecase "Сравнить услуги (до 3)" as UC6
-  usecase "Создать заявку" as UC7
-  usecase "Принять оферту" as UC8
-  usecase "Общаться в чате" as UC9
-  usecase "Оставить отзыв" as UC10
+  ' Client
+  usecase "Register / Login" as UC1
+  usecase "Verify email" as UC2
+  usecase "Browse service catalog" as UC3
+  usecase "Filter by category/city" as UC4
+  usecase "Add to favorites" as UC5
+  usecase "Compare services (up to 3)" as UC6
+  usecase "Create request" as UC7
+  usecase "Accept offer" as UC8
+  usecase "Chat with company" as UC9
+  usecase "Leave review" as UC10
 
-  ' Компания
-  usecase "Управлять услугами (CRUD)" as UC11
-  usecase "Просматривать заявки" as UC12
-  usecase "Подать оферту" as UC13
-  usecase "Вести Kanban-доску" as UC14
-  usecase "Экспортировать данные (CSV)" as UC15
-  usecase "Ответить на отзыв" as UC16
+  ' Company
+  usecase "Manage services (CRUD)" as UC11
+  usecase "View requests" as UC12
+  usecase "Submit offer" as UC13
+  usecase "Manage Kanban board" as UC14
+  usecase "Export data (CSV)" as UC15
+  usecase "Reply to review" as UC16
 
-  ' Администратор
-  usecase "Управлять пользователями" as UC17
-  usecase "Блокировать / верифицировать" as UC18
-  usecase "Управлять промокодами" as UC19
-  usecase "Просматривать аудит-лог" as UC20
+  ' Administrator
+  usecase "Manage users" as UC17
+  usecase "Block / verify users" as UC18
+  usecase "Manage promo codes" as UC19
+  usecase "View audit log" as UC20
 
-  ' Система
-  usecase "Отменить истёкшие заявки" as UC21
-  usecase "Отправить email-уведомление" as UC22
+  ' System
+  usecase "Cancel expired requests" as UC21
+  usecase "Send email notifications" as UC22
 }
 
 C --> UC1
